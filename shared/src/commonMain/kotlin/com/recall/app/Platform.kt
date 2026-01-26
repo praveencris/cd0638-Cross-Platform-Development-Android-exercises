@@ -1,9 +1,5 @@
 package com.recall.app
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-
 /**
  * Platform interface to identify the current platform
  */
@@ -22,7 +18,6 @@ expect fun getPlatform(): Platform
  * @return String containing platform name and today's date
  */
 fun greet(): String {
-    val currentMoment = Clock.System.now()
-    val currentDate = currentMoment.toLocalDateTime(TimeZone.currentSystemDefault()).date
-    return "Hello, ${getPlatform().name}! Today is $currentDate."
+    // TODO: Use kotlinx-datetime to add the current date
+    return "Hello, ${getPlatform().name}! Date: TODO"
 }

@@ -20,7 +20,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.kotlinx.datetime)
+            // TODO: Add DateTime dependency
+            // implementation(libs.kotlinx.datetime)
         }
 
         commonTest.dependencies {
