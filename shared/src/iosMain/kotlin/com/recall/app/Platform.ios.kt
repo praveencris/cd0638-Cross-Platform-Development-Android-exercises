@@ -1,5 +1,6 @@
 package com.recall.app
 
+import platform.Foundation.NSUUID
 import platform.UIKit.UIDevice
 
 /**
@@ -13,3 +14,9 @@ class IOSPlatform : Platform {
  * Actual implementation of getPlatform() for iOS
  */
 actual fun getPlatform(): Platform = IOSPlatform()
+
+/**
+ * Actual implementation of UUID generation for iOS
+ * Uses Foundation's NSUUID for native UUID generation
+ */
+actual fun generateUUID(): String = NSUUID().UUIDString

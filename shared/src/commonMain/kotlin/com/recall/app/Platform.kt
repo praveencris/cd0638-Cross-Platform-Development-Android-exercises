@@ -18,6 +18,13 @@ interface Platform {
 expect fun getPlatform(): Platform
 
 /**
+ * Expected platform-specific UUID generation
+ * Each platform uses its native UUID implementation
+ * @return A unique identifier string
+ */
+expect fun generateUUID(): String
+
+/**
  * Greeting function that displays platform name and current date
  * @return String containing platform name and today's date
  */
