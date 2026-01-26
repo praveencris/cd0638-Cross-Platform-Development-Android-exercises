@@ -27,30 +27,6 @@ object SpaceRepetitionAlgo {
      * @return Updated card with new interval and ease factor
      */
     fun calculateNextReview(card: Card, quality: Int): Card {
-        // If quality < 3 (failure), reset interval to 1 day
-        if (quality < 3) {
-            return card.copy(
-                interval = 1,
-                // Ease stays the same on failure
-                ease = card.ease
-            )
-        }
-
-        // Quality >= 3 (success), progress the interval
-        val nextInterval = when (card.interval) {
-            0 -> 1      // First review: 1 day
-            1 -> 6      // Second review: 6 days
-            else -> (card.interval * card.ease).roundToInt()  // Subsequent: exponential growth
-        }
-
-        // Calculate new ease factor based on performance
-        // Formula: ease + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
-        val easeAdjustment = 0.1f - (5 - quality) * (0.08f + (5 - quality) * 0.02f)
-        val newEase = (card.ease + easeAdjustment).coerceAtLeast(EASE_MIN)
-
-        return card.copy(
-            interval = nextInterval,
-            ease = newEase
-        )
+        TODO("Implement SM-2 Logic based on provided formula")
     }
 }

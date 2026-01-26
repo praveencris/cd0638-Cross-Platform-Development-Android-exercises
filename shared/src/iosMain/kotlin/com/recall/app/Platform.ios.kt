@@ -19,4 +19,6 @@ actual fun getPlatform(): Platform = IOSPlatform()
  * Actual implementation of UUID generation for iOS
  * Uses Foundation's NSUUID for native UUID generation
  */
-actual fun generateUUID(): String = NSUUID().UUIDString
+actual fun generateUUID(): String {
+    TODO("Implement platform-specific UUID generation")
+}
