@@ -1,35 +1,35 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+🧠 Exercise 2: Building the App's Brain
+Module: Shared Business Logic & Models Estimated Time: 30-40 Minutes
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+🎓 Objective
+In this exercise, you will build the "Shared Domain" of the Recall app. This is the code that is 100% shared between Android and iOS. You will define how data is structured and how the Spaced Repetition math works.
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+✅ Task 1: Implement Platform APIs (expect/actual)
+KMP allows you to access native APIs when "Common Kotlin" isn't enough. We need to generate unique IDs for our cards.
 
-### Build and Run Android Application
+Navigate to shared/src/androidMain/.../generateUUID.kt. Use java.util.UUID to return a string.
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+Navigate to shared/src/iosMain/.../generateUUID.kt. Use NSUUID().UUIDString() to return a string.
 
-### Build and Run iOS Application
+✅ Task 2: The SM-2 Algorithm
+Open SpaceRepetitionAlgo.kt. You must implement the logic that powers the "Study" button seen in our design docs.
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+Input: A Card and a quality (0-5).
 
----
+Failure (< 3): Set interval to 1.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+Success (>= 3):
+
+If interval is 0, set to 1.
+
+If interval is 1, set to 6.
+
+Otherwise, multiply current interval by the ease factor.
+
+Ease: Update the ease factor using the SM-2 formula (refer to your lecture notes) and ensure it never drops below 1.3.
+
+✅ Task 3: Verify the Logic
+Run the tests:
+
+./gradlew shared:test
+Your business logic is the "Single Source of Truth." If these tests pass, your app will behave identically on both Android and iOS!
