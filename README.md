@@ -1,5 +1,3 @@
----
-
 # 📱 Exercise 1: The "Hello World" of KMP
 
 **Module:** Project Setup & Configuration
