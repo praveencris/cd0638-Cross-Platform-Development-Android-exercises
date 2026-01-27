@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.recall.app.di.appModule
 import com.recall.app.di.sharedModule
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
@@ -19,7 +20,7 @@ import org.koin.compose.koinInject
 @Composable
 fun App() {
     KoinApplication(application = {
-        modules(sharedModule)
+        modules(sharedModule, appModule)
     }) {
         MaterialTheme {
             MainScreen()
