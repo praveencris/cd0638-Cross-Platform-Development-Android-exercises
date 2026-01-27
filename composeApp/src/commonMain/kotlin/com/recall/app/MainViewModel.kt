@@ -11,7 +11,8 @@ import kotlinx.coroutines.launch
 
 /**
  * Shared ViewModel for managing deck state across platforms
- * Fetches decks from the API and exposes them via StateFlow
+ *
+ * TODO: Implement data fetching logic in this ViewModel
  */
 class MainViewModel(
     private val apiService: RecallApiService
@@ -27,26 +28,22 @@ class MainViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
-    init {
-        fetchDecks()
-    }
+    // TODO: Add an init block that calls fetchDecks() when the ViewModel is created
+    // init {
+    //     fetchDecks()
+    // }
 
-    private fun fetchDecks() {
-        scope.launch {
-            _isLoading.value = true
-            _error.value = null
-            try {
-                val fetchedDecks = apiService.fetchAllDecks()
-                _decks.value = fetchedDecks
-            } catch (e: Exception) {
-                _error.value = e.message ?: "Unknown error occurred"
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
+    // TODO: Implement fetchDecks() function
+    // Hint: Use scope.launch to call apiService.fetchAllDecks() in a coroutine
+    // Remember to update _isLoading, _decks, and _error states appropriately
+    // private fun fetchDecks() {
+    //     scope.launch {
+    //         // Your implementation here
+    //     }
+    // }
 
-    fun retry() {
-        fetchDecks()
-    }
+    // TODO: Implement retry() function that calls fetchDecks()
+    // fun retry() {
+    //     fetchDecks()
+    // }
 }

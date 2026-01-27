@@ -1,33 +1,48 @@
-#### **README: Solution 4b (Shared UI)**
+#### **README: Exercise 4b (The Shared Bridge)**
 
-# 🏁 Solution 4b: Shared UI & State
+# 🌉 Exercise 4b: Shared UI & State
 
-**Branch:** `solution-module-4b`
+**Module:** Shared UI with Compose Multiplatform
 
-This branch demonstrates the power of Compose Multiplatform. We implemented the UI and State Logic **once**, and it drives both the Android and iOS applications.
+**Estimated Time:** 25 Minutes
 
-## 🛠️ Implementation Summary
+### **🎓 Objective**
 
-1. **Shared ViewModel**: Located in `commonMain`, this class manages the `RecallApiService` and exposes a `StateFlow<List<Deck>>`. It handles coroutines platform-agnostically.
-2. **Compose Multiplatform**: The `App.kt` file defines the entire visual structure. It uses `LazyColumn` (a shared list component) to render the decks.
-3. **Unified Entry Points**:
-* **Android**: `MainActivity` simply sets the content to `App()`.
-* **iOS**: `MainViewController` wraps `App()` in a `ComposeUIViewController` so Swift can consume it.
+In this exercise, you will implement a **Shared ViewModel** and a **Shared UI Screen**. Instead of writing separate code for Android and iOS, you will write the logic and the UI once in `commonMain`. Both platforms will immediately display the data fetched from your Gist.
+
+### **✅ Task 1: The Shared ViewModel**
+
+We need a state holder that can survive configuration changes and manage background tasks.
+
+1. **Open** `composeApp/src/commonMain/kotlin/com/recall/app/MainViewModel.kt`.
+2. **Action**: Define a `MutableStateFlow` to hold the list of `Deck` objects.
+3. **Action**: In the `init` block (or a `loadDecks` function), launch a Coroutine.
+4. **Logic**: Call `apiService.fetchAllDecks()` and update the state flow.
+* *Hint: Remember to use `Dispatchers.Main` for UI-related state updates.*
 
 
 
-## 📂 Key Files
+### **✅ Task 2: The Compose Multiplatform UI**
 
-| File Path | Description |
-| --- | --- |
-| `composeApp/.../commonMain/.../MainViewModel.kt` | The shared state holder. |
-| `composeApp/.../commonMain/.../App.kt` | The shared UI screen. |
-| `composeApp/.../androidMain/.../MainActivity.kt` | Android entry point. |
-| `composeApp/.../iosMain/.../MainViewController.kt` | iOS entry point. |
+Now let's render the data using Jetpack Compose, which now runs on iOS too!
 
-## 🧪 Verification
+1. **Open** `composeApp/src/commonMain/kotlin/com/recall/app/App.kt`.
+2. **Action**: Inside the `App()` composable, initialize your `MainViewModel`.
+* *Note: You can use Koin's `koinInject()` if configured, or manually pass the service.*
 
-The solution is verified if:
 
-1. **Android**: Shows the list of 10 decks.
-2. **iOS**: Shows the *exact same* list of 10 decks.
+3. **Action**: Collect the stream:
+```kotlin
+val decks by viewModel.decks.collectAsState()
+
+```
+
+
+4. **Action**: Replace the placeholder Text with a `LazyColumn`.
+5. **Design**: For each deck, create a simple `Row` showing the **Deck Title** and the **Card Count** (e.g., "Geography (50 cards)").
+
+### **✅ Task 3: Verify Both Platforms**
+
+1. **Run on Android**: Launch the `composeApp` configuration on an Android Emulator.
+2. **Run on iOS**: Launch the `iosApp` configuration on an iPhone Simulator.
+3. **Goal**: Both devices should show the exact same list of 10 decks.
