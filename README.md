@@ -1,72 +1,26 @@
-The README for the solution branch should serve as the "Source of Truth" for the completed networking implementation. It documents the architecture of the Ktor client and the integration with the remote Gist.
+### **Solution 4a: Linking & DI (README)**
 
----
+# 🏁 Solution 4a: The DI Handshake
 
-# 🏁 Module 3 Solution: Networking with Ktor
+**Branch:** `solution-module-4a`
 
-**Branch:** `solution-module-3`
-
-This branch contains the fully implemented networking layer for the Recall app. The core focus was transitioning from static data to a dynamic, remote data source using **Ktor** and **Kotlinx Serialization**.
+This branch contains the successfully linked architecture between the Android frontend and the KMP shared logic.
 
 ## 🛠️ Implementation Summary
 
-### 1. Multiplatform Network Configuration
-
-The network stack is configured to use platform-optimal engines while keeping the implementation logic in `commonMain`:
-
-* **Android:** Utilizes the `OkHttp` engine for robust connection pooling and interception.
-* **iOS:** Utilizes the `Darwin` engine to leverage native `NSURLSession` for better performance and system integration.
-
-### 2. Global HTTP Client
-
-The `NetworkClient` object initializes a shared `HttpClient` with the following features:
-
-* **ContentNegotiation:** Automatically handles JSON-to-Kotlin object conversion.
-* **Kotlinx Serialization:** Configured to ignore unknown JSON keys to ensure the app remains resilient to API changes or extra metadata in the Gist response.
-
-### 3. API Service Layer
-
-The `RecallApiService` acts as the data provider. It is hardcoded to point to the project's primary data source:
-
-* **Endpoint:** `https://gist.githubusercontent.com/kshitizbali/7dba0064f63c3971d0194a6b5d938d56/raw/4b138fbc16292c86d2ada848738b0a706c29d5cc/decks.json`
-* **Mapping:** The service parses the raw JSON into the `List<Deck>` model defined in Module 2.
+1. **Module Linking**: Updated `composeApp/build.gradle.kts` to include `project(":shared")`.
+2. **Multiplatform DI**: Implemented a "Start Hook" in `commonMain` called `initKoin`. This allows the platform (Android) to inject its context into the shared dependency graph.
+3. **Singleton Services**: Registered `RecallApiService` in the shared graph so it can be injected into any ViewModel or Screen.
 
 ## 📂 Key Files
 
 | File Path | Description |
 | --- | --- |
-| `shared/src/commonMain/kotlin/com/recall/app/network/NetworkClient.kt` | The shared Ktor client configuration. |
-| `shared/src/commonMain/kotlin/com/recall/app/network/RecallApiService.kt` | Service class for fetching and parsing the decks. |
-| `shared/src/commonTest/kotlin/com/recall/app/network/RecallApiTest.kt` | Integration tests verifying the remote fetch. |
+| `shared/.../di/Koin.kt` | The shared DI entry point (`initKoin`). |
+| `composeApp/.../RecallApp.kt` | Android Application class starting the DI graph. |
+| `composeApp/build.gradle.kts` | Gradle config linking the two modules. |
 
 ## 🧪 Verification
 
-To verify that the networking layer is functioning correctly, the following unit test was implemented and passed:
-
-```kotlin
-@Test
-fun testFetchAllDecks() = runTest {
-    val service = RecallApiService(NetworkClient.client)
-    val decks = service.fetchAllDecks()
-
-    assertTrue(decks.isNotEmpty(), "Decks should not be empty")
-    assertEquals(10, decks.size, "Should fetch exactly 10 decks")
-    assertEquals("Geography Basics", decks.first().title)
-}
-
-```
-
-## 🚀 Running the Tests
-
-Execute the following command to ensure the networking solution is stable on your current environment:
-
-```bash
-./gradlew shared:testDebugUnitTest
-
-```
-
----
-
-### Next Steps for the Course
-
-This solution provides the foundation for **Module 4: Local Persistence**. Once the data is fetched via Ktor, the next challenge will be caching this data into a local SQLDelight database to enable offline study capabilities.
+The solution is verified if the app starts up and the following log is visible in Logcat:
+`KOIN: [info] - app context focused`
