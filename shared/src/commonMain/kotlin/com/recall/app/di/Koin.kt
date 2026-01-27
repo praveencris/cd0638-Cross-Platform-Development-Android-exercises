@@ -22,7 +22,6 @@ val sharedModule = module {
  *
  * @param appDeclaration Platform-specific Koin configuration (e.g., androidContext)
  */
-fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
-    appDeclaration()
-    modules(sharedModule)
+fun initKoin(appDeclaration: KoinAppDeclaration = {}) {
+    TODO("Initialize Koin and register modules")
 }
