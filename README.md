@@ -1,7 +1,3 @@
-The README for the solution branch should serve as the "Source of Truth" for the completed networking implementation. It documents the architecture of the Ktor client and the integration with the remote Gist.
-
----
-
 # 🏁 Module 3 Solution: Networking with Ktor
 
 **Branch:** `solution-module-3`
