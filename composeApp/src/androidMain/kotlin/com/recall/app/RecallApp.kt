@@ -2,6 +2,7 @@ package com.recall.app
 
 import android.app.Application
 import com.recall.app.di.androidModule
+import com.recall.app.di.appModule
 import com.recall.app.di.initKoin
 import org.koin.android.ext.koin.androidContext
 
@@ -19,7 +20,7 @@ class RecallApp : Application() {
         // We provide Android context and platform-specific modules
         initKoin {
             androidContext(this@RecallApp)
-            modules(androidModule)
+            modules(androidModule, appModule)
         }
     }
 }
