@@ -1,6 +1,6 @@
 # 🏁 Module 3 Solution: Networking with Ktor
 
-**Branch:** `solution-module-3`
+**Branch:** `sol-lesson-3-networking-with-ktor`
 
 This branch contains the fully implemented networking layer for the Recall app. The core focus was transitioning from static data to a dynamic, remote data source using **Ktor** and **Kotlinx Serialization**.
 
