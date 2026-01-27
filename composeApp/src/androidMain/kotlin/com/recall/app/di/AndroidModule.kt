@@ -1,14 +1,12 @@
 package com.recall.app.di
 
-import com.recall.app.MainViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 /**
  * Android-specific dependency injection module
- * Provides Android platform dependencies like ViewModels
+ * Provides Android platform dependencies
  */
 val androidModule = module {
-    // Provide MainViewModel with injected RecallApiService from shared module
-    viewModel { MainViewModel(get()) }
+    // Android-specific dependencies can be added here
+    // MainViewModel is now registered in the shared module
 }
