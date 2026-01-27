@@ -14,9 +14,6 @@ import org.koin.dsl.module
 val sharedModule = module {
     // Provide singleton instance of RecallApiService
     single { RecallApiService(NetworkClient.httpClient) }
-
-    // Provide factory instance of MainViewModel
-    factory { com.recall.app.MainViewModel(get()) }
 }
 
 /**
