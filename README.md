@@ -1,26 +1,31 @@
-### **Solution 4a: Linking & DI (README)**
+### **Solution 4b: The Logic Bridge (README)**
 
-# 🏁 Solution 4a: The DI Handshake
+# 🏁 Solution 4b: ViewModels & Coroutines
 
-**Branch:** `solution-module-4a`
+**Branch:** `solution-module-4b`
 
-This branch contains the successfully linked architecture between the Android frontend and the KMP shared logic.
+This branch completes the Android integration by connecting the UI to the Shared Logic.
 
 ## 🛠️ Implementation Summary
 
-1. **Module Linking**: Updated `composeApp/build.gradle.kts` to include `project(":shared")`.
-2. **Multiplatform DI**: Implemented a "Start Hook" in `commonMain` called `initKoin`. This allows the platform (Android) to inject its context into the shared dependency graph.
-3. **Singleton Services**: Registered `RecallApiService` in the shared graph so it can be injected into any ViewModel or Screen.
+1. **Reactive State**: Used `MutableStateFlow` in the `MainViewModel` to create a reactive data pipeline.
+2. **Safe Coroutines**: Implemented `viewModelScope.launch` to ensure that network requests are automatically cancelled if the user closes the app, preventing memory leaks.
+3. **Koin Injection**: Used `by viewModel()` to provide the ViewModel instance to the `MainActivity`.
 
 ## 📂 Key Files
 
 | File Path | Description |
 | --- | --- |
-| `shared/.../di/Koin.kt` | The shared DI entry point (`initKoin`). |
-| `composeApp/.../RecallApp.kt` | Android Application class starting the DI graph. |
-| `composeApp/build.gradle.kts` | Gradle config linking the two modules. |
+| `MainViewModel.kt` | Manages UI state and shared service calls. |
+| `MainActivity.kt` | Collects state and renders the Compose UI. |
 
 ## 🧪 Verification
 
-The solution is verified if the app starts up and the following log is visible in Logcat:
-`KOIN: [info] - app context focused`
+The solution is verified if the Android Emulator displays:
+
+1. **Platform Greeting**: "Hello from Android!"
+2. **Data Count**: "10 Decks Available" (fetched live from Gist).
+
+## 🚀 Next Step
+
+The data is now live! In **Module 5**, we will implement **SQLDelight** to save these 10 decks locally so the app works even without an internet connection.
