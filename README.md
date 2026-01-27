@@ -1,35 +1,72 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
-
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
-
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
-
-### Build and Run Android Application
-
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
-
-### Build and Run iOS Application
-
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+The README for the solution branch should serve as the "Source of Truth" for the completed networking implementation. It documents the architecture of the Ktor client and the integration with the remote Gist.
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+# 🏁 Module 3 Solution: Networking with Ktor
+
+**Branch:** `solution-module-3`
+
+This branch contains the fully implemented networking layer for the Recall app. The core focus was transitioning from static data to a dynamic, remote data source using **Ktor** and **Kotlinx Serialization**.
+
+## 🛠️ Implementation Summary
+
+### 1. Multiplatform Network Configuration
+
+The network stack is configured to use platform-optimal engines while keeping the implementation logic in `commonMain`:
+
+* **Android:** Utilizes the `OkHttp` engine for robust connection pooling and interception.
+* **iOS:** Utilizes the `Darwin` engine to leverage native `NSURLSession` for better performance and system integration.
+
+### 2. Global HTTP Client
+
+The `NetworkClient` object initializes a shared `HttpClient` with the following features:
+
+* **ContentNegotiation:** Automatically handles JSON-to-Kotlin object conversion.
+* **Kotlinx Serialization:** Configured to ignore unknown JSON keys to ensure the app remains resilient to API changes or extra metadata in the Gist response.
+
+### 3. API Service Layer
+
+The `RecallApiService` acts as the data provider. It is hardcoded to point to the project's primary data source:
+
+* **Endpoint:** `https://gist.githubusercontent.com/kshitizbali/7dba0064f63c3971d0194a6b5d938d56/raw/4b138fbc16292c86d2ada848738b0a706c29d5cc/decks.json`
+* **Mapping:** The service parses the raw JSON into the `List<Deck>` model defined in Module 2.
+
+## 📂 Key Files
+
+| File Path | Description |
+| --- | --- |
+| `shared/src/commonMain/kotlin/com/recall/app/network/NetworkClient.kt` | The shared Ktor client configuration. |
+| `shared/src/commonMain/kotlin/com/recall/app/network/RecallApiService.kt` | Service class for fetching and parsing the decks. |
+| `shared/src/commonTest/kotlin/com/recall/app/network/RecallApiTest.kt` | Integration tests verifying the remote fetch. |
+
+## 🧪 Verification
+
+To verify that the networking layer is functioning correctly, the following unit test was implemented and passed:
+
+```kotlin
+@Test
+fun testFetchAllDecks() = runTest {
+    val service = RecallApiService(NetworkClient.client)
+    val decks = service.fetchAllDecks()
+
+    assertTrue(decks.isNotEmpty(), "Decks should not be empty")
+    assertEquals(10, decks.size, "Should fetch exactly 10 decks")
+    assertEquals("Geography Basics", decks.first().title)
+}
+
+```
+
+## 🚀 Running the Tests
+
+Execute the following command to ensure the networking solution is stable on your current environment:
+
+```bash
+./gradlew shared:testDebugUnitTest
+
+```
+
+---
+
+### Next Steps for the Course
+
+This solution provides the foundation for **Module 4: Local Persistence**. Once the data is fetched via Ktor, the next challenge will be caching this data into a local SQLDelight database to enable offline study capabilities.
