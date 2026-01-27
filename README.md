@@ -1,72 +1,102 @@
-The README for the solution branch should serve as the "Source of Truth" for the completed networking implementation. It documents the architecture of the Ktor client and the integration with the remote Gist.
+# 🌐 Exercise 3: Connecting to the Cloud
+
+**Module:** Networking with Ktor & Serialization
+
+**Estimated Time:** 20 Minutes
+
+### **🎓 Objective**
+
+In this exercise, you will connect the "Recall" app to the internet. You will set up the **Ktor HTTP Client**—the industry standard for KMP networking—and fetch a JSON file containing 10 decks and 50 flashcards from a remote server.
+
+By the end of this lab, you will have:
+
+1. Configured platform-specific networking engines for Android and iOS.
+2. Initialized a global `HttpClient` with JSON serialization.
+3. Mapped a remote JSON response to your existing `Deck` and `Card` domain models.
+4. Verified the integration with automated tests.
 
 ---
 
-# 🏁 Module 3 Solution: Networking with Ktor
+### **🛠️ Prerequisites**
 
-**Branch:** `solution-module-3`
+* Completion of Exercise 2 (Shared Business Logic).
+* A working internet connection.
 
-This branch contains the fully implemented networking layer for the Recall app. The core focus was transitioning from static data to a dynamic, remote data source using **Ktor** and **Kotlinx Serialization**.
+---
 
-## 🛠️ Implementation Summary
+### **✅ Task 1: Configure the Network Stack**
 
-### 1. Multiplatform Network Configuration
+KMP requires different "Engines" for different platforms to handle the underlying networking protocols.
 
-The network stack is configured to use platform-optimal engines while keeping the implementation logic in `commonMain`:
+1. **Version Catalog**: Open `gradle/libs.versions.toml`. Add the following under `[libraries]` (use version `2.3.7`):
+* `ktor-client-core`
+* `ktor-client-content-negotiation`
+* `ktor-serialization-kotlinx-json`
+* `ktor-client-okhttp` (for Android)
+* `ktor-client-darwin` (for iOS)
 
-* **Android:** Utilizes the `OkHttp` engine for robust connection pooling and interception.
-* **iOS:** Utilizes the `Darwin` engine to leverage native `NSURLSession` for better performance and system integration.
 
-### 2. Global HTTP Client
+2. **Build Script**: Open `shared/build.gradle.kts`.
+* Add core and serialization libraries to `commonMain`.
+* Add `ktor-client-okhttp` to `androidMain`.
+* Add `ktor-client-darwin` to `iosMain`.
 
-The `NetworkClient` object initializes a shared `HttpClient` with the following features:
 
-* **ContentNegotiation:** Automatically handles JSON-to-Kotlin object conversion.
-* **Kotlinx Serialization:** Configured to ignore unknown JSON keys to ensure the app remains resilient to API changes or extra metadata in the Gist response.
+3. **Sync Gradle** to apply the changes.
 
-### 3. API Service Layer
+---
 
-The `RecallApiService` acts as the data provider. It is hardcoded to point to the project's primary data source:
+### **✅ Task 2: Build the HttpClient**
 
-* **Endpoint:** `https://gist.githubusercontent.com/kshitizbali/7dba0064f63c3971d0194a6b5d938d56/raw/4b138fbc16292c86d2ada848738b0a706c29d5cc/decks.json`
-* **Mapping:** The service parses the raw JSON into the `List<Deck>` model defined in Module 2.
+Open `NetworkClient.kt` in the shared module. You need to initialize the client so it knows how to handle JSON data.
 
-## 📂 Key Files
+1. **Initialize**: Create the `HttpClient`.
+2. **Install ContentNegotiation**: This allows the client to automatically convert JSON strings into Kotlin objects.
+3. **Configure JSON**:
+* Set `ignoreUnknownKeys = true`. This is critical because APIs often return extra metadata that isn't needed by our models.
+* Set `prettyPrint = true` for easier debugging.
 
-| File Path | Description |
-| --- | --- |
-| `shared/src/commonMain/kotlin/com/recall/app/network/NetworkClient.kt` | The shared Ktor client configuration. |
-| `shared/src/commonMain/kotlin/com/recall/app/network/RecallApiService.kt` | Service class for fetching and parsing the decks. |
-| `shared/src/commonTest/kotlin/com/recall/app/network/RecallApiTest.kt` | Integration tests verifying the remote fetch. |
 
-## 🧪 Verification
 
-To verify that the networking layer is functioning correctly, the following unit test was implemented and passed:
+---
 
-```kotlin
-@Test
-fun testFetchAllDecks() = runTest {
-    val service = RecallApiService(NetworkClient.client)
-    val decks = service.fetchAllDecks()
+### **✅ Task 3: Fetch the Decks**
 
-    assertTrue(decks.isNotEmpty(), "Decks should not be empty")
-    assertEquals(10, decks.size, "Should fetch exactly 10 decks")
-    assertEquals("Geography Basics", decks.first().title)
-}
+Open `RecallApiService.kt`. This class is responsible for the actual network call to your Gist.
 
-```
+1. **The Endpoint**: Use the following URL:
+   `https://gist.githubusercontent.com/kshitizbali/7dba0064f63c3971d0194a6b5d938d56/raw/4b138fbc16292c86d2ada848738b0a706c29d5cc/decks.json`
+2. **The Call**: Use `client.get(URL)` to fetch the data.
+3. **The Result**: Return the response as a `List<Deck>`.
 
-## 🚀 Running the Tests
+---
 
-Execute the following command to ensure the networking solution is stable on your current environment:
+### **✅ Task 4: Verify the Fetch**
 
+Before building a UI, we must ensure the network layer is robust.
+
+1. **Open** the **Terminal** tab.
+2. **Run** the tests:
 ```bash
-./gradlew shared:testDebugUnitTest
+./gradlew shared:test
 
 ```
 
+
+3. **Verification**: The test should confirm that the `List<Deck>` is not empty and that the first deck contains the expected cards from your Gist.
+
 ---
 
-### Next Steps for the Course
+### **🆘 Troubleshooting**
 
-This solution provides the foundation for **Module 4: Local Persistence**. Once the data is fetched via Ktor, the next challenge will be caching this data into a local SQLDelight database to enable offline study capabilities.
+* **Android Internet Permission**: Ensure `<uses-permission android:name="android.permission.INTERNET" />` is in your `AndroidManifest.xml`.
+* **Serialization Mismatch**: If you get a `SerializationException`, check that your `@SerialName` annotations in the `Card` model exactly match the keys in the JSON (e.g., `image_base64`).
+* **iOS Engine**: Ensure you are using the `Darwin` engine for iOS; using `OkHttp` or `CIO` on iOS targets will cause a compile-time or runtime error.
+
+---
+
+### **🚀 Definition of Done**
+
+* The Ktor client is successfully configured with platform-specific engines.
+* The `RecallApiService` successfully fetches and parses all 10 decks.
+* The integration tests pass, proving the JSON structure matches our shared models.

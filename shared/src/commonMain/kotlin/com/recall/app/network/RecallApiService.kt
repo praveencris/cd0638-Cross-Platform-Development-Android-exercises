@@ -25,7 +25,6 @@ class RecallApiService(private val client: HttpClient) {
      * @throws Exception if the network request fails or JSON parsing fails
      */
     suspend fun fetchAllDecks(): List<Deck> {
-        val response: DecksResponse = client.get(baseUrl).body()
-        return response.decks
+        TODO("Use the client to GET the decks from the Gist URL")
     }
 }

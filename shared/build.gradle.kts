@@ -23,17 +23,20 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.ktor.serialization.kotlinx.json)
+            // TODO: Add Ktor dependencies
+            // implementation(libs.ktor.client.core)
+            // implementation(libs.ktor.client.content.negotiation)
+            // implementation(libs.ktor.serialization.kotlinx.json)
         }
 
         androidMain.dependencies {
-            implementation(libs.ktor.client.okhttp)
+            // TODO: Add Android HTTP engine
+            // implementation(libs.ktor.client.okhttp)
         }
 
         iosMain.dependencies {
-            implementation(libs.ktor.client.darwin)
+            // TODO: Add iOS HTTP engine
+            // implementation(libs.ktor.client.darwin)
         }
 
         commonTest.dependencies {
