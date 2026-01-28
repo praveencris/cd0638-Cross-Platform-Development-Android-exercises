@@ -1,31 +1,49 @@
-#### **README: Solution 5a (Adaptive Scaffold)**
+### **Solution 5b: The Responsive Dashboard (README)**
 
-# 📐 Solution 5a: The Adaptive Scaffold
+# 🎨 Solution 5b: The Responsive Dashboard
 
-**Branch:** `sol-lesson-5a-ui-adaptive-scaffold`
+**Branch:** `sol-lesson-5b-ui-responsive-dashboard`
 
-This branch implements the foundational logic for **Adaptive Layouts** in Kotlin Multiplatform. Instead of relying on Android-specific resource qualifiers (like `sw600dp`), we built a pure Compose solution that works on Android, iOS, and Desktop.
+This branch implements the "Zen Study" UI design with fully adaptive behavior. It transforms the app from a simple text list into a production-grade dashboard that respects the user's device size.
 
 ## 🛠️ Implementation Summary
 
-1. **Window Size Detection**: Implemented a custom `calculateWindowSize()` composable using `BoxWithConstraints`. This reads the available screen width and categorizes it into standard breakpoints.
-2. **Enum Classes**: Defined `WindowSize` (Compact, Medium, Expanded) to type-safe the layout logic.
-3. **Root Integration**: Updated `App.kt` to calculate the window size *once* at the top level and pass it down to all child screens.
+1. **Zen UI Components**: Built `DeckCard.kt` matching the provided design specifications:
+* **Gradients**: Implemented Blue, Orange, and Emerald card variants based on deck color.
+* **Typography**: Used proper font weighting and spacing (Inter/Sans-Serif fallback).
+* **Visuals**: Added progress bars and "Due" pills with rounded backgrounds.
+
+
+2. **Adaptive Logic**: Implemented `LibraryScreen.kt` to consume the `WindowSize` parameter:
+* **Compact (Phone)**: Renders a `LazyColumn` (Vertical List) with single column.
+* **Medium (Small Tablet)**: Renders a `LazyVerticalGrid` with 2 columns.
+* **Expanded (Large Tablet/Desktop)**: Renders a `LazyVerticalGrid` with 3 columns.
+
+
+3. **Performance**: Used efficient composition patterns to ensure smooth scrolling even with complex gradients and multiple cards.
 
 ## 📂 Key Files
 
 | File Path | Description |
 | --- | --- |
-| `composeApp/.../ui/WindowSize.kt` | Contains the `WindowSize` enum and the calculation logic using `BoxWithConstraints`. |
-| `composeApp/.../App.kt` | The root composable that detects the size and displays the debug text. |
+| `composeApp/.../ui/components/DeckCard.kt` | The high-fidelity UI component for a single deck with gradients and progress visualization. |
+| `composeApp/.../ui/LibraryScreen.kt` | The main dashboard screen containing the conditional List/Grid logic. |
+| `composeApp/.../ui/WindowSize.kt` | Window size detection and adaptive layout support. |
+| `composeApp/.../App.kt` | Root composable integrating adaptive layouts with state management. |
 
 ## 🧪 Verification
 
 The solution is verified if:
 
-1. **Phone Emulator**: Displays "Current Mode: Compact".
-2. **Tablet / Resizable Emulator**: When you rotate the device or resize the window past 840dp, the text automatically updates to "Expanded".
+1. **Visual Audit**: The cards match the "Zen Study" design (gradients, rounded corners, progress bars, due pills).
+2. **Responsiveness**:
+* On a **Phone (Portrait)**, the cards stack vertically in a single column.
+* On a **Small Tablet (Landscape)**, the cards arrange themselves in a 2-column grid.
+* On a **Large Tablet/Desktop**, the cards arrange themselves in a 3-column grid.
+3. **Color Variants**: Blue, Orange, and Emerald gradients display correctly based on deck color hex values.
+
+
 
 ## 🚀 Next Step
 
-The infrastructure is ready. In **Exercise 5b**, we will use this `WindowSize` to toggle between a vertical List (for phones) and a Grid (for tablets) using the "Zen Study" design.
+The UI is beautiful, but the data is still just a list of decks. In **Module 6**, we will implement the **Study Session UI**, allowing users to tap a card, flip it, and rate their memory using the SM-2 buttons.

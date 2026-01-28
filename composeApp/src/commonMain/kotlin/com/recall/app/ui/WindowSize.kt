@@ -46,20 +46,6 @@ enum class WindowSize {
  * the window is resized, allowing for truly adaptive layouts across platforms.
  *
  * @param content The composable content that receives the current [WindowSize]
- *
- * @sample
- * ```kotlin
- * @Composable
- * fun MyScreen() {
- *     AdaptiveLayout { windowSize ->
- *         when (windowSize) {
- *             WindowSize.Compact -> CompactLayout()
- *             WindowSize.Medium -> MediumLayout()
- *             WindowSize.Expanded -> ExpandedLayout()
- *         }
- *     }
- * }
- * ```
  */
 @Composable
 fun AdaptiveLayout(content: @Composable (WindowSize) -> Unit) {
