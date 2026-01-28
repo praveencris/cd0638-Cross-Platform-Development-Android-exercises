@@ -1,31 +1,57 @@
-#### **README: Solution 5a (Adaptive Scaffold)**
+### **Exercise 5a: The Adaptive Scaffold (README)**
 
-# 📐 Solution 5a: The Adaptive Scaffold
+# 📐 Exercise 5a: The Adaptive Scaffold
 
-**Branch:** `sol-lesson-5a-ui-adaptive-scaffold`
+**Module:** Building Adaptive UIs
+**Estimated Time:** 20 Minutes
 
-This branch implements the foundational logic for **Adaptive Layouts** in Kotlin Multiplatform. Instead of relying on Android-specific resource qualifiers (like `sw600dp`), we built a pure Compose solution that works on Android, iOS, and Desktop.
+### **🎓 Objective**
 
-## 🛠️ Implementation Summary
+In this exercise, you will lay the foundation for a responsive application. You will implement a pure Kotlin Multiplatform mechanism to detect the screen size of the device (Phone vs. Tablet) without relying on Android XML resource qualifiers. This "Window Size Class" logic will drive the layout decisions for the entire app.
 
-1. **Window Size Detection**: Implemented a custom `calculateWindowSize()` composable using `BoxWithConstraints`. This reads the available screen width and categorizes it into standard breakpoints.
-2. **Enum Classes**: Defined `WindowSize` (Compact, Medium, Expanded) to type-safe the layout logic.
-3. **Root Integration**: Updated `App.kt` to calculate the window size *once* at the top level and pass it down to all child screens.
+### **🛠️ Prerequisites**
 
-## 📂 Key Files
+* Completion of Module 4b (Shared UI).
+* A project structure where `commonMain` is actively driving the UI.
 
-| File Path | Description |
-| --- | --- |
-| `composeApp/.../ui/WindowSize.kt` | Contains the `WindowSize` enum and the calculation logic using `BoxWithConstraints`. |
-| `composeApp/.../App.kt` | The root composable that detects the size and displays the debug text. |
+---
 
-## 🧪 Verification
+### **✅ Task 1: Define Window Sizes**
 
-The solution is verified if:
+We need a type-safe way to categorize devices.
 
-1. **Phone Emulator**: Displays "Current Mode: Compact".
-2. **Tablet / Resizable Emulator**: When you rotate the device or resize the window past 840dp, the text automatically updates to "Expanded".
+1. **Open** `composeApp/src/commonMain/kotlin/com/recall/app/ui/WindowSize.kt`.
+2. **Action**: Define an `enum class WindowSize` with three entries:
+* `Compact` (Phones)
+* `Medium` (Foldables/Small Tablets)
+* `Expanded` (Tablets/Desktop)
 
-## 🚀 Next Step
 
-The infrastructure is ready. In **Exercise 5b**, we will use this `WindowSize` to toggle between a vertical List (for phones) and a Grid (for tablets) using the "Zen Study" design.
+
+### **✅ Task 2: Implement Detection Logic**
+
+Now, write the Composable that actually measures the screen.
+
+1. **Action**: In the same file, implement the `calculateWindowSize()` function.
+2. **Logic**: Use `BoxWithConstraints` to access the `maxWidth`.
+* **< 600.dp**  Return `Compact`
+* **< 840.dp**  Return `Medium`
+* **> 840.dp**  Return `Expanded`
+
+
+3. **Audit**: Ensure you strictly follow the Material Design 3 breakpoint guidelines.
+
+### **✅ Task 3: Wire Up the Root**
+
+1. **Open** `composeApp/src/commonMain/kotlin/com/recall/app/App.kt`.
+2. **Action**: Call `calculateWindowSize()` at the very top of your `App` composable.
+3. **Action**: For now, replace your UI with a temporary text label: `"Window Mode: $windowSize"`.
+4. **Test**: Run the app on a Phone Emulator and a Tablet Emulator (or resize the desktop preview). Ensure the text updates correctly.
+
+---
+
+### **🚀 Definition of Done**
+
+* The `WindowSize` enum is defined in `commonMain`.
+* The app compiles and runs on both Android and iOS.
+* The UI displays "Compact" on phones and "Expanded" on tablets.

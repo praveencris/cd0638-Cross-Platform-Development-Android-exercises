@@ -21,27 +21,28 @@ import org.koin.compose.koinInject
 fun App() {
     KoinContext {
         MaterialTheme {
-            // Adaptive layout wrapper that detects window size
-            AdaptiveLayout { windowSize ->
-                // Temporary debug display for window size detection
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        // Debug text showing current window size mode
-                        Text(
-                            text = "Current Mode: $windowSize",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(8.dp)
-                        )
+            // TODO: Calculate window size and pass to UI
+            // Step 1: Wrap the content below with AdaptiveLayout { windowSize -> ... }
+            // Step 2: Replace the placeholder text with "Current Mode: $windowSize"
+            // Step 3: Verify that the debug text updates when you rotate or resize the screen
 
-                        // Main content
-                        MainScreen()
-                    }
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // Temporary debug display for window size detection
+                    Text(
+                        text = "Current Mode: [TODO - Calculate window size here]",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(8.dp)
+                    )
+
+                    // Main content
+                    MainScreen()
                 }
             }
         }

@@ -46,29 +46,14 @@ enum class WindowSize {
  * the window is resized, allowing for truly adaptive layouts across platforms.
  *
  * @param content The composable content that receives the current [WindowSize]
- *
- * @sample
- * ```kotlin
- * @Composable
- * fun MyScreen() {
- *     AdaptiveLayout { windowSize ->
- *         when (windowSize) {
- *             WindowSize.Compact -> CompactLayout()
- *             WindowSize.Medium -> MediumLayout()
- *             WindowSize.Expanded -> ExpandedLayout()
- *         }
- *     }
- * }
- * ```
  */
 @Composable
 fun AdaptiveLayout(content: @Composable (WindowSize) -> Unit) {
-    BoxWithConstraints {
-        val windowSize = when {
-            maxWidth < 600.dp -> WindowSize.Compact
-            maxWidth < 840.dp -> WindowSize.Medium
-            else -> WindowSize.Expanded
-        }
-        content(windowSize)
-    }
+    // TODO: Use BoxWithConstraints to calculate width based on breakpoints (600dp, 840dp)
+    // Step 1: Create a BoxWithConstraints composable
+    // Step 2: Inside the block, determine windowSize based on maxWidth:
+    //         - If maxWidth < 600.dp -> WindowSize.Compact
+    //         - If maxWidth < 840.dp -> WindowSize.Medium
+    //         - Otherwise -> WindowSize.Expanded
+    // Step 3: Call content(windowSize) to render the UI with the calculated size
 }
