@@ -1,33 +1,31 @@
-#### **README: Solution 4b (Shared UI)**
+#### **README: Solution 5a (Adaptive Scaffold)**
 
-# 🏁 Solution 4b: Shared UI & State
+# 📐 Solution 5a: The Adaptive Scaffold
 
-**Branch:** `solution-module-4b`
+**Branch:** `sol-lesson-5a-ui-adaptive-scaffold`
 
-This branch demonstrates the power of Compose Multiplatform. We implemented the UI and State Logic **once**, and it drives both the Android and iOS applications.
+This branch implements the foundational logic for **Adaptive Layouts** in Kotlin Multiplatform. Instead of relying on Android-specific resource qualifiers (like `sw600dp`), we built a pure Compose solution that works on Android, iOS, and Desktop.
 
 ## 🛠️ Implementation Summary
 
-1. **Shared ViewModel**: Located in `commonMain`, this class manages the `RecallApiService` and exposes a `StateFlow<List<Deck>>`. It handles coroutines platform-agnostically.
-2. **Compose Multiplatform**: The `App.kt` file defines the entire visual structure. It uses `LazyColumn` (a shared list component) to render the decks.
-3. **Unified Entry Points**:
-* **Android**: `MainActivity` simply sets the content to `App()`.
-* **iOS**: `MainViewController` wraps `App()` in a `ComposeUIViewController` so Swift can consume it.
-
-
+1. **Window Size Detection**: Implemented a custom `calculateWindowSize()` composable using `BoxWithConstraints`. This reads the available screen width and categorizes it into standard breakpoints.
+2. **Enum Classes**: Defined `WindowSize` (Compact, Medium, Expanded) to type-safe the layout logic.
+3. **Root Integration**: Updated `App.kt` to calculate the window size *once* at the top level and pass it down to all child screens.
 
 ## 📂 Key Files
 
 | File Path | Description |
 | --- | --- |
-| `composeApp/.../commonMain/.../MainViewModel.kt` | The shared state holder. |
-| `composeApp/.../commonMain/.../App.kt` | The shared UI screen. |
-| `composeApp/.../androidMain/.../MainActivity.kt` | Android entry point. |
-| `composeApp/.../iosMain/.../MainViewController.kt` | iOS entry point. |
+| `composeApp/.../ui/WindowSize.kt` | Contains the `WindowSize` enum and the calculation logic using `BoxWithConstraints`. |
+| `composeApp/.../App.kt` | The root composable that detects the size and displays the debug text. |
 
 ## 🧪 Verification
 
 The solution is verified if:
 
-1. **Android**: Shows the list of 10 decks.
-2. **iOS**: Shows the *exact same* list of 10 decks.
+1. **Phone Emulator**: Displays "Current Mode: Compact".
+2. **Tablet / Resizable Emulator**: When you rotate the device or resize the window past 840dp, the text automatically updates to "Expanded".
+
+## 🚀 Next Step
+
+The infrastructure is ready. In **Exercise 5b**, we will use this `WindowSize` to toggle between a vertical List (for phones) and a Grid (for tablets) using the "Zen Study" design.

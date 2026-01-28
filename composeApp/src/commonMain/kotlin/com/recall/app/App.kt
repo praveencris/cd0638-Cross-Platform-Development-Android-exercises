@@ -8,18 +8,42 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.recall.app.ui.AdaptiveLayout
+import com.recall.app.ui.WindowSize
 import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
 
 /**
  * Shared Compose UI for both Android and iOS
- * Displays a list of decks fetched from the API
+ * Displays a list of decks fetched from the API with adaptive layout support
  */
 @Composable
 fun App() {
     KoinContext {
         MaterialTheme {
-            MainScreen()
+            // Adaptive layout wrapper that detects window size
+            AdaptiveLayout { windowSize ->
+                // Temporary debug display for window size detection
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        // Debug text showing current window size mode
+                        Text(
+                            text = "Current Mode: $windowSize",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(8.dp)
+                        )
+
+                        // Main content
+                        MainScreen()
+                    }
+                }
+            }
         }
     }
 }
@@ -31,15 +55,11 @@ fun MainScreen() {
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
             Text(
                 text = "Recall (KMP)",
                 style = MaterialTheme.typography.headlineLarge,
@@ -109,5 +129,4 @@ fun MainScreen() {
                 }
             }
         }
-    }
 }
