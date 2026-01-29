@@ -17,25 +17,61 @@ import androidx.compose.ui.unit.dp
 import com.recall.app.domain.models.Deck
 
 /**
+ * Color palette for deck cards
+ *
+ * Each palette defines gradient colors and an accent color for consistent theming
+ */
+private data class ColorPalette(
+    val gradientStart: Color,
+    val gradientEnd: Color,
+    val accent: Color
+)
+
+/**
+ * Predefined color palettes matching the Zen Study design
+ */
+private val colorPalettes = listOf(
+    // Blue palette
+    ColorPalette(
+        gradientStart = Color(0xFFEFF6FF), // blue-50
+        gradientEnd = Color(0xFFDBEAFE),   // blue-100
+        accent = Color(0xFF2B8CEE)         // primary blue
+    ),
+    // Orange palette
+    ColorPalette(
+        gradientStart = Color(0xFFFFF7ED), // orange-50
+        gradientEnd = Color(0xFFFFEDD5),   // orange-100
+        accent = Color(0xFFF97316)         // orange-500
+    ),
+    // Emerald palette
+    ColorPalette(
+        gradientStart = Color(0xFFECFDF5), // emerald-50
+        gradientEnd = Color(0xFFD1FAE5),   // emerald-100
+        accent = Color(0xFF10B981)         // emerald-500
+    )
+)
+
+/**
  * Beautiful gradient card component for displaying deck information
  *
  * Features:
- * - Gradient background based on deck color
+ * - Gradient background from rotating color palette
  * - Icon with rounded background
  * - Due count pill badge
  * - Title and description
  * - Progress bar visualization
  *
  * @param deck The deck data to display
+ * @param index The deck's position in the list (for color palette rotation)
  * @param modifier Optional modifier for the card
  */
 @Composable
 fun DeckCard(
     deck: Deck,
+    index: Int,
     modifier: Modifier = Modifier
 ) {
-    val gradient = getGradientColors(deck.colorHex)
-    val accentColor = getAccentColor(deck.colorHex)
+    val colorPalette = colorPalettes[index % colorPalettes.size]
     val dueCount = calculateDueCount(deck)
     val progress = calculateProgress(deck)
     val description = generateDescription(deck)
@@ -52,7 +88,10 @@ fun DeckCard(
                 .fillMaxSize()
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = gradient
+                        colors = listOf(
+                            colorPalette.gradientStart,
+                            colorPalette.gradientEnd
+                        )
                     )
                 )
                 .padding(20.dp)
@@ -91,7 +130,7 @@ fun DeckCard(
                             Text(
                                 text = "$dueCount due",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = accentColor,
+                                color = colorPalette.accent,
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             )
@@ -130,95 +169,12 @@ fun DeckCard(
                             .fillMaxWidth()
                             .height(6.dp)
                             .clip(RoundedCornerShape(3.dp)),
-                        color = accentColor,
+                        color = colorPalette.accent,
                         trackColor = Color.White.copy(alpha = 0.4f)
                     )
                 }
             }
         }
-    }
-}
-
-/**
- * Maps hex color to gradient color scheme
- *
- * Supports three primary color schemes:
- * - Blue (cool tones)
- * - Orange/Red (warm tones)
- * - Emerald/Green (nature tones)
- */
-private fun getGradientColors(colorHex: String): List<Color> {
-    val color = parseHexColor(colorHex)
-
-    // Extract RGB components as ULong and convert to Float
-    val colorValue = color.value
-    val red = ((colorValue shr 16) and 0xFFu).toInt() / 255f
-    val green = ((colorValue shr 8) and 0xFFu).toInt() / 255f
-    val blue = (colorValue and 0xFFu).toInt() / 255f
-
-    return when {
-        // Blue tones (high blue, low red)
-        blue > red && blue > green -> listOf(
-            Color(0xFFEFF6FF), // blue-50
-            Color(0xFFDBEAFE)  // blue-100
-        )
-        // Orange/Red tones (high red)
-        red > green && red > blue -> listOf(
-            Color(0xFFFFF7ED), // orange-50
-            Color(0xFFFFEDD5)  // orange-100
-        )
-        // Green/Emerald tones (high green)
-        green > red && green > blue -> listOf(
-            Color(0xFFECFDF5), // emerald-50
-            Color(0xFFD1FAE5)  // emerald-100
-        )
-        // Default to blue
-        else -> listOf(
-            Color(0xFFEFF6FF),
-            Color(0xFFDBEAFE)
-        )
-    }
-}
-
-/**
- * Gets the accent color for icons and text based on hex color
- */
-private fun getAccentColor(colorHex: String): Color {
-    val color = parseHexColor(colorHex)
-
-    val colorValue = color.value
-    val red = ((colorValue shr 16) and 0xFFu).toInt() / 255f
-    val green = ((colorValue shr 8) and 0xFFu).toInt() / 255f
-    val blue = (colorValue and 0xFFu).toInt() / 255f
-
-    return when {
-        blue > red && blue > green -> Color(0xFF3B82F6) // blue-500
-        red > green && red > blue -> Color(0xFFF97316)   // orange-500
-        green > red && green > blue -> Color(0xFF10B981) // emerald-500
-        else -> Color(0xFF3B82F6)
-    }
-}
-
-/**
- * Parses hex color string to Color object
- *
- * Pure Kotlin implementation that works across all platforms
- */
-private fun parseHexColor(hex: String): Color {
-    val cleanHex = hex.removePrefix("#")
-    return try {
-        val colorInt = cleanHex.toLong(16)
-        if (cleanHex.length == 6) {
-            // RGB format, add full alpha
-            Color((0xFF000000 or colorInt).toInt())
-        } else if (cleanHex.length == 8) {
-            // ARGB format
-            Color(colorInt.toInt())
-        } else {
-            Color(0xFF3B82F6) // Default blue
-        }
-    } catch (e: Exception) {
-        Color(0xFF3B82F6) // Default blue
     }
 }
 

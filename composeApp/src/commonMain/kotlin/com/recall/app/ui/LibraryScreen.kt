@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -76,8 +76,8 @@ private fun CompactLayout(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        items(decks) { deck ->
-            DeckCard(deck = deck)
+        itemsIndexed(decks) { index, deck ->
+            DeckCard(deck = deck, index = index)
         }
     }
 }
@@ -99,8 +99,8 @@ private fun GridLayout(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        items(decks) { deck ->
-            DeckCard(deck = deck)
+        itemsIndexed(decks) { index, deck ->
+            DeckCard(deck = deck, index = index)
         }
     }
 }
