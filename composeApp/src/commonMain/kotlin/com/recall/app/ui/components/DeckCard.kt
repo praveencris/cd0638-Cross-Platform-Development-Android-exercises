@@ -15,6 +15,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.recall.app.domain.models.Deck
+import com.recall.app.domain.models.DeckCategory
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import recall.composeapp.generated.resources.Res
+import recall.composeapp.generated.resources.biotech_24px
+import recall.composeapp.generated.resources.history_edu_24px
+import recall.composeapp.generated.resources.language_chinese_dayi_24px
+import recall.composeapp.generated.resources.logo_dev_24px
 
 /**
  * Color palette for deck cards
@@ -50,6 +58,18 @@ private val colorPalettes = listOf(
         accent = Color(0xFF10B981)         // emerald-500
     )
 )
+
+/**
+ * Maps deck category to the appropriate icon resource
+ */
+private fun getCategoryIcon(category: DeckCategory): DrawableResource {
+    return when (category) {
+        DeckCategory.LANGUAGE -> Res.drawable.language_chinese_dayi_24px
+        DeckCategory.HISTORY -> Res.drawable.history_edu_24px
+        DeckCategory.SCIENCE -> Res.drawable.biotech_24px
+        DeckCategory.TECHNOLOGY -> Res.drawable.logo_dev_24px
+    }
+}
 
 /**
  * Beautiful gradient card component for displaying deck information
@@ -114,10 +134,11 @@ fun DeckCard(
                             .background(Color.White.copy(alpha = 0.6f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "📚",
-                            style = MaterialTheme.typography.headlineSmall,
-                            textAlign = TextAlign.Center
+                        Icon(
+                            painter = painterResource(getCategoryIcon(deck.category)),
+                            contentDescription = "${deck.category.name} icon",
+                            tint = colorPalette.accent,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
 

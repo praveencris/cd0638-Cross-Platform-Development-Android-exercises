@@ -16,7 +16,7 @@ class RecallApiService(private val client: HttpClient) {
     /**
      * Base URL for the decks JSON data
      */
-    private val baseUrl = "https://gist.githubusercontent.com/kshitizbali/7dba0064f63c3971d0194a6b5d938d56/raw/4b138fbc16292c86d2ada848738b0a706c29d5cc/decks.json"
+    private val baseUrl = "https://gist.githubusercontent.com/kshitizbali/1d894000650f1a1836ab8ad586a39f3b/raw/8200d74f96660bcd828d4cdead158f512fc17289/decks.json"
 
     /**
      * Fetches all available decks from the remote API

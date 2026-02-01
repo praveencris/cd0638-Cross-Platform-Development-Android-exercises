@@ -2,6 +2,7 @@ package com.recall.app.ui.previews
 
 import com.recall.app.domain.models.Card
 import com.recall.app.domain.models.Deck
+import com.recall.app.domain.models.DeckCategory
 
 /**
  * Sample data generator for Compose previews
@@ -37,12 +38,14 @@ fun sampleDeck(
     id: String = "1",
     title: String = "Sample Deck",
     colorHex: String = "#2B8CEE",
+    category: DeckCategory = DeckCategory.LANGUAGE,
     cardCount: Int = 25
 ): Deck {
     return Deck(
         id = id,
         title = title,
         colorHex = colorHex,
+        category = category,
         cards = List(cardCount) { index ->
             sampleCard(
                 id = "$id-card-$index",
@@ -63,54 +66,63 @@ fun sampleDeckList(): List<Deck> {
             id = "1",
             title = "Japanese N5",
             colorHex = "#2B8CEE",
+            category = DeckCategory.LANGUAGE,
             cardCount = 45
         ),
         sampleDeck(
             id = "2",
             title = "History 101",
             colorHex = "#F97316",
+            category = DeckCategory.HISTORY,
             cardCount = 32
         ),
         sampleDeck(
             id = "3",
             title = "Biology Terms",
             colorHex = "#10B981",
+            category = DeckCategory.SCIENCE,
             cardCount = 68
         ),
         sampleDeck(
             id = "4",
             title = "Spanish Vocab",
             colorHex = "#2B8CEE",
+            category = DeckCategory.LANGUAGE,
             cardCount = 15
         ),
         sampleDeck(
             id = "5",
             title = "Chemistry",
             colorHex = "#F97316",
+            category = DeckCategory.SCIENCE,
             cardCount = 52
         ),
         sampleDeck(
             id = "6",
             title = "Geography",
             colorHex = "#10B981",
+            category = DeckCategory.HISTORY,
             cardCount = 28
         ),
         sampleDeck(
             id = "7",
             title = "Programming",
             colorHex = "#2B8CEE",
+            category = DeckCategory.SCIENCE,
             cardCount = 94
         ),
         sampleDeck(
             id = "8",
             title = "Music Theory",
             colorHex = "#F97316",
+            category = DeckCategory.HISTORY,
             cardCount = 38
         ),
         sampleDeck(
             id = "9",
             title = "Art History",
             colorHex = "#10B981",
+            category = DeckCategory.HISTORY,
             cardCount = 41
         )
     )
@@ -124,6 +136,7 @@ fun sampleSmallDeck(): Deck {
         id = "small",
         title = "French Basics",
         colorHex = "#2B8CEE",
+        category = DeckCategory.LANGUAGE,
         cardCount = 12
     )
 }
@@ -136,6 +149,7 @@ fun sampleMediumDeck(): Deck {
         id = "medium",
         title = "World Capitals",
         colorHex = "#F97316",
+        category = DeckCategory.HISTORY,
         cardCount = 35
     )
 }
@@ -148,6 +162,7 @@ fun sampleLargeDeck(): Deck {
         id = "large",
         title = "Medical Terminology",
         colorHex = "#10B981",
+        category = DeckCategory.SCIENCE,
         cardCount = 87
     )
 }
