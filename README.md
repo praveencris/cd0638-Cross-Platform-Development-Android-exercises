@@ -1,49 +1,60 @@
-### **Solution 5b: The Responsive Dashboard (README)**
+# 🎨 Exercise 5b: The Responsive Dashboard
 
-# 🎨 Solution 5b: The Responsive Dashboard
+**Branch:** `lesson-5b-ui-responsive-dashboard`
+**Module:** Building Adaptive UIs
+**Estimated Time:** 20-30 Minutes
 
-**Branch:** `sol-lesson-5b-ui-responsive-dashboard`
+### **🎓 Objective**
 
-This branch implements the "Zen Study" UI design with fully adaptive behavior. It transforms the app from a simple text list into a production-grade dashboard that respects the user's device size.
+In this exercise, you will implement the "Zen Study" design aesthetic. You will build a high-fidelity `DeckCard` component and use the `WindowSize` logic from Exercise 5a to toggle between a **List Layout** (for phones) and a **Grid Layout** (for tablets).
 
-## 🛠️ Implementation Summary
+### **🎨 Design Reference**
 
-1. **Zen UI Components**: Built `DeckCard.kt` matching the provided design specifications:
-* **Gradients**: Implemented Blue, Orange, and Emerald card variants based on deck color.
-* **Typography**: Used proper font weighting and spacing (Inter/Sans-Serif fallback).
-* **Visuals**: Added progress bars and "Due" pills with rounded backgrounds.
+* **Location:** `root/plan/design/main_list_zen_study_-_minimalist_variant/`
+* **Key Asset:** `screen.png` (Visual Reference) & `code.html` (Color/Tailwind Specs)
+* **Style:** Minimalist, Whitespace-heavy, Rounded Corners, Soft Gradients (Blue/Orange/Green).
 
+---
 
-2. **Adaptive Logic**: Implemented `LibraryScreen.kt` to consume the `WindowSize` parameter:
-* **Compact (Phone)**: Renders a `LazyColumn` (Vertical List) with single column.
-* **Medium (Small Tablet)**: Renders a `LazyVerticalGrid` with 2 columns.
-* **Expanded (Large Tablet/Desktop)**: Renders a `LazyVerticalGrid` with 3 columns.
+### **✅ Task 1: Build the Zen Card**
 
-
-3. **Performance**: Used efficient composition patterns to ensure smooth scrolling even with complex gradients and multiple cards.
-
-## 📂 Key Files
-
-| File Path | Description |
-| --- | --- |
-| `composeApp/.../ui/components/DeckCard.kt` | The high-fidelity UI component for a single deck with gradients and progress visualization. |
-| `composeApp/.../ui/LibraryScreen.kt` | The main dashboard screen containing the conditional List/Grid logic. |
-| `composeApp/.../ui/WindowSize.kt` | Window size detection and adaptive layout support. |
-| `composeApp/.../App.kt` | Root composable integrating adaptive layouts with state management. |
-
-## 🧪 Verification
-
-The solution is verified if:
-
-1. **Visual Audit**: The cards match the "Zen Study" design (gradients, rounded corners, progress bars, due pills).
-2. **Responsiveness**:
-* On a **Phone (Portrait)**, the cards stack vertically in a single column.
-* On a **Small Tablet (Landscape)**, the cards arrange themselves in a 2-column grid.
-* On a **Large Tablet/Desktop**, the cards arrange themselves in a 3-column grid.
-3. **Color Variants**: Blue, Orange, and Emerald gradients display correctly based on deck color hex values.
+1. **Open** `composeApp/src/commonMain/kotlin/com/recall/app/ui/components/DeckCard.kt`.
+2. **Action**: Implement the UI to match the design screenshot.
+* **Container**: Rounded corners (`24.dp`), Gradient background.
+* **Content**: Title (Bold), Subtitle (Opacity 60%), "Due" Badge (Pill shape), Progress Bar.
+* **Colors**: Dynamically apply the hex color from the `Deck` model.
 
 
+3. **Audit**: Ensure your code is production-grade. Use `Arrangement.spacedBy` for padding and `MaterialTheme` typography.
 
-## 🚀 Next Step
+### **✅ Task 2: The Adaptive Layout**
 
-The UI is beautiful, but the data is still just a list of decks. In **Module 6**, we will implement the **Study Session UI**, allowing users to tap a card, flip it, and rate their memory using the SM-2 buttons.
+1. **Open** `composeApp/src/commonMain/kotlin/com/recall/app/ui/LibraryScreen.kt`.
+2. **Action**: Consume the `WindowSize` parameter passed down from `App.kt`.
+3. **Logic**:
+* **IF Compact**: Render a `LazyColumn` (Vertical List).
+* **IF Medium/Expanded**: Render a `LazyVerticalGrid` with 2 columns.
+
+
+4. **Refactor**: Pass your `decks` data into this layout and render a `DeckCard` for each item.
+
+### **✅ Task 3: Visual Verification**
+
+1. **Phone Test**: Launch on an Android Phone or iPhone Simulator. You should see a vertical list of beautiful cards.
+2. **Tablet Test**: Launch on a Tablet or resize the window. The layout should snap into a 2-column grid.
+
+---
+
+### **🆘 Troubleshooting**
+
+* **"Unresolved Reference: dp"**: Make sure you import `androidx.compose.ui.unit.dp`.
+* **Grid not showing?**: Ensure you are using `LazyVerticalGrid` with `GridCells.Fixed(2)`.
+* **Colors look wrong?**: Check `code.html` in the design folder for the exact Hex codes used in the mockups.
+
+---
+
+### **🚀 Definition of Done**
+
+* The UI matches the "Zen Study" minimalist design.
+* The app adapts layout structure based on the device size.
+* The code passes a self-audit for best practices (no hardcoded magic numbers, proper modifier usage).
