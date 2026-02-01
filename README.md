@@ -1,56 +1,33 @@
-# 🏁 Solution 6b: Study Mode & Input
-**Branch:** `solution-module-6b`
+# 🧠 Exercise 6b: The Study Interface
+**Module:** Tablet & Foldable Optimization
+**Estimated Time:** 45 Minutes
 
-This branch implements the interactive "Study Loop" with production-grade input handling for large screens.
+### **🎓 Objective**
+In this exercise, you will build the complete "Study Loop". This includes the 3D Flip Animation, Keyboard Shortcuts, and most importantly, **State Persistence** so users can pick up exactly where they left off.
 
-## 🛠️ Implementation Summary
+### **✅ Task 1: The "Resume" Logic**
+We need the app to remember which card you were on.
+1.  **Open** `composeApp/src/commonMain/kotlin/com/recall/app/MainViewModel.kt`.
+2.  **Action**: Implement `getStartIndex(deckId)`. It should return the saved index from `deckProgress`.
+3.  **Action**: Implement `onCardReviewed`.
+    * Save the `newIndex` to the map.
+    * **Crucial:** Create a *copy* of the deck in the `_decks` list with the updated `progress` (calculated as `index / total`). This triggers the UI to refresh the progress bar.
 
-### 1. Focus Management & Keyboard Support
-To support hardware keyboards (iPad Magic Keyboard, Android Tablets, Desktop), we explicitly request focus when the screen enters composition.
-```kotlin
-val focusRequester = remember { FocusRequester() }
-LaunchedEffect(Unit) { focusRequester.requestFocus() }
+### **✅ Task 2: The Animated Card**
+1.  **Open** `composeApp/src/commonMain/kotlin/com/recall/app/ui/StudyScreen.kt`.
+2.  **Animation**: Use `animateFloatAsState` to animate a rotation value from `0f` to `180f`.
+3.  **Graphics**: Use `Modifier.graphicsLayer` to apply the rotation.
+    * *Trick:* When rotation > 90 degrees, show the **Back** of the card and rotate the content 180 degrees so it isn't mirrored.
 
-Box(
-    modifier = Modifier
-        .focusRequester(focusRequester)
-        .onKeyEvent { event ->
-            if (event.key == Key.Spacebar && event.type == KeyEventType.KeyUp) {
-                isFlipped = !isFlipped
-                true // Event consumed
-            } else {
-                false
-            }
-        }
-)
+### **✅ Task 3: Connecting the Wires**
+1.  **Events**: When a user clicks "Easy" or "Hard":
+    * Calculate the `nextIndex`.
+    * Call `onCardReviewed(nextIndex)` to notify the ViewModel.
+2.  **Keyboard**: Add a `FocusRequester` and `onKeyEvent` handler.
+    * **Spacebar** $\rightarrow$ Flip Card.
+    * **1, 2, 3, 4** $\rightarrow$ Rate Card.
 
-```
-
-### 2. Component Architecture
-
-To prevent `StudyScreen.kt` from becoming a "God File," we split the card faces into private sub-composables:
-
-* `StudyCardFront(...)`: Handles the gradient background and "Tap to Flip" prompt.
-* `StudyCardBack(...)`: Displays the answer and the SM-2 Rating Buttons.
-
-### 3. Navigation Integration
-
-The screen accepts an `onClose` lambda. This is wired to the "X" button, ensuring that:
-
-* On **Phones**, it pops the navigation stack.
-* On **Tablets**, it clears the right pane (showing the empty state).
-
-## 📂 Key Files
-
-| File Path | Description |
-| --- | --- |
-| `composeApp/.../ui/StudyScreen.kt` | The main interactive screen containing the Flip Logic and Keyboard listener. |
-
-## 🧪 Verification
-
-The solution is verified if:
-
-1. **Visuals:** The card renders with the correct gradient (Blue/Orange/Green variants).
-2. **Interaction:** Tapping the card toggles between Question and Answer.
-3. **Shortcuts:** Pressing `Spacebar` flips the card. Pressing `1`, `2`, `3`, or `4` logs a rating action.
-4. **Navigation:** Clicking the "X" button returns you to the Library (or Empty State on Tablet).
+### **🚀 Definition of Done**
+1.  **Visuals:** Card flips with a smooth 3D animation.
+2.  **Resume:** If you leave a deck at Card #5 and come back, it starts at Card #5.
+3.  **Progress:** As you review cards, the Progress Bar in the "My Library" list updates in real-time.

@@ -66,7 +66,8 @@ class MainViewModel(
      * @return The saved card index, or 0 if no progress exists
      */
     fun getStartIndex(deckId: String): Int {
-        return deckProgress[deckId] ?: 0
+        // TODO: Return saved index from deckProgress map (default to 0)
+        return 0
     }
 
     /**
@@ -75,30 +76,11 @@ class MainViewModel(
      * @param newIndex The new card index after review
      */
     fun onCardReviewed(deckId: String, newIndex: Int) {
-        // Find the deck to get card count
-        val deck = _decks.value.find { it.id == deckId } ?: return
-        val cardCount = deck.cards.size
-
-        // Reset progress if we've completed the deck (reached the end)
-        val actualIndex = if (newIndex >= cardCount) 0 else newIndex
-
-        // Save the card index for resume
-        deckProgress[deckId] = actualIndex
-
-        // Calculate progress fraction (0.0 to 1.0)
-        val progressFraction = if (cardCount > 0) {
-            actualIndex.toFloat() / cardCount.toFloat()
-        } else {
-            0f
-        }
-
-        // Update the deck in the list to trigger UI updates
-        _decks.value = _decks.value.map { currentDeck ->
-            if (currentDeck.id == deckId) {
-                currentDeck.copy(progress = progressFraction)
-            } else {
-                currentDeck
-            }
-        }
+        // TODO: Implement state tracking and list updates
+        // 1. Find the deck to get card count
+        // 2. Reset progress if completed (index >= cardCount)
+        // 3. Save the card index in deckProgress
+        // 4. Calculate progress fraction (index / cardCount)
+        // 5. Update the deck in _decks list with new progress
     }
 }

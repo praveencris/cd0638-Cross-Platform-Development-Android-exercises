@@ -1,7 +1,5 @@
 package com.recall.app.ui
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,15 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.focusable
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.*
 import com.recall.app.domain.models.Card
 import com.recall.app.domain.models.Deck
 
@@ -59,66 +52,14 @@ fun StudyScreen(
         null
     }
 
-    // Focus management for keyboard support
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
+    // TODO: Add keyboard support - FocusRequester, LaunchedEffect, onKeyEvent
+    // - Spacebar should flip the card
+    // - Keys 1-4 should trigger rating buttons
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color(0xFFE6F0FA))
-            .focusRequester(focusRequester)
-            .onKeyEvent { event ->
-                when {
-                    // Spacebar flips the card
-                    event.key == Key.Spacebar && event.type == KeyEventType.KeyUp -> {
-                        isFlipped = !isFlipped
-                        true
-                    }
-                    // Number keys 1-4 trigger rating buttons (only when flipped)
-                    isFlipped && event.type == KeyEventType.KeyUp -> {
-                        when (event.key) {
-                            Key.One -> {
-                                // Trigger Again button logic
-                                val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                                currentCardIndex = nextIndex
-                                isFlipped = false
-                                onCardReviewed(nextIndex)
-                                true
-                            }
-                            Key.Two -> {
-                                // Trigger Hard button logic
-                                val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                                currentCardIndex = nextIndex
-                                isFlipped = false
-                                onCardReviewed(nextIndex)
-                                true
-                            }
-                            Key.Three -> {
-                                // Trigger Good button logic
-                                val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                                currentCardIndex = nextIndex
-                                isFlipped = false
-                                onCardReviewed(nextIndex)
-                                true
-                            }
-                            Key.Four -> {
-                                // Trigger Easy button logic
-                                val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                                currentCardIndex = nextIndex
-                                isFlipped = false
-                                onCardReviewed(nextIndex)
-                                true
-                            }
-                            else -> false
-                        }
-                    }
-                    else -> false
-                }
-            }
-            .focusable()
     ) {
         Column(
             modifier = Modifier
@@ -155,29 +96,20 @@ fun StudyScreen(
                 if (isFlipped) {
                     SpacedRepetitionButtons(
                         onAgain = {
-                            // Move to next card and report progress
-                            val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                            currentCardIndex = nextIndex
-                            isFlipped = false
-                            onCardReviewed(nextIndex)
+                            // TODO: Calculate nextIndex, update currentCardIndex, reset isFlipped
+                            // TODO: Call onCardReviewed(nextIndex) to update ViewModel
                         },
                         onHard = {
-                            val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                            currentCardIndex = nextIndex
-                            isFlipped = false
-                            onCardReviewed(nextIndex)
+                            // TODO: Calculate nextIndex, update currentCardIndex, reset isFlipped
+                            // TODO: Call onCardReviewed(nextIndex) to update ViewModel
                         },
                         onGood = {
-                            val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                            currentCardIndex = nextIndex
-                            isFlipped = false
-                            onCardReviewed(nextIndex)
+                            // TODO: Calculate nextIndex, update currentCardIndex, reset isFlipped
+                            // TODO: Call onCardReviewed(nextIndex) to update ViewModel
                         },
                         onEasy = {
-                            val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                            currentCardIndex = nextIndex
-                            isFlipped = false
-                            onCardReviewed(nextIndex)
+                            // TODO: Calculate nextIndex, update currentCardIndex, reset isFlipped
+                            // TODO: Call onCardReviewed(nextIndex) to update ViewModel
                         },
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
                     )
@@ -275,194 +207,54 @@ private fun FlashCard(
     onCardTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val rotation by animateFloatAsState(
-        targetValue = if (isFlipped) 180f else 0f,
-        animationSpec = tween(durationMillis = 400),
-        label = "cardFlip"
-    )
+    // TODO: Implement 3D Flip Animation
+    // 1. Use animateFloatAsState to animate rotation from 0f to 180f
+    // 2. Apply graphicsLayer modifier with rotationY and cameraDistance
+    // 3. Switch content at 90 degrees (front vs back)
+    // 4. Apply counter-rotation to back side so text is readable
 
     Card(
         modifier = modifier
-            .clickable(onClick = onCardTap)
-            .graphicsLayer {
-                rotationY = rotation
-                cameraDistance = 12f * density
-            },
+            .clickable(onClick = onCardTap),
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            // Show front side when rotation <= 90 degrees
-            if (rotation <= 90f) {
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    // Top gradient section (teal background)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(0.4f)
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color(0xFF14B8A6),
-                                        Color(0xFF0D9488)
-                                    )
-                                )
-                            ),
-                        contentAlignment = Alignment.TopEnd
-                    ) {
-                        // Category badge
-                        Surface(
-                            modifier = Modifier.padding(16.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color.White.copy(alpha = 0.3f)
-                        ) {
-                            Text(
-                                text = deck.category.name.replace("_", " "),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.White,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                            )
-                        }
-                    }
+            // Placeholder card UI - students will implement the full design
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFFF5F5F5))
+                    .padding(32.dp)
+            ) {
+                Text(
+                    text = if (isFlipped) "ANSWER" else "QUESTION",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isFlipped) Color(0xFF10B981) else Color(0xFF2B8CEE),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
 
-                    // Bottom white section (question)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(0.6f)
-                            .background(Color.White),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(32.dp)
-                        ) {
-                            // Label
-                            Text(
-                                text = "QUESTION",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = Color(0xFF2B8CEE),
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.2.sp,
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
+                Text(
+                    text = if (isFlipped) card.back else card.front,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1F2937),
+                    textAlign = TextAlign.Center
+                )
 
-                            // Question text
-                            Text(
-                                text = card.front,
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1F2937),
-                                textAlign = TextAlign.Center,
-                                lineHeight = MaterialTheme.typography.headlineMedium.lineHeight
-                            )
-
-                            Spacer(modifier = Modifier.height(24.dp))
-
-                            // Tap to flip hint
-                            Row(
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(top = 16.dp)
-                            ) {
-                                Text(
-                                    text = "↻",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = Color(0xFF9CA3AF)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Tap to flip",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = Color(0xFF9CA3AF)
-                                )
-                            }
-                        }
-                    }
-                }
-            } else {
-                // Show back side when rotation > 90 degrees
-                // Apply counter-rotation so text is readable
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            rotationY = 180f
-                        }
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        // Top gradient section (teal background)
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.4f)
-                                .background(
-                                    brush = Brush.verticalGradient(
-                                        colors = listOf(
-                                            Color(0xFF14B8A6),
-                                            Color(0xFF0D9488)
-                                        )
-                                    )
-                                ),
-                            contentAlignment = Alignment.TopEnd
-                        ) {
-                            // Category badge
-                            Surface(
-                                modifier = Modifier.padding(16.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color.White.copy(alpha = 0.3f)
-                            ) {
-                                Text(
-                                    text = deck.category.name.replace("_", " "),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Medium,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                                )
-                            }
-                        }
-
-                        // Bottom white section (answer)
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.6f)
-                                .background(Color.White),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(32.dp)
-                            ) {
-                                // Label
-                                Text(
-                                    text = "ANSWER",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = Color(0xFF10B981),
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.2.sp,
-                                    modifier = Modifier.padding(bottom = 16.dp)
-                                )
-
-                                // Answer text
-                                Text(
-                                    text = card.back,
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF1F2937),
-                                    textAlign = TextAlign.Center,
-                                    lineHeight = MaterialTheme.typography.headlineMedium.lineHeight
-                                )
-                            }
-                        }
-                    }
+                if (!isFlipped) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "↻ Tap to flip",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color(0xFF9CA3AF)
+                    )
                 }
             }
         }
