@@ -17,8 +17,10 @@ import com.recall.app.ui.WindowSize
  * Layout behavior:
  * - **Compact (Phone)**: Stack navigation - shows either Library OR Study screen
  *   - Close button returns to library when study screen is shown
- * - **Medium/Expanded (Tablet)**: Split view - shows Library AND Study simultaneously
- *   - Library pane on left (weight 1f)
+ * - **Medium (Portrait Tablet)**: Stack navigation - shows either Library OR Study screen
+ *   - Same behavior as phone to avoid cramped split view
+ * - **Expanded (Landscape Tablet/Desktop)**: Split view - shows Library AND Study simultaneously
+ *   - Library pane on left (weight 1f) with single-column list
  *   - Vertical divider
  *   - Study pane on right (weight 2f)
  *
@@ -39,25 +41,22 @@ fun MasterDetailLayout(
     onDeckSelected: (Deck?) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when (windowSize) {
-        WindowSize.Compact -> {
-            // Phone: Stack navigation (either list OR detail)
-            CompactLayout(
-                selectedDeck = selectedDeck,
-                decks = decks,
-                onDeckSelected = onDeckSelected,
-                modifier = modifier
-            )
-        }
-        WindowSize.Medium, WindowSize.Expanded -> {
-            // Tablet: Split view (list AND detail side by side)
-            SplitLayout(
-                selectedDeck = selectedDeck,
-                decks = decks,
-                onDeckSelected = onDeckSelected,
-                modifier = modifier
-            )
-        }
+    // Only use Split View for Expanded (Landscape Tablet/Desktop)
+    // Compact (Phone) and Medium (Portrait Tablet) use CompactLayout (Stack)
+    if (windowSize == WindowSize.Expanded) {
+        SplitLayout(
+            selectedDeck = selectedDeck,
+            decks = decks,
+            onDeckSelected = onDeckSelected,
+            modifier = modifier
+        )
+    } else {
+        CompactLayout(
+            selectedDeck = selectedDeck,
+            decks = decks,
+            onDeckSelected = onDeckSelected,
+            modifier = modifier
+        )
     }
 }
 
@@ -92,6 +91,7 @@ private fun CompactLayout(
 
 /**
  * Split layout for tablets - shows library and study side by side
+ * Forces Compact mode for library to render single-column list (not grid)
  */
 @Composable
 private fun SplitLayout(
@@ -102,9 +102,10 @@ private fun SplitLayout(
 ) {
     Row(modifier = modifier.fillMaxSize()) {
         // Left pane: Library
+        // We force WindowSize.Compact so LibraryScreen renders as a LIST (1 col), not a GRID
         Box(modifier = Modifier.weight(1f)) {
             LibraryScreen(
-                windowSize = WindowSize.Medium,
+                windowSize = WindowSize.Compact,
                 decks = decks,
                 onDeckClick = { deck -> onDeckSelected(deck) }
             )
