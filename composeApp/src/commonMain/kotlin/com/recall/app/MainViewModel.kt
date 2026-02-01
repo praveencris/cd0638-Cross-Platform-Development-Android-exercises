@@ -27,8 +27,7 @@ class MainViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
-    private val _selectedDeck = MutableStateFlow<Deck?>(null)
-    val selectedDeck: StateFlow<Deck?> = _selectedDeck.asStateFlow()
+    // TODO: Manage selected deck state
 
     init {
         fetchDecks()
@@ -54,6 +53,6 @@ class MainViewModel(
     }
 
     fun selectDeck(deck: Deck?) {
-        _selectedDeck.value = deck
+        // TODO: Implement deck selection logic
     }
 }

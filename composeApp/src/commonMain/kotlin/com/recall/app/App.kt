@@ -7,7 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.recall.app.ui.AdaptiveLayout
-import com.recall.app.ui.navigation.MasterDetailLayout
+import com.recall.app.ui.LibraryScreen
 import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
 
@@ -24,7 +24,6 @@ fun App() {
                 val decks by viewModel.decks.collectAsState()
                 val isLoading by viewModel.isLoading.collectAsState()
                 val error by viewModel.error.collectAsState()
-                val selectedDeck by viewModel.selectedDeck.collectAsState()
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -67,11 +66,9 @@ fun App() {
                             }
                         }
                         else -> {
-                            MasterDetailLayout(
+                            LibraryScreen(
                                 windowSize = windowSize,
-                                selectedDeck = selectedDeck,
-                                decks = decks,
-                                onDeckSelected = viewModel::selectDeck
+                                decks = decks
                             )
                         }
                     }
