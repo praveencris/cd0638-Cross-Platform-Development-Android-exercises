@@ -1,6 +1,5 @@
 package com.recall.app.ui.navigation
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -17,7 +16,7 @@ import com.recall.app.ui.WindowSize
  *
  * Layout behavior:
  * - **Compact (Phone)**: Stack navigation - shows either Library OR Study screen
- *   - Uses BackHandler to return to library when study screen is shown
+ *   - Close button returns to library when study screen is shown
  * - **Medium/Expanded (Tablet)**: Split view - shows Library AND Study simultaneously
  *   - Library pane on left (weight 1f)
  *   - Vertical divider
@@ -64,7 +63,7 @@ fun MasterDetailLayout(
 
 /**
  * Compact layout for phones - shows either library or study screen
- * Uses BackHandler to navigate back from study to library
+ * Close button in StudyScreen navigates back to library
  */
 @Composable
 private fun CompactLayout(
@@ -75,9 +74,6 @@ private fun CompactLayout(
 ) {
     if (selectedDeck != null) {
         // Show study screen
-        BackHandler {
-            onDeckSelected(null)
-        }
         StudyScreen(
             deck = selectedDeck,
             onClose = { onDeckSelected(null) },
