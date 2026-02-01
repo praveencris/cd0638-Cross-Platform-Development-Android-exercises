@@ -105,7 +105,11 @@ fun DeckCard(
             .height(180.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent,
+            contentColor = Color(0xFF1F2937) // Default dark text color
+        )
     ) {
         Box(
             modifier = Modifier
