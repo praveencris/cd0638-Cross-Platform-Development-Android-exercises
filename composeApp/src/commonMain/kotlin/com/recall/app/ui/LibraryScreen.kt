@@ -25,12 +25,14 @@ import com.recall.app.ui.components.DeckCard
  *
  * @param windowSize Current window size category for responsive layout
  * @param decks List of decks to display
+ * @param onDeckClick Callback when a deck is clicked
  * @param modifier Optional modifier for the screen
  */
 @Composable
 fun LibraryScreen(
     windowSize: WindowSize,
     decks: List<Deck>,
+    onDeckClick: (Deck) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -51,15 +53,15 @@ fun LibraryScreen(
         when (windowSize) {
             WindowSize.Compact -> {
                 // Single column list for phones
-                CompactLayout(decks = decks)
+                CompactLayout(decks = decks, onDeckClick = onDeckClick)
             }
             WindowSize.Medium -> {
                 // 2-column grid for small tablets
-                GridLayout(decks = decks, columns = 2)
+                GridLayout(decks = decks, columns = 2, onDeckClick = onDeckClick)
             }
             WindowSize.Expanded -> {
                 // 3-column grid for large tablets and desktop
-                GridLayout(decks = decks, columns = 3)
+                GridLayout(decks = decks, columns = 3, onDeckClick = onDeckClick)
             }
         }
     }
@@ -71,6 +73,7 @@ fun LibraryScreen(
 @Composable
 private fun CompactLayout(
     decks: List<Deck>,
+    onDeckClick: (Deck) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -78,7 +81,11 @@ private fun CompactLayout(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         itemsIndexed(decks) { index, deck ->
-            DeckCard(deck = deck, index = index)
+            DeckCard(
+                deck = deck,
+                index = index,
+                onClick = { onDeckClick(deck) }
+            )
         }
     }
 }
@@ -92,6 +99,7 @@ private fun CompactLayout(
 private fun GridLayout(
     decks: List<Deck>,
     columns: Int,
+    onDeckClick: (Deck) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -101,7 +109,11 @@ private fun GridLayout(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         itemsIndexed(decks) { index, deck ->
-            DeckCard(deck = deck, index = index)
+            DeckCard(
+                deck = deck,
+                index = index,
+                onClick = { onDeckClick(deck) }
+            )
         }
     }
 }

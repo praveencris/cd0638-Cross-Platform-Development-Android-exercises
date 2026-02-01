@@ -1,6 +1,7 @@
 package com.recall.app.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -83,12 +84,14 @@ private fun getCategoryIcon(category: DeckCategory): DrawableResource {
  *
  * @param deck The deck data to display
  * @param index The deck's position in the list (for color palette rotation)
+ * @param onClick Callback when the card is clicked
  * @param modifier Optional modifier for the card
  */
 @Composable
 fun DeckCard(
     deck: Deck,
     index: Int,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val colorPalette = colorPalettes[index % colorPalettes.size]
@@ -99,7 +102,8 @@ fun DeckCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(180.dp),
+            .height(180.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {

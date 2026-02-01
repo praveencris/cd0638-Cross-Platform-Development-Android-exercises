@@ -1,0 +1,137 @@
+package com.recall.app.ui.navigation
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.recall.app.domain.models.Deck
+import com.recall.app.ui.LibraryScreen
+import com.recall.app.ui.StudyScreen
+import com.recall.app.ui.WindowSize
+
+/**
+ * Adaptive master-detail layout that provides different navigation patterns
+ * based on screen size
+ *
+ * Layout behavior:
+ * - **Compact (Phone)**: Stack navigation - shows either Library OR Study screen
+ *   - Uses BackHandler to return to library when study screen is shown
+ * - **Medium/Expanded (Tablet)**: Split view - shows Library AND Study simultaneously
+ *   - Library pane on left (weight 1f)
+ *   - Vertical divider
+ *   - Study pane on right (weight 2f)
+ *
+ * This pattern is standard for large-screen Android apps and allows the same
+ * UI components to work seamlessly across different form factors.
+ *
+ * @param windowSize Current window size category for responsive layout
+ * @param selectedDeck Currently selected deck (null means no selection)
+ * @param decks List of all available decks
+ * @param onDeckSelected Callback when a deck is selected or deselected
+ * @param modifier Optional modifier for the layout
+ */
+@Composable
+fun MasterDetailLayout(
+    windowSize: WindowSize,
+    selectedDeck: Deck?,
+    decks: List<Deck>,
+    onDeckSelected: (Deck?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    when (windowSize) {
+        WindowSize.Compact -> {
+            // Phone: Stack navigation (either list OR detail)
+            CompactLayout(
+                selectedDeck = selectedDeck,
+                decks = decks,
+                onDeckSelected = onDeckSelected,
+                modifier = modifier
+            )
+        }
+        WindowSize.Medium, WindowSize.Expanded -> {
+            // Tablet: Split view (list AND detail side by side)
+            SplitLayout(
+                selectedDeck = selectedDeck,
+                decks = decks,
+                onDeckSelected = onDeckSelected,
+                modifier = modifier
+            )
+        }
+    }
+}
+
+/**
+ * Compact layout for phones - shows either library or study screen
+ * Uses BackHandler to navigate back from study to library
+ */
+@Composable
+private fun CompactLayout(
+    selectedDeck: Deck?,
+    decks: List<Deck>,
+    onDeckSelected: (Deck?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (selectedDeck != null) {
+        // Show study screen
+        BackHandler {
+            onDeckSelected(null)
+        }
+        StudyScreen(
+            deck = selectedDeck,
+            onClose = { onDeckSelected(null) },
+            modifier = modifier
+        )
+    } else {
+        // Show library screen
+        LibraryScreen(
+            windowSize = WindowSize.Compact,
+            decks = decks,
+            onDeckClick = { deck -> onDeckSelected(deck) },
+            modifier = modifier
+        )
+    }
+}
+
+/**
+ * Split layout for tablets - shows library and study side by side
+ */
+@Composable
+private fun SplitLayout(
+    selectedDeck: Deck?,
+    decks: List<Deck>,
+    onDeckSelected: (Deck?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier.fillMaxSize()) {
+        // Left pane: Library
+        Box(modifier = Modifier.weight(1f)) {
+            LibraryScreen(
+                windowSize = WindowSize.Medium,
+                decks = decks,
+                onDeckClick = { deck -> onDeckSelected(deck) }
+            )
+        }
+
+        // Divider
+        VerticalDivider(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(1.dp)
+        )
+
+        // Right pane: Study screen or empty state
+        Box(modifier = Modifier.weight(2f)) {
+            if (selectedDeck != null) {
+                StudyScreen(
+                    deck = selectedDeck,
+                    onClose = { onDeckSelected(null) }
+                )
+            } else {
+                // Empty state - could show a "Select a deck" message
+                Box(modifier = Modifier.fillMaxSize())
+            }
+        }
+    }
+}
