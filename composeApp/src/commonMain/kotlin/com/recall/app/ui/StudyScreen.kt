@@ -16,6 +16,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.focusable
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.*
 import com.recall.app.domain.models.Card
 import com.recall.app.domain.models.Deck
 
@@ -47,10 +51,58 @@ fun StudyScreen(
         null
     }
 
+    // Focus management for keyboard support
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color(0xFFE6F0FA))
+            .focusRequester(focusRequester)
+            .onKeyEvent { event ->
+                when {
+                    // Spacebar flips the card
+                    event.key == Key.Spacebar && event.type == KeyEventType.KeyUp -> {
+                        isFlipped = !isFlipped
+                        true
+                    }
+                    // Number keys 1-4 trigger rating buttons (only when flipped)
+                    isFlipped && event.type == KeyEventType.KeyUp -> {
+                        when (event.key) {
+                            Key.One -> {
+                                // Trigger Again button logic
+                                currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                                isFlipped = false
+                                true
+                            }
+                            Key.Two -> {
+                                // Trigger Hard button logic
+                                currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                                isFlipped = false
+                                true
+                            }
+                            Key.Three -> {
+                                // Trigger Good button logic
+                                currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                                isFlipped = false
+                                true
+                            }
+                            Key.Four -> {
+                                // Trigger Easy button logic
+                                currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                                isFlipped = false
+                                true
+                            }
+                            else -> false
+                        }
+                    }
+                    else -> false
+                }
+            }
+            .focusable()
     ) {
         Column(
             modifier = Modifier
