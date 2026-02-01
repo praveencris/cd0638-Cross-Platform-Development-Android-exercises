@@ -102,7 +102,7 @@ fun DeckCard(
 ) {
     val colorPalette = colorPalettes[index % colorPalettes.size]
     val dueCount = calculateDueCount(deck)
-    val progress = calculateProgress(deck)
+    val progress = deck.progress
     val description = generateDescription(deck)
 
     // Adaptive card height based on window size
@@ -231,26 +231,6 @@ fun DeckCard(
  */
 private fun calculateDueCount(deck: Deck): Int {
     return deck.cards.size
-}
-
-/**
- * Calculates review progress as a percentage
- *
- * For now, uses a simple heuristic based on card count
- * In production, would use actual review history
- */
-private fun calculateProgress(deck: Deck): Float {
-    if (deck.cards.isEmpty()) return 0f
-
-    // Simple heuristic: progress increases with deck size
-    // Smaller decks are assumed to be newer (lower progress)
-    // Larger decks are assumed to be more studied (higher progress)
-    return when {
-        deck.cards.size < 20 -> 0.3f
-        deck.cards.size < 50 -> 0.5f
-        deck.cards.size < 100 -> 0.7f
-        else -> 0.85f
-    }
 }
 
 /**
