@@ -3,6 +3,7 @@ package com.recall.app.ui.navigation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.recall.app.domain.models.Deck
@@ -73,11 +74,13 @@ private fun CompactLayout(
 ) {
     if (selectedDeck != null) {
         // Show study screen
-        StudyScreen(
-            deck = selectedDeck,
-            onClose = { onDeckSelected(null) },
-            modifier = modifier
-        )
+        key(selectedDeck.id) {
+            StudyScreen(
+                deck = selectedDeck,
+                onClose = { onDeckSelected(null) },
+                modifier = modifier
+            )
+        }
     } else {
         // Show library screen
         LibraryScreen(
@@ -121,10 +124,12 @@ private fun SplitLayout(
         // Right pane: Study screen or empty state
         Box(modifier = Modifier.weight(2f)) {
             if (selectedDeck != null) {
-                StudyScreen(
-                    deck = selectedDeck,
-                    onClose = { onDeckSelected(null) }
-                )
+                key(selectedDeck.id) {
+                    StudyScreen(
+                        deck = selectedDeck,
+                        onClose = { onDeckSelected(null) }
+                    )
+                }
             } else {
                 // Empty state - could show a "Select a deck" message
                 Box(modifier = Modifier.fillMaxSize())

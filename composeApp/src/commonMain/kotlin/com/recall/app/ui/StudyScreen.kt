@@ -1,5 +1,7 @@
 package com.recall.app.ui
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -251,85 +254,96 @@ private fun FlashCard(
     onCardTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val rotation by animateFloatAsState(
+        targetValue = if (isFlipped) 180f else 0f,
+        animationSpec = tween(durationMillis = 400),
+        label = "cardFlip"
+    )
+
     Card(
         modifier = modifier
-            .clickable(onClick = onCardTap),
+            .clickable(onClick = onCardTap)
+            .graphicsLayer {
+                rotationY = rotation
+                cameraDistance = 12f * density
+            },
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                // Top gradient section (teal background)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(0.4f)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color(0xFF14B8A6),
-                                    Color(0xFF0D9488)
+            // Show front side when rotation <= 90 degrees
+            if (rotation <= 90f) {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // Top gradient section (teal background)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(0.4f)
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color(0xFF14B8A6),
+                                        Color(0xFF0D9488)
+                                    )
                                 )
+                            ),
+                        contentAlignment = Alignment.TopEnd
+                    ) {
+                        // Category badge
+                        Surface(
+                            modifier = Modifier.padding(16.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color.White.copy(alpha = 0.3f)
+                        ) {
+                            Text(
+                                text = deck.category.name.replace("_", " "),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                             )
-                        ),
-                    contentAlignment = Alignment.TopEnd
-                ) {
-                    // Category badge
-                    Surface(
-                        modifier = Modifier.padding(16.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color.White.copy(alpha = 0.3f)
-                    ) {
-                        Text(
-                            text = deck.category.name.replace("_", " "),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.White,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
+                        }
                     }
-                }
 
-                // Bottom white section (question/answer)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(0.6f)
-                        .background(Color.White),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(32.dp)
+                    // Bottom white section (question)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(0.6f)
+                            .background(Color.White),
+                        contentAlignment = Alignment.Center
                     ) {
-                        // Label
-                        Text(
-                            text = if (isFlipped) "ANSWER" else "QUESTION",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = if (isFlipped) Color(0xFF10B981) else Color(0xFF2B8CEE),
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.2.sp,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(32.dp)
+                        ) {
+                            // Label
+                            Text(
+                                text = "QUESTION",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = Color(0xFF2B8CEE),
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.2.sp,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
 
-                        // Question/Answer text
-                        Text(
-                            text = if (isFlipped) card.back else card.front,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1F2937),
-                            textAlign = TextAlign.Center,
-                            lineHeight = MaterialTheme.typography.headlineMedium.lineHeight
-                        )
+                            // Question text
+                            Text(
+                                text = card.front,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1F2937),
+                                textAlign = TextAlign.Center,
+                                lineHeight = MaterialTheme.typography.headlineMedium.lineHeight
+                            )
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
 
-                        // Tap to flip hint (only show when not flipped)
-                        if (!isFlipped) {
+                            // Tap to flip hint
                             Row(
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically,
@@ -345,6 +359,85 @@ private fun FlashCard(
                                     text = "Tap to flip",
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = Color(0xFF9CA3AF)
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Show back side when rotation > 90 degrees
+                // Apply counter-rotation so text is readable
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            rotationY = 180f
+                        }
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        // Top gradient section (teal background)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.4f)
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color(0xFF14B8A6),
+                                            Color(0xFF0D9488)
+                                        )
+                                    )
+                                ),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            // Category badge
+                            Surface(
+                                modifier = Modifier.padding(16.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color.White.copy(alpha = 0.3f)
+                            ) {
+                                Text(
+                                    text = deck.category.name.replace("_", " "),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
+                            }
+                        }
+
+                        // Bottom white section (answer)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.6f)
+                                .background(Color.White),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.padding(32.dp)
+                            ) {
+                                // Label
+                                Text(
+                                    text = "ANSWER",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = Color(0xFF10B981),
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.2.sp,
+                                    modifier = Modifier.padding(bottom = 16.dp)
+                                )
+
+                                // Answer text
+                                Text(
+                                    text = card.back,
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF1F2937),
+                                    textAlign = TextAlign.Center,
+                                    lineHeight = MaterialTheme.typography.headlineMedium.lineHeight
                                 )
                             }
                         }
