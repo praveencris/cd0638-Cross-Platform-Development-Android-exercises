@@ -5,8 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.recall.app.domain.models.Card
 import com.recall.app.domain.models.Deck
 
@@ -152,10 +151,11 @@ private fun TopBar(
                 onClick = onClose,
                 modifier = Modifier.size(40.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
-                    tint = Color(0xFF1F2937)
+                Text(
+                    text = "✕",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color(0xFF1F2937),
+                    fontWeight = FontWeight.Normal
                 )
             }
 
@@ -260,7 +260,7 @@ private fun FlashCard(
                             style = MaterialTheme.typography.labelLarge,
                             color = if (isFlipped) Color(0xFF10B981) else Color(0xFF2B8CEE),
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.2.dp.value.toInt().toDouble().dp.value.dp,
+                            letterSpacing = 1.2.sp,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
