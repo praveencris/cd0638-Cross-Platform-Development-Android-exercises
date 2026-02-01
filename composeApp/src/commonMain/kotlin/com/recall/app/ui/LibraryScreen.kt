@@ -53,15 +53,15 @@ fun LibraryScreen(
         when (windowSize) {
             WindowSize.Compact -> {
                 // Single column list for phones
-                CompactLayout(decks = decks, onDeckClick = onDeckClick)
+                CompactLayout(decks = decks, windowSize = windowSize, onDeckClick = onDeckClick)
             }
             WindowSize.Medium -> {
                 // 2-column grid for small tablets
-                GridLayout(decks = decks, columns = 2, onDeckClick = onDeckClick)
+                GridLayout(decks = decks, columns = 2, windowSize = windowSize, onDeckClick = onDeckClick)
             }
             WindowSize.Expanded -> {
                 // 3-column grid for large tablets and desktop
-                GridLayout(decks = decks, columns = 3, onDeckClick = onDeckClick)
+                GridLayout(decks = decks, columns = 3, windowSize = windowSize, onDeckClick = onDeckClick)
             }
         }
     }
@@ -73,6 +73,7 @@ fun LibraryScreen(
 @Composable
 private fun CompactLayout(
     decks: List<Deck>,
+    windowSize: WindowSize,
     onDeckClick: (Deck) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -84,6 +85,7 @@ private fun CompactLayout(
             DeckCard(
                 deck = deck,
                 index = index,
+                windowSize = windowSize,
                 onClick = { onDeckClick(deck) }
             )
         }
@@ -99,6 +101,7 @@ private fun CompactLayout(
 private fun GridLayout(
     decks: List<Deck>,
     columns: Int,
+    windowSize: WindowSize,
     onDeckClick: (Deck) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -112,6 +115,7 @@ private fun GridLayout(
             DeckCard(
                 deck = deck,
                 index = index,
+                windowSize = windowSize,
                 onClick = { onDeckClick(deck) }
             )
         }

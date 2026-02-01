@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.recall.app.ui.WindowSize
 import com.recall.app.ui.components.DeckCard
 
 /**
@@ -26,6 +27,7 @@ private fun DeckCardBluePreview() {
             cardCount = 45
         ),
         index = 0,
+        windowSize = WindowSize.Compact,
         modifier = Modifier.padding(16.dp)
     )
 }
@@ -40,6 +42,7 @@ private fun DeckCardOrangePreview() {
             cardCount = 32
         ),
         index = 1,
+        windowSize = WindowSize.Compact,
         modifier = Modifier.padding(16.dp)
     )
 }
@@ -54,6 +57,7 @@ private fun DeckCardEmeraldPreview() {
             cardCount = 68
         ),
         index = 2,
+        windowSize = WindowSize.Compact,
         modifier = Modifier.padding(16.dp)
     )
 }
@@ -64,6 +68,7 @@ private fun DeckCardSmallPreview() {
     DeckCard(
         deck = sampleSmallDeck(),
         index = 0,
+        windowSize = WindowSize.Compact,
         modifier = Modifier.padding(16.dp)
     )
 }
@@ -74,6 +79,7 @@ private fun DeckCardMediumPreview() {
     DeckCard(
         deck = sampleMediumDeck(),
         index = 1,
+        windowSize = WindowSize.Compact,
         modifier = Modifier.padding(16.dp)
     )
 }
@@ -84,6 +90,7 @@ private fun DeckCardLargePreview() {
     DeckCard(
         deck = sampleLargeDeck(),
         index = 2,
+        windowSize = WindowSize.Compact,
         modifier = Modifier.padding(16.dp)
     )
 }
@@ -98,6 +105,7 @@ private fun DeckCardLongTitlePreview() {
             cardCount = 54
         ),
         index = 0,
+        windowSize = WindowSize.Compact,
         modifier = Modifier.padding(16.dp)
     )
 }

@@ -14,9 +14,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.recall.app.domain.models.Deck
 import com.recall.app.domain.models.DeckCategory
+import com.recall.app.ui.WindowSize
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import recall.composeapp.generated.resources.Res
@@ -81,9 +84,11 @@ private fun getCategoryIcon(category: DeckCategory): DrawableResource {
  * - Due count pill badge
  * - Title and description
  * - Progress bar visualization
+ * - Adaptive sizing based on window size
  *
  * @param deck The deck data to display
  * @param index The deck's position in the list (for color palette rotation)
+ * @param windowSize Current window size for adaptive layout
  * @param onClick Callback when the card is clicked
  * @param modifier Optional modifier for the card
  */
@@ -91,6 +96,7 @@ private fun getCategoryIcon(category: DeckCategory): DrawableResource {
 fun DeckCard(
     deck: Deck,
     index: Int,
+    windowSize: WindowSize,
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -99,10 +105,17 @@ fun DeckCard(
     val progress = calculateProgress(deck)
     val description = generateDescription(deck)
 
+    // Adaptive card height based on window size
+    val cardHeight = when (windowSize) {
+        WindowSize.Compact -> 200.dp
+        WindowSize.Medium -> 220.dp
+        WindowSize.Expanded -> 240.dp
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(180.dp)
+            .height(cardHeight)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -126,7 +139,7 @@ fun DeckCard(
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Top
             ) {
                 // Top section: Icon and Due pill
                 Row(
@@ -158,9 +171,8 @@ fun DeckCard(
                         ) {
                             Text(
                                 text = "$dueCount due",
-                                style = MaterialTheme.typography.labelSmall,
+                                style = MaterialTheme.typography.labelMedium,
                                 color = colorPalette.accent,
-                                fontWeight = FontWeight.Medium,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             )
                         }
@@ -171,20 +183,24 @@ fun DeckCard(
 
                 // Middle section: Title and description
                 Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.Center
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = deck.title,
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1F2937)
+                        color = Color(0xFF1F2937),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = description,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF6B7280)
+                        color = Color(0xFF6B7280),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
 
