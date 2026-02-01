@@ -1,56 +1,44 @@
-# 🏁 Solution 6b: Study Mode & Input
+# 🏁 Solution 6b: Study Mode & State Hoisting
 **Branch:** `solution-module-6b`
 
-This branch implements the interactive "Study Loop" with production-grade input handling for large screens.
+This branch implements the production-grade "Study Loop," featuring 3D animations, keyboard support, and a reactive architecture for progress tracking.
 
 ## 🛠️ Implementation Summary
 
-### 1. Focus Management & Keyboard Support
-To support hardware keyboards (iPad Magic Keyboard, Android Tablets, Desktop), we explicitly request focus when the screen enters composition.
-```kotlin
-val focusRequester = remember { FocusRequester() }
-LaunchedEffect(Unit) { focusRequester.requestFocus() }
+### 1. State Hoisting (The "Resume" Feature)
+We moved the "Current Card Index" state out of the UI and into the `MainViewModel`.
+* **Flow:** `ViewModel` holds state $\rightarrow$ Passes `startIndex` to `StudyScreen` $\rightarrow$ Screen reports `onCardReviewed` $\rightarrow$ ViewModel updates state.
+* **Benefit:** This allows the user to switch decks (or rotate tablets) without losing their place.
 
-Box(
-    modifier = Modifier
-        .focusRequester(focusRequester)
-        .onKeyEvent { event ->
-            if (event.key == Key.Spacebar && event.type == KeyEventType.KeyUp) {
-                isFlipped = !isFlipped
-                true // Event consumed
-            } else {
-                false
-            }
-        }
-)
+### 2. Reactive Data Updates
+To update the Progress Bar on the List Screen without refreshing the API:
+```kotlin
+// MainViewModel.kt
+_decks.value = _decks.value.map { deck ->
+    if (deck.id == targetId) deck.copy(progress = newProgress) else deck
+}
 
 ```
 
-### 2. Component Architecture
+This forces Jetpack Compose to recognize a change in the list item and redraw only that specific card's progress bar.
 
-To prevent `StudyScreen.kt` from becoming a "God File," we split the card faces into private sub-composables:
+### 3. 3D Flip Animation
 
-* `StudyCardFront(...)`: Handles the gradient background and "Tap to Flip" prompt.
-* `StudyCardBack(...)`: Displays the answer and the SM-2 Rating Buttons.
+We used `graphicsLayer` for a true 3D effect.
 
-### 3. Navigation Integration
-
-The screen accepts an `onClose` lambda. This is wired to the "X" button, ensuring that:
-
-* On **Phones**, it pops the navigation stack.
-* On **Tablets**, it clears the right pane (showing the empty state).
+* **Camera Distance:** Set to `12f * density` to add depth perspective.
+* **Content Switching:** At 90 degrees rotation, we swap the composable from `Front` to `Back` and invert the back's rotation so text remains readable.
 
 ## 📂 Key Files
 
 | File Path | Description |
 | --- | --- |
-| `composeApp/.../ui/StudyScreen.kt` | The main interactive screen containing the Flip Logic and Keyboard listener. |
+| `composeApp/.../ui/StudyScreen.kt` | Handles Animation, Input, and reporting progress. |
+| `composeApp/.../MainViewModel.kt` | Manages the `deckProgress` map and updates the Deck list. |
+| `shared/.../Deck.kt` | Updated with the `progress` field. |
 
 ## 🧪 Verification
 
-The solution is verified if:
-
-1. **Visuals:** The card renders with the correct gradient (Blue/Orange/Green variants).
-2. **Interaction:** Tapping the card toggles between Question and Answer.
-3. **Shortcuts:** Pressing `Spacebar` flips the card. Pressing `1`, `2`, `3`, or `4` logs a rating action.
-4. **Navigation:** Clicking the "X" button returns you to the Library (or Empty State on Tablet).
+1. **Resume Test:** Open Deck A -> Go to Card 3 -> Open Deck B -> Return to Deck A. You should see Card 3.
+2. **Animation Test:** Tapping the card performs a 3D flip.
+3. **List Test:** Completing cards updates the green progress bar on the Library screen.
