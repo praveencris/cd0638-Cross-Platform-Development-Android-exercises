@@ -21,4 +21,30 @@ Box(Modifier.weight(1f)) {
         ...
     )
 }
+
 ```
+
+* **The Problem:** Passing `WindowSize.Expanded` to the side pane caused the `LibraryScreen` to attempt rendering a 2-column Grid inside a 400dp space, resulting in squashed text.
+* **The Solution:** By passing `WindowSize.Compact`, we instruct the component to render its "List Variant," which is optimized for narrow spaces. This respects the **Container Size** rather than the **Device Size**.
+
+### 3. State-Driven Navigation
+
+Navigation is decoupled from the UI framework (no `NavController` arguments).
+
+* **Stack Mode:** Uses `BackHandler` to nullify the `selectedDeck` state.
+* **Split Mode:** Selection simply triggers a recomposition of the right pane.
+
+## 📂 Key Files
+
+| File Path | Description |
+| --- | --- |
+| `composeApp/.../ui/navigation/MasterDetailLayout.kt` | Contains the Adaptive Logic and the "Container Override" fix. |
+| `composeApp/.../MainViewModel.kt` | Manages the navigation state (`selectedDeck`). |
+
+## 🧪 Verification
+
+The solution is verified if:
+
+1. **Tablet Landscape:** Shows a clean List (Left) and Detail (Right).
+2. **Tablet Portrait:** Shows a full-screen Grid (Single Pane).
+3. **Phone:** Shows a standard navigation stack.
