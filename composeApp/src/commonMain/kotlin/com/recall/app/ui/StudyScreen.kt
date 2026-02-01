@@ -34,18 +34,23 @@ import com.recall.app.domain.models.Deck
  * - Progress tracking (current card / total cards)
  * - Spaced repetition buttons (Again, Hard, Good, Easy)
  * - Adaptive background gradient based on deck category
+ * - Resume functionality to continue where you left off
  *
  * @param deck The deck being studied
+ * @param startIndex The card index to start at (for resume functionality)
+ * @param onCardReviewed Callback when a card is reviewed, receives the new card index
  * @param onClose Callback when user closes the study session
  * @param modifier Optional modifier for the screen
  */
 @Composable
 fun StudyScreen(
     deck: Deck,
+    startIndex: Int = 0,
+    onCardReviewed: (Int) -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var currentCardIndex by remember { mutableStateOf(0) }
+    var currentCardIndex by remember { mutableStateOf(startIndex) }
     var isFlipped by remember { mutableStateOf(false) }
 
     val currentCard = if (deck.cards.isNotEmpty() && currentCardIndex < deck.cards.size) {
@@ -77,26 +82,34 @@ fun StudyScreen(
                         when (event.key) {
                             Key.One -> {
                                 // Trigger Again button logic
-                                currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                                val nextIndex = (currentCardIndex + 1) % deck.cards.size
+                                currentCardIndex = nextIndex
                                 isFlipped = false
+                                onCardReviewed(nextIndex)
                                 true
                             }
                             Key.Two -> {
                                 // Trigger Hard button logic
-                                currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                                val nextIndex = (currentCardIndex + 1) % deck.cards.size
+                                currentCardIndex = nextIndex
                                 isFlipped = false
+                                onCardReviewed(nextIndex)
                                 true
                             }
                             Key.Three -> {
                                 // Trigger Good button logic
-                                currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                                val nextIndex = (currentCardIndex + 1) % deck.cards.size
+                                currentCardIndex = nextIndex
                                 isFlipped = false
+                                onCardReviewed(nextIndex)
                                 true
                             }
                             Key.Four -> {
                                 // Trigger Easy button logic
-                                currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                                val nextIndex = (currentCardIndex + 1) % deck.cards.size
+                                currentCardIndex = nextIndex
                                 isFlipped = false
+                                onCardReviewed(nextIndex)
                                 true
                             }
                             else -> false
@@ -142,21 +155,29 @@ fun StudyScreen(
                 if (isFlipped) {
                     SpacedRepetitionButtons(
                         onAgain = {
-                            // Move to next card
-                            currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                            // Move to next card and report progress
+                            val nextIndex = (currentCardIndex + 1) % deck.cards.size
+                            currentCardIndex = nextIndex
                             isFlipped = false
+                            onCardReviewed(nextIndex)
                         },
                         onHard = {
-                            currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                            val nextIndex = (currentCardIndex + 1) % deck.cards.size
+                            currentCardIndex = nextIndex
                             isFlipped = false
+                            onCardReviewed(nextIndex)
                         },
                         onGood = {
-                            currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                            val nextIndex = (currentCardIndex + 1) % deck.cards.size
+                            currentCardIndex = nextIndex
                             isFlipped = false
+                            onCardReviewed(nextIndex)
                         },
                         onEasy = {
-                            currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                            val nextIndex = (currentCardIndex + 1) % deck.cards.size
+                            currentCardIndex = nextIndex
                             isFlipped = false
+                            onCardReviewed(nextIndex)
                         },
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
                     )

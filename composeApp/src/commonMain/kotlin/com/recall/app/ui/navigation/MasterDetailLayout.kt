@@ -32,6 +32,8 @@ import com.recall.app.ui.WindowSize
  * @param selectedDeck Currently selected deck (null means no selection)
  * @param decks List of all available decks
  * @param onDeckSelected Callback when a deck is selected or deselected
+ * @param getStartIndex Function to get the saved card index for a deck (for resume)
+ * @param onCardReviewed Callback when a card is reviewed, receives deck ID and new card index
  * @param modifier Optional modifier for the layout
  */
 @Composable
@@ -40,6 +42,8 @@ fun MasterDetailLayout(
     selectedDeck: Deck?,
     decks: List<Deck>,
     onDeckSelected: (Deck?) -> Unit,
+    getStartIndex: (String) -> Int,
+    onCardReviewed: (String, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Only use Split View for Expanded (Landscape Tablet/Desktop)
@@ -49,6 +53,8 @@ fun MasterDetailLayout(
             selectedDeck = selectedDeck,
             decks = decks,
             onDeckSelected = onDeckSelected,
+            getStartIndex = getStartIndex,
+            onCardReviewed = onCardReviewed,
             modifier = modifier
         )
     } else {
@@ -56,6 +62,8 @@ fun MasterDetailLayout(
             selectedDeck = selectedDeck,
             decks = decks,
             onDeckSelected = onDeckSelected,
+            getStartIndex = getStartIndex,
+            onCardReviewed = onCardReviewed,
             modifier = modifier
         )
     }
@@ -70,6 +78,8 @@ private fun CompactLayout(
     selectedDeck: Deck?,
     decks: List<Deck>,
     onDeckSelected: (Deck?) -> Unit,
+    getStartIndex: (String) -> Int,
+    onCardReviewed: (String, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (selectedDeck != null) {
@@ -77,6 +87,8 @@ private fun CompactLayout(
         key(selectedDeck.id) {
             StudyScreen(
                 deck = selectedDeck,
+                startIndex = getStartIndex(selectedDeck.id),
+                onCardReviewed = { newIndex -> onCardReviewed(selectedDeck.id, newIndex) },
                 onClose = { onDeckSelected(null) },
                 modifier = modifier
             )
@@ -101,6 +113,8 @@ private fun SplitLayout(
     selectedDeck: Deck?,
     decks: List<Deck>,
     onDeckSelected: (Deck?) -> Unit,
+    getStartIndex: (String) -> Int,
+    onCardReviewed: (String, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(modifier = modifier.fillMaxSize()) {
@@ -127,6 +141,8 @@ private fun SplitLayout(
                 key(selectedDeck.id) {
                     StudyScreen(
                         deck = selectedDeck,
+                        startIndex = getStartIndex(selectedDeck.id),
+                        onCardReviewed = { newIndex -> onCardReviewed(selectedDeck.id, newIndex) },
                         onClose = { onDeckSelected(null) }
                     )
                 }

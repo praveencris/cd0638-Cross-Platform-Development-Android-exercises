@@ -30,6 +30,9 @@ class MainViewModel(
     private val _selectedDeck = MutableStateFlow<Deck?>(null)
     val selectedDeck: StateFlow<Deck?> = _selectedDeck.asStateFlow()
 
+    // Track current card index for each deck to support resume functionality
+    private val deckProgress = mutableMapOf<String, Int>()
+
     init {
         fetchDecks()
     }
@@ -55,5 +58,47 @@ class MainViewModel(
 
     fun selectDeck(deck: Deck?) {
         _selectedDeck.value = deck
+    }
+
+    /**
+     * Get the saved card index for a deck to support resume functionality
+     * @param deckId The deck's unique identifier
+     * @return The saved card index, or 0 if no progress exists
+     */
+    fun getStartIndex(deckId: String): Int {
+        return deckProgress[deckId] ?: 0
+    }
+
+    /**
+     * Update progress when a card is reviewed
+     * @param deckId The deck's unique identifier
+     * @param newIndex The new card index after review
+     */
+    fun onCardReviewed(deckId: String, newIndex: Int) {
+        // Find the deck to get card count
+        val deck = _decks.value.find { it.id == deckId } ?: return
+        val cardCount = deck.cards.size
+
+        // Reset progress if we've completed the deck (reached the end)
+        val actualIndex = if (newIndex >= cardCount) 0 else newIndex
+
+        // Save the card index for resume
+        deckProgress[deckId] = actualIndex
+
+        // Calculate progress fraction (0.0 to 1.0)
+        val progressFraction = if (cardCount > 0) {
+            actualIndex.toFloat() / cardCount.toFloat()
+        } else {
+            0f
+        }
+
+        // Update the deck in the list to trigger UI updates
+        _decks.value = _decks.value.map { currentDeck ->
+            if (currentDeck.id == deckId) {
+                currentDeck.copy(progress = progressFraction)
+            } else {
+                currentDeck
+            }
+        }
     }
 }
