@@ -23,6 +23,7 @@ fun WearAppContent(
     decks: List<Deck>,
     isLoading: Boolean,
     error: String?,
+    heartRate: Int?,
     onRetry: () -> Unit,
     onDeckClick: (Deck) -> Unit,
     modifier: Modifier = Modifier
@@ -49,6 +50,20 @@ fun WearAppContent(
                         text = "Recall",
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.title3
+                    )
+                }
+            }
+
+            // Display heart rate if available
+            heartRate?.let { bpm ->
+                item {
+                    Text(
+                        text = "❤️ $bpm BPM",
+                        style = MaterialTheme.typography.body2,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
                     )
                 }
             }

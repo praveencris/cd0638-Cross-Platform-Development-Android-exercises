@@ -57,6 +57,18 @@ dependencies {
     implementation(libs.androidx.wear.compose.foundation)
     implementation(libs.androidx.wear.compose.navigation)
 
+    // Wear OS Tiles - Quick access glanceable surfaces
+    implementation(libs.androidx.wear.tiles)
+
+    // Wear OS Complications - Watch face integration
+    implementation(libs.androidx.wear.watchface.complications.data.source)
+
+    // Health Services - Access to health and fitness data
+    implementation(libs.androidx.health.services.client)
+
+    // Guava - Required by Health Services for ListenableFuture
+    implementation(libs.guava)
+
     // Horologist - Compose layout helpers for Wear OS
     implementation(libs.horologist.compose.layout)
     implementation(libs.horologist.composables)

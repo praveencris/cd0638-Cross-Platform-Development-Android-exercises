@@ -30,6 +30,11 @@ fun WearApp(viewModel: MainViewModel = koinInject()) {
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
+    // Observe heart rate from Health Services
+    // For demonstration, we'll show a mock value
+    // In production, you would integrate with HealthServicesClient.measureClient
+    val heartRate: Int? = 72 // Mock heart rate value
+
     // Trigger data loading when the composable enters composition
     LaunchedEffect(Unit) {
         viewModel.fetchDecks()
@@ -39,6 +44,7 @@ fun WearApp(viewModel: MainViewModel = koinInject()) {
         decks = decks,
         isLoading = isLoading,
         error = error,
+        heartRate = heartRate,
         onRetry = { viewModel.retry() },
         onDeckClick = { deck ->
             // TODO: Navigate to study screen in future iterations
