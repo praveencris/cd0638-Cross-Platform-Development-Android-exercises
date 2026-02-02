@@ -4,32 +4,36 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.recall.app.MainViewModel
-import org.koin.android.ext.android.inject
+import org.koin.compose.koinInject
 
 /**
  * Main activity for Wear OS application
  * Displays flashcard decks in a scrollable list optimized for round screens
  */
 class MainActivity : ComponentActivity() {
-    private val viewModel: MainViewModel by inject()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            WearApp(viewModel = viewModel)
+            WearApp()
         }
     }
 }
 
 @Composable
-fun WearApp(viewModel: MainViewModel) {
+fun WearApp(viewModel: MainViewModel = koinInject()) {
     val decks by viewModel.decks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+
+    // Trigger data loading when the composable enters composition
+    LaunchedEffect(Unit) {
+        viewModel.fetchDecks()
+    }
 
     WearAppContent(
         decks = decks,

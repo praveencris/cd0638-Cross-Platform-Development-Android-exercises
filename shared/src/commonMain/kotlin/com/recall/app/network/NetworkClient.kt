@@ -23,21 +23,26 @@ object NetworkClient {
      * - ContentNegotiation: Handles automatic serialization/deserialization
      * - ignoreUnknownKeys: Allows parsing JSON with extra fields not in our models
      * - Accepts both application/json and text/plain (for GitHub Gist compatibility)
+     *
+     * Uses lazy initialization to defer OkHttp engine creation until first network call.
+     * This prevents blocking the main thread during app startup.
      */
-    val httpClient = HttpClient(createHttpEngine()) {
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                isLenient = true
-                prettyPrint = true
-            }, contentType = ContentType.Application.Json)
+    val httpClient: HttpClient by lazy {
+        HttpClient(createHttpEngine()) {
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                    prettyPrint = true
+                }, contentType = ContentType.Application.Json)
 
-            // Also accept text/plain as JSON (GitHub Gist returns this)
-            json(Json {
-                ignoreUnknownKeys = true
-                isLenient = true
-                prettyPrint = true
-            }, contentType = ContentType.Text.Plain)
+                // Also accept text/plain as JSON (GitHub Gist returns this)
+                json(Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                    prettyPrint = true
+                }, contentType = ContentType.Text.Plain)
+            }
         }
     }
 }

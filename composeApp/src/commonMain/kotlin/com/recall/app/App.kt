@@ -26,6 +26,11 @@ fun App() {
                 val error by viewModel.error.collectAsState()
                 val selectedDeck by viewModel.selectedDeck.collectAsState()
 
+                // Trigger data loading when the composable enters composition
+                LaunchedEffect(Unit) {
+                    viewModel.fetchDecks()
+                }
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

@@ -33,11 +33,11 @@ class MainViewModel(
     // Track current card index for each deck to support resume functionality
     private val deckProgress = mutableMapOf<String, Int>()
 
-    init {
-        fetchDecks()
-    }
-
-    private fun fetchDecks() {
+    /**
+     * Fetch all decks from the API
+     * Call this from the UI when ready to load data (e.g., in LaunchedEffect)
+     */
+    fun fetchDecks() {
         scope.launch {
             _isLoading.value = true
             _error.value = null

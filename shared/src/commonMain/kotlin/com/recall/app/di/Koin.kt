@@ -1,5 +1,6 @@
 package com.recall.app.di
 
+import com.recall.app.MainViewModel
 import com.recall.app.network.NetworkClient
 import com.recall.app.network.RecallApiService
 import org.koin.core.context.startKoin
@@ -14,6 +15,9 @@ import org.koin.dsl.module
 val sharedModule = module {
     // Provide singleton instance of RecallApiService
     single { RecallApiService(NetworkClient.httpClient) }
+
+    // Provide MainViewModel instance (factory scope - new instance per injection)
+    factory { MainViewModel(get()) }
 }
 
 /**
