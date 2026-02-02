@@ -4,13 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
-import androidx.wear.compose.foundation.lazy.ScalingLazyListState
-import androidx.wear.compose.foundation.lazy.items
-import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.*
 import com.recall.app.domain.models.Deck
 
@@ -27,130 +20,19 @@ fun WearAppContent(
     onDeckClick: (Deck) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val listState = rememberScalingLazyListState()
-
-    Scaffold(
-        timeText = {
-            TimeText()
-        },
-        modifier = modifier
+    // TODO: Replace this placeholder with ScalingLazyColumn to show the list of decks
+    // Hint: Use Scaffold with TimeText at the top to show the clock
+    // Hint: Use ScalingLazyColumn for the Fish-Eye effect on round screens
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        ScalingLazyColumn(
-            state = listState,
-            contentPadding = PaddingValues(
-                top = 32.dp,
-                bottom = 32.dp
-            ),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            item {
-                ListHeader {
-                    Text(
-                        text = "Recall",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.title3
-                    )
-                }
-            }
-
-            when {
-                isLoading -> {
-                    item {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                }
-
-                error != null -> {
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "Error loading decks",
-                                style = MaterialTheme.typography.body2,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colors.error
-                            )
-                            Text(
-                                text = error,
-                                style = MaterialTheme.typography.caption3,
-                                textAlign = TextAlign.Center,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                    item {
-                        Chip(
-                            label = { Text("Retry") },
-                            onClick = onRetry,
-                            colors = ChipDefaults.primaryChipColors()
-                        )
-                    }
-                }
-
-                decks.isEmpty() -> {
-                    item {
-                        Text(
-                            text = "No decks available",
-                            style = MaterialTheme.typography.body2,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                        )
-                    }
-                }
-
-                else -> {
-                    items(decks) { deck ->
-                        DeckChip(
-                            deck = deck,
-                            onClick = { onDeckClick(deck) }
-                        )
-                    }
-                }
-            }
-        }
+        Text(text = "Hello Wear OS")
     }
 }
 
-/**
- * Individual deck item as a Wear OS Chip
- */
-@Composable
-private fun DeckChip(
-    deck: Deck,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Chip(
-        label = {
-            Text(
-                text = deck.title,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        secondaryLabel = {
-            Text(
-                text = "${deck.cards.size} cards" +
-                    if (deck.progress > 0f) " • ${(deck.progress * 100).toInt()}%" else "",
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        onClick = onClick,
-        colors = ChipDefaults.secondaryChipColors(),
-        modifier = modifier.fillMaxWidth()
-    )
-}
+// TODO: Create a DeckChip component using Wear Compose
+// Hint: Use Chip from androidx.wear.compose.material
+// Hint: Set the label to deck.title
+// Hint: Set secondaryLabel to "${deck.cards.size} cards"
+// Hint: Use ChipDefaults.secondaryChipColors() for styling
