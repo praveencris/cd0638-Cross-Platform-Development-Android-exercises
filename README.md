@@ -1,44 +1,47 @@
-# 🏁 Solution 6b: Study Mode & State Hoisting
-**Branch:** `solution-module-6b`
+# 🏁 Solution 7: Wear OS Implementation
+**Branch:** `solution-module-7`
 
-This branch implements the production-grade "Study Loop," featuring 3D animations, keyboard support, and a reactive architecture for progress tracking.
+This branch adds a native **Wear OS** module (`:wear`) to the KMP project. It demonstrates how to reuse 100% of the backend logic while writing a completely separate, optimized UI for the wrist.
 
 ## 🛠️ Implementation Summary
 
-### 1. State Hoisting (The "Resume" Feature)
-We moved the "Current Card Index" state out of the UI and into the `MainViewModel`.
-* **Flow:** `ViewModel` holds state $\rightarrow$ Passes `startIndex` to `StudyScreen` $\rightarrow$ Screen reports `onCardReviewed` $\rightarrow$ ViewModel updates state.
-* **Benefit:** This allows the user to switch decks (or rotate tablets) without losing their place.
+### 1. Architecture: Unified Logic, Separate UI
+We did **not** write a new API client or Database for the watch.
+* **`:shared`**: Reused `RecallApiService`, `Deck`, and `MainViewModel` directly.
+* **`:wear`**: A strictly native Android UI using **Compose for Wear OS**.
+* *Why?* Mobile UI (Rectangle) and Watch UI (Circle) are too different to share layout code effectively. This separation ensures a 5-star experience on both form factors.
 
-### 2. Reactive Data Updates
-To update the Progress Bar on the List Screen without refreshing the API:
+### 2. The "Fish-Eye" Effect (ScalingLazyColumn)
+We used `ScalingLazyColumn` instead of `LazyColumn`.
 ```kotlin
-// MainViewModel.kt
-_decks.value = _decks.value.map { deck ->
-    if (deck.id == targetId) deck.copy(progress = newProgress) else deck
-}
+ScalingLazyColumn(
+    anchorType = ScalingLazyListAnchorType.ItemStart, // Items snap to top
+    modifier = Modifier.fillMaxSize()
+) { ... }
 
 ```
 
-This forces Jetpack Compose to recognize a change in the list item and redraw only that specific card's progress bar.
+* **Benefit:** This automatically shrinks and fades items as they move away from the center, making the list feel natural on a round screen.
 
-### 3. 3D Flip Animation
+### 3. Dependency Compatibility (Technical Note)
 
-We used `graphicsLayer` for a true 3D effect.
+To support the project's "Bleeding Edge" Compose Multiplatform version (`1.10.0`), we explicitly updated the Wear libraries:
 
-* **Camera Distance:** Set to `12f * density` to add depth perspective.
-* **Content Switching:** At 90 degrees rotation, we swap the composable from `Front` to `Back` and invert the back's rotation so text remains readable.
+* **Wear Compose:** `1.5.6` (Compatible with modern Foundation).
+* **Horologist:** `0.7.15` (Google's Wear helper library).
+* **Play Services Wearable:** `19.0.0` (Data layer).
 
 ## 📂 Key Files
 
 | File Path | Description |
 | --- | --- |
-| `composeApp/.../ui/StudyScreen.kt` | Handles Animation, Input, and reporting progress. |
-| `composeApp/.../MainViewModel.kt` | Manages the `deckProgress` map and updates the Deck list. |
-| `shared/.../Deck.kt` | Updated with the `progress` field. |
+| `wear/build.gradle.kts` | The specific Wear OS dependencies (Horologist, Wear Compose). |
+| `wear/.../presentation/WearApp.kt` | The main entry point containing the `ScalingLazyColumn`. |
+| `settings.gradle.kts` | Modified to include the new `:wear` module. |
+| `libs.versions.toml` | Updated with Wear-specific library versions. |
 
 ## 🧪 Verification
 
-1. **Resume Test:** Open Deck A -> Go to Card 3 -> Open Deck B -> Return to Deck A. You should see Card 3.
-2. **Animation Test:** Tapping the card performs a 3D flip.
-3. **List Test:** Completing cards updates the green progress bar on the Library screen.
+1. **Launch:** Run the `wear` configuration.
+2. **Visuals:** The app should look like a native system app (black background, stadium-shaped chips).
+3. **Interaction:** Scrolling feels smooth with the scaling effect active.
