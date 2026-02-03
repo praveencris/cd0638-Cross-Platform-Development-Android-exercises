@@ -1,34 +1,48 @@
-# 🏁 Solution 8a: Database Foundation
-**Branch:** `solution-module-8a`
+# 💾 Exercise 8a: Database Foundation (Room KMP)
+**Module:** Persistence & Performance
+**Prerequisite:** Completed Module 7b
+**Estimated Time:** 30 Minutes
 
-This branch implements the persistence layer using **Room KMP**. It enables the shared business logic to store data locally on both Android and iOS devices.
+### **🎓 Objective**
+In this exercise, you will lay the foundation for "Offline Support" by implementing a local SQLite database using **Room KMP**. You will define the data structure (Entities) and the methods to read/write it (DAO), running on both Android and iOS.
 
-## 🛠️ Implementation Summary
+### **⚠️ The "Pre-Configured" Setup**
+Setting up KSP and Room Gradle plugins is complex and prone to version conflicts. We have **pre-configured** the `build.gradle.kts` and `libs.versions.toml` files for you.
+* **Your Job:** Focus on the Kotlin code—defining Tables and Queries.
 
-### 1. Schema Definition (Entities)
-We created two tables that mirror our Domain models:
-* **`DeckEntity`**: Simple parent table.
-* **`CardEntity`**: Child table with a **Foreign Key** to `DeckEntity` (`ON DELETE CASCADE`). This ensures data integrity—orphaned cards are automatically removed.
+### **✅ Task 1: Define the Tables (Entities)**
+We need to mirror our domain models (`Deck`, `Card`) into database tables.
+1.  **Open** `shared/src/commonMain/kotlin/com/recall/app/data/local/entity/DeckEntity.kt`.
+    * Annotate the class with `@Entity`.
+    * Add `@PrimaryKey val id: String`.
+    * Add `val title: String`.
+2.  **Open** `CardEntity.kt`.
+    * Annotate with `@Entity(foreignKeys = [...])`.
+    * **Constraint:** Link `deckId` to `DeckEntity` so deleting a deck deletes its cards (`CASCADE`).
 
-### 2. Data Access (DAO)
-We implemented `RecallDao` with:
-* **Reactive Queries:** `getDecks()` returns a `Flow`. This is crucial for "Offline-First" apps. When the DB changes (e.g., a background sync), the UI updates automatically.
-* **Suspend Functions:** One-shot operations (Insert/Delete) use Kotlin Coroutines.
-* **The "Trap":** We intentionally added `getCardsForDeck` (a synchronous-style lookup) to demonstrate the **N+1 Query Problem** in the upcoming Profiling module (8c).
+### **✅ Task 2: The Data Access Object (DAO)**
+The DAO is where you write SQL (without writing much SQL).
+1.  **Open** `shared/src/commonMain/kotlin/com/recall/app/data/local/dao/RecallDao.kt`.
+2.  **Annotate** the interface with `@Dao`.
+3.  **Implement Methods:**
+    * `getDecks()`: Returns `Flow<List<DeckEntity>>`.
+    * `insertDeck(...)`: A `suspend` function using `@Insert(onConflict = OnConflictStrategy.REPLACE)`.
+    * `insertCard(...)`: Similar to deck.
+4.  **🕵️ intentional Flaw (For Future Lesson):**
+    * Add a method `getCardsForDeck(deckId: String): List<CardEntity>`.
+    * *Why?* We will use this later to write a "bad" query and catch it with the Profiler.
 
-### 3. Room Configuration (The Heavy Lifting)
-Room KMP requires careful setup in `libs.versions.toml` and `build.gradle.kts`:
-* **KSP (Kotlin Symbol Processing):** Used to generate the SQLite code implementation from our annotations.
-* **SQLite Bundled:** We included `androidx.sqlite:sqlite-bundled` so the app ships with a consistent SQLite version, rather than relying on the specific OS version of the user's phone.
+### **✅ Task 3: The Database Class**
+Connect the Entities and DAO.
+1.  **Open** `shared/src/commonMain/kotlin/com/recall/app/data/local/RecallDatabase.kt`.
+2.  **Annotate** the abstract class with `@Database`.
+    * Include `DeckEntity` and `CardEntity` in the `entities` array.
+    * Set `version = 1`.
+3.  **Abstract Function:** Define `abstract fun recallDao(): RecallDao`.
 
-## 📂 Key Files
-| File Path | Description |
-| :--- | :--- |
-| `shared/.../local/entity/` | `DeckEntity` and `CardEntity` definitions. |
-| `shared/.../local/dao/RecallDao.kt` | Interface defining SQL interactions. |
-| `shared/.../local/RecallDatabase.kt` | The main database entry point. |
-| `shared/build.gradle.kts` | KSP and Schema directory configuration. |
-
-## 🧪 Verification
-1.  **Build:** Run `./gradlew :shared:assembleDebug`.
-2.  **Success:** If the build passes, Room has successfully generated the implementation code (look in `shared/build/generated/ksp/`).
+### **🚀 Definition of Done**
+* [ ] The project compiles without KSP errors.
+* [ ] You have `DeckEntity` and `CardEntity` defined with Primary Keys.
+* [ ] `RecallDao` has methods to Insert and Query data.
+* [ ] `RecallDatabase` connects the entities and exposes the DAO.
+* *Note:* The app won't *use* the DB yet (that's Part 8b), but the foundation must build successfully.
