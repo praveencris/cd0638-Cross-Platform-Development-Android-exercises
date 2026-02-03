@@ -11,7 +11,7 @@ import io.ktor.client.request.*
  *
  * @param client The configured HttpClient instance
  */
-class RecallApiService(private val client: HttpClient) {
+open class RecallApiService(private val client: HttpClient) {
 
     /**
      * Base URL for the decks JSON data
@@ -24,7 +24,7 @@ class RecallApiService(private val client: HttpClient) {
      * @return List of Deck objects with their cards
      * @throws Exception if the network request fails or JSON parsing fails
      */
-    suspend fun fetchAllDecks(): List<Deck> {
+    open suspend fun fetchAllDecks(): List<Deck> {
         val response: DecksResponse = client.get(baseUrl).body()
         return response.decks
     }

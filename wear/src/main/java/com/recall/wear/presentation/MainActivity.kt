@@ -7,7 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.platform.LocalContext
 import com.recall.app.MainViewModel
+import com.recall.wear.data.HealthServicesManager
 import org.koin.compose.koinInject
 
 /**
@@ -26,14 +29,27 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun WearApp(viewModel: MainViewModel = koinInject()) {
+    // Wrap content with permission handler for heart rate access
+    HeartRatePermissionHandler {
+        WearAppWithPermission(viewModel)
+    }
+}
+
+@Composable
+private fun WearAppWithPermission(viewModel: MainViewModel) {
     val decks by viewModel.decks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
     // Observe heart rate from Health Services
-    // For demonstration, we'll show a mock value
-    // In production, you would integrate with HealthServicesClient.measureClient
-    val heartRate: Int? = 72 // Mock heart rate value
+    // Only called after permission is granted by HeartRatePermissionHandler
+    val context = LocalContext.current
+    val heartRate by produceState<Int?>(initialValue = null) {
+        val healthServicesManager = HealthServicesManager(context)
+        healthServicesManager.heartRateFlow().collect { bpm ->
+            value = bpm
+        }
+    }
 
     // Trigger data loading when the composable enters composition
     LaunchedEffect(Unit) {
