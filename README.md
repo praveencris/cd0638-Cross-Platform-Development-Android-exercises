@@ -1,36 +1,45 @@
-# 🏁 Solution 7b: Advanced Wear OS
-**Branch:** `solution-module-7b`
+# ⌚ Exercise 7b: Wear OS Ecosystem
+**Module:** Advanced Wear OS Integration
+**Prerequisite:** Completed Module 7a (Basic List UI)
+**Estimated Time:** 60 Minutes
 
-This branch extends the basic Wear OS app with deep system integrations, transforming it from a simple "List Viewer" into a native citizen of the watch ecosystem.
+### **🎓 Objective**
+In this exercise, you will go beyond the app code and integrate Recall with the full Wear OS ecosystem. You will implement **Health Services** (Heart Rate), a **Complication**, and a **Tile**.
 
-## 🛠️ Implementation Summary
+### **✅ Task 1: The Runtime Permission (Crucial)**
+Wear OS apps require explicit user approval to read sensors. Merely adding it to the Manifest is not enough!
+1.  **Open** `wear/src/main/java/com/recall/wear/presentation/WearApp.kt`.
+2.  **Logic**:
+    * Create a `rememberLauncherForActivityResult` for `ActivityResultContracts.RequestPermission()`.
+    * Use a `LaunchedEffect` to launch the permission `Manifest.permission.BODY_SENSORS` as soon as the app starts.
+    * Store the result (`isGranted`) in a state variable.
 
-### 1. Health Services (Passive Data)
-We implemented `HealthServicesClient` to read the user's Heart Rate.
-* **Key Class:** `MeasureClient`
-* **Permission:** `android.permission.BODY_SENSORS`
-* **Implementation:** We use a `produceState` in Compose to subscribe to the `HEART_RATE_BPM` flow only when the UI is visible. This ensures we don't drain the battery when the user isn't looking at the screen.
+### **✅ Task 2: Health Services (Heart Rate)**
+Now that we have permission, let's read the data.
+1.  **Action**:
+    * Inject `MeasureClient` (from Health Services).
+    * **Crucial:** Only call `measureClient.measure(...)` if your permission state is `true`.
+    * Display the value (e.g., "❤️ 72 BPM") at the top of your screen.
 
-### 2. Watch Face Complication
-We created a `SuspendingComplicationDataSourceService`.
-* **Type:** `ShortText` (Standard layout for small round slots).
-* **Update Cycle:** The OS polls this service. We return a `ShortTextComplicationData` built using the `ComplicationDataSourceService` API.
-* **Deep Link:** Tapping the complication fires a `PendingIntent` that launches `MainActivity`.
+### **✅ Task 3: The "Due" Complication**
+Users shouldn't have to open the app to see if they have work to do.
+1.  **Open** `wear/src/main/java/com/recall/wear/complication/RecallComplicationService.kt`.
+2.  **Action**: Override `onComplicationRequest`.
+3.  **Logic**: Return a `ShortTextComplicationData`:
+    * **Text:** "12" (Mock count)
+    * **Title:** "Due"
+    * **TapAction:** Opens the app.
 
-### 3. Tiles (ProtoLayout)
-We created a `SuspendingTileService`.
-* **Tech:** Tiles do **not** use Compose. They use **ProtoLayout**, a declarative schema that is serialized and sent to the OS to render.
-* **Layout:** We used `PrimaryLayout` from the `protolayout-material` library to easily create a standard "Title + Chip + Button" design without manual pixel math.
+### **✅ Task 4: The "Quick Study" Tile**
+Tiles are swipeable widgets accessible from the watch face.
+1.  **Open** `wear/src/main/java/com/recall/wear/tile/RecallTileService.kt`.
+2.  **Action**: Override `tileRequest`.
+3.  **Layout**: Build a ProtoLayout showing:
+    * **Text:** "Physics Deck"
+    * **Button:** "Study Now" (ClickAction opens the app).
 
-## 📂 Key Files
-| File Path | Description |
-| :--- | :--- |
-| `wear/.../complication/RecallComplicationService.kt` | Logic for the "Due Count" widget. |
-| `wear/.../tile/RecallTileService.kt` | Logic for the "Quick Study" tile. |
-| `wear/.../presentation/WearApp.kt` | Updated with Heart Rate display. |
-| `wear/src/main/AndroidManifest.xml` | Added Services and Permissions. |
-
-## 🧪 Verification
-1.  **Health:** Run the app on an Emulator. Open "Extended Controls" (3 dots) > "Wear OS" > "Health" and change the Heart Rate. The UI should update instantly.
-2.  **Complication:** Long-press the watch face > Edit > Tap a slot > Select "Recall". It should appear.
-3.  **Tile:** Swipe left/right on the watch face > "Add Tile" > Select "Recall". The UI should render.
+### **🚀 Definition of Done**
+* [ ] **Permissions:** On first launch, the app explicitly asks "Allow Recall to access sensor data?".
+* [ ] **Health:** Once allowed, you see a live Heart Rate (mocked via Emulator controls).
+* [ ] **Watch Face:** You can add the "Recall" complication to a slot.
+* [ ] **Tiles:** You can swipe right on the watch face and see the "Study Now" tile.
