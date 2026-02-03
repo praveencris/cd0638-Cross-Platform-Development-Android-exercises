@@ -1,36 +1,34 @@
-# 🏁 Solution 7b: Advanced Wear OS
-**Branch:** `solution-module-7b`
+# 🏁 Solution 8a: Database Foundation
+**Branch:** `solution-module-8a`
 
-This branch extends the basic Wear OS app with deep system integrations, transforming it from a simple "List Viewer" into a native citizen of the watch ecosystem.
+This branch implements the persistence layer using **Room KMP**. It enables the shared business logic to store data locally on both Android and iOS devices.
 
 ## 🛠️ Implementation Summary
 
-### 1. Health Services (Passive Data)
-We implemented `HealthServicesClient` to read the user's Heart Rate.
-* **Key Class:** `MeasureClient`
-* **Permission:** `android.permission.BODY_SENSORS`
-* **Implementation:** We use a `produceState` in Compose to subscribe to the `HEART_RATE_BPM` flow only when the UI is visible. This ensures we don't drain the battery when the user isn't looking at the screen.
+### 1. Schema Definition (Entities)
+We created two tables that mirror our Domain models:
+* **`DeckEntity`**: Simple parent table.
+* **`CardEntity`**: Child table with a **Foreign Key** to `DeckEntity` (`ON DELETE CASCADE`). This ensures data integrity—orphaned cards are automatically removed.
 
-### 2. Watch Face Complication
-We created a `SuspendingComplicationDataSourceService`.
-* **Type:** `ShortText` (Standard layout for small round slots).
-* **Update Cycle:** The OS polls this service. We return a `ShortTextComplicationData` built using the `ComplicationDataSourceService` API.
-* **Deep Link:** Tapping the complication fires a `PendingIntent` that launches `MainActivity`.
+### 2. Data Access (DAO)
+We implemented `RecallDao` with:
+* **Reactive Queries:** `getDecks()` returns a `Flow`. This is crucial for "Offline-First" apps. When the DB changes (e.g., a background sync), the UI updates automatically.
+* **Suspend Functions:** One-shot operations (Insert/Delete) use Kotlin Coroutines.
+* **The "Trap":** We intentionally added `getCardsForDeck` (a synchronous-style lookup) to demonstrate the **N+1 Query Problem** in the upcoming Profiling module (8c).
 
-### 3. Tiles (ProtoLayout)
-We created a `SuspendingTileService`.
-* **Tech:** Tiles do **not** use Compose. They use **ProtoLayout**, a declarative schema that is serialized and sent to the OS to render.
-* **Layout:** We used `PrimaryLayout` from the `protolayout-material` library to easily create a standard "Title + Chip + Button" design without manual pixel math.
+### 3. Room Configuration (The Heavy Lifting)
+Room KMP requires careful setup in `libs.versions.toml` and `build.gradle.kts`:
+* **KSP (Kotlin Symbol Processing):** Used to generate the SQLite code implementation from our annotations.
+* **SQLite Bundled:** We included `androidx.sqlite:sqlite-bundled` so the app ships with a consistent SQLite version, rather than relying on the specific OS version of the user's phone.
 
 ## 📂 Key Files
 | File Path | Description |
 | :--- | :--- |
-| `wear/.../complication/RecallComplicationService.kt` | Logic for the "Due Count" widget. |
-| `wear/.../tile/RecallTileService.kt` | Logic for the "Quick Study" tile. |
-| `wear/.../presentation/WearApp.kt` | Updated with Heart Rate display. |
-| `wear/src/main/AndroidManifest.xml` | Added Services and Permissions. |
+| `shared/.../local/entity/` | `DeckEntity` and `CardEntity` definitions. |
+| `shared/.../local/dao/RecallDao.kt` | Interface defining SQL interactions. |
+| `shared/.../local/RecallDatabase.kt` | The main database entry point. |
+| `shared/build.gradle.kts` | KSP and Schema directory configuration. |
 
 ## 🧪 Verification
-1.  **Health:** Run the app on an Emulator. Open "Extended Controls" (3 dots) > "Wear OS" > "Health" and change the Heart Rate. The UI should update instantly.
-2.  **Complication:** Long-press the watch face > Edit > Tap a slot > Select "Recall". It should appear.
-3.  **Tile:** Swipe left/right on the watch face > "Add Tile" > Select "Recall". The UI should render.
+1.  **Build:** Run `./gradlew :shared:assembleDebug`.
+2.  **Success:** If the build passes, Room has successfully generated the implementation code (look in `shared/build/generated/ksp/`).

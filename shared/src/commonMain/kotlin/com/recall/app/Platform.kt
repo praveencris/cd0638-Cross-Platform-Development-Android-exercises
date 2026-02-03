@@ -1,5 +1,7 @@
 package com.recall.app
 
+import androidx.room.RoomDatabase
+import com.recall.app.data.local.RecallDatabase
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -23,6 +25,13 @@ expect fun getPlatform(): Platform
  * @return A unique identifier string
  */
 expect fun generateUUID(): String
+
+/**
+ * Expected platform-specific database builder
+ * Each platform (Android, iOS) provides its own Room database configuration
+ * @return A configured RoomDatabase.Builder for RecallDatabase
+ */
+expect fun getDatabaseBuilder(): RoomDatabase.Builder<RecallDatabase>
 
 /**
  * Greeting function that displays platform name and current date
