@@ -6,5 +6,6 @@ import androidx.room.PrimaryKey
 @Entity
 data class DeckEntity(
     @PrimaryKey val id: String,
-    val title: String
+    val title: String,
+    val currentCardIndex: Int = 0  // Track progress for resume functionality
 )

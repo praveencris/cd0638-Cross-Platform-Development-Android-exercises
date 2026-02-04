@@ -13,6 +13,6 @@ actual class DatabaseFactory {
         val dbFilePath = NSHomeDirectory() + "/recall.db"
         return Room.databaseBuilder<RecallDatabase>(
             name = dbFilePath
-        )
+        ).addMigrations(MIGRATION_1_2)
     }
 }

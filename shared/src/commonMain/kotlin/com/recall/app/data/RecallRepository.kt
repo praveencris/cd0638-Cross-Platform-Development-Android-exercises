@@ -6,6 +6,7 @@ import com.recall.app.data.local.toEntity
 import com.recall.app.domain.models.Deck
 import com.recall.app.network.RecallApiService
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 /**
@@ -47,6 +48,19 @@ interface RecallRepository {
      * Throws exception on network error - let ViewModel handle error state
      */
     suspend fun refreshDecks()
+
+    /**
+     * Update the current card index for a deck (for resume functionality)
+     *
+     * This function:
+     * - Updates database directly (Single Source of Truth)
+     * - Database Flow automatically notifies observers
+     * - Progress persists across app restarts
+     *
+     * @param deckId The deck's unique identifier
+     * @param cardIndex The current card index (0-based)
+     */
+    suspend fun updateDeckProgress(deckId: String, cardIndex: Int)
 }
 
 /**
@@ -75,10 +89,18 @@ class RecallRepositoryImpl(
         // 1. Fetch from network
         val decksFromApi = api.fetchAllDecks()
 
-        // 2. Convert domain models to entities and save to database
+        // 2. Get existing decks to preserve progress
+        val existingDecks = dao.getDecks().map { deckEntities ->
+            deckEntities.associateBy { it.id }
+        }.first()
+
+        // 3. Convert domain models to entities and save to database
         decksFromApi.forEach { deck ->
-            // Insert deck entity
-            dao.insertDeck(deck.toEntity())
+            // Preserve progress if deck already exists
+            val deckEntity = deck.toEntity().copy(
+                currentCardIndex = existingDecks[deck.id]?.currentCardIndex ?: 0
+            )
+            dao.insertDeck(deckEntity)
 
             // Insert card entities for this deck
             val cardEntities = deck.cards.map { card ->
@@ -87,6 +109,11 @@ class RecallRepositoryImpl(
             dao.insertCards(cardEntities)
         }
 
-        // 3. Database Flow automatically notifies observers (no return needed)
+        // 4. Database Flow automatically notifies observers (no return needed)
+    }
+
+    override suspend fun updateDeckProgress(deckId: String, cardIndex: Int) {
+        dao.updateDeckProgress(deckId, cardIndex)
+        // Database Flow automatically notifies observers (reactive update)
     }
 }

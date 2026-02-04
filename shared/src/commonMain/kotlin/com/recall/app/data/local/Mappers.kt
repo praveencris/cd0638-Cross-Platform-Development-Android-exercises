@@ -22,14 +22,23 @@ import com.recall.app.domain.models.DeckCategory
  * @param cards List of cards belonging to this deck
  * @return Deck domain model with default values for fields not stored in database
  */
-fun DeckEntity.toDomain(cards: List<Card> = emptyList()): Deck = Deck(
-    id = id,
-    title = title,
-    colorHex = "#6200EE", // Default color - could be stored in DB in future
-    category = DeckCategory.LANGUAGE, // Default category - could be stored in DB in future
-    cards = cards,
-    progress = 0f // Progress is managed by ViewModel, not persisted
-)
+fun DeckEntity.toDomain(cards: List<Card> = emptyList()): Deck {
+    // Calculate progress fraction from persisted currentCardIndex
+    val progressFraction = if (cards.isNotEmpty()) {
+        currentCardIndex.toFloat() / cards.size.toFloat()
+    } else {
+        0f
+    }
+
+    return Deck(
+        id = id,
+        title = title,
+        colorHex = "#6200EE", // Default color - could be stored in DB in future
+        category = DeckCategory.LANGUAGE, // Default category - could be stored in DB in future
+        cards = cards,
+        progress = progressFraction // Now computed from persisted currentCardIndex
+    )
+}
 
 /**
  * Convert CardEntity to Domain Card model
@@ -51,10 +60,20 @@ fun CardEntity.toDomain(): Card = Card(
  * Only persists core fields needed for database storage
  * @return DeckEntity for database insertion
  */
-fun Deck.toEntity(): DeckEntity = DeckEntity(
-    id = id,
-    title = title
-)
+fun Deck.toEntity(): DeckEntity {
+    // Calculate currentCardIndex from progress fraction
+    val cardIndex = if (cards.isNotEmpty()) {
+        (progress * cards.size).toInt().coerceIn(0, cards.size - 1)
+    } else {
+        0
+    }
+
+    return DeckEntity(
+        id = id,
+        title = title,
+        currentCardIndex = cardIndex // Now persists progress
+    )
+}
 
 /**
  * Convert Domain Card to CardEntity

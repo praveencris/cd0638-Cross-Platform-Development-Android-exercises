@@ -21,4 +21,7 @@ interface RecallDao {
 
     @Query("SELECT * FROM CardEntity WHERE deckId = :deckId")
     suspend fun getCardsForDeck(deckId: String): List<CardEntity>
+
+    @Query("UPDATE DeckEntity SET currentCardIndex = :cardIndex WHERE id = :deckId")
+    suspend fun updateDeckProgress(deckId: String, cardIndex: Int)
 }

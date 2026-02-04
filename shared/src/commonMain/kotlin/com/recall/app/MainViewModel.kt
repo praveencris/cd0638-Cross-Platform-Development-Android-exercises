@@ -36,8 +36,8 @@ class MainViewModel(
     private val _selectedDeck = MutableStateFlow<Deck?>(null)
     val selectedDeck: StateFlow<Deck?> = _selectedDeck.asStateFlow()
 
-    // Track current card index for each deck to support resume functionality
-    private val deckProgress = mutableMapOf<String, Int>()
+    // Progress is now persisted in database and loaded via repository
+    // No in-memory map needed - Single Source of Truth
 
     init {
         // Observe database Flow for automatic UI updates
@@ -94,43 +94,39 @@ class MainViewModel(
 
     /**
      * Get the saved card index for a deck to support resume functionality
+     * Now reads from database-loaded deck instead of in-memory map
      * @param deckId The deck's unique identifier
-     * @return The saved card index, or 0 if no progress exists
+     * @return The saved card index, or 0 if deck not found
      */
     fun getStartIndex(deckId: String): Int {
-        return deckProgress[deckId] ?: 0
+        val deck = _decks.value.find { it.id == deckId } ?: return 0
+        val cardCount = deck.cards.size
+        if (cardCount == 0) return 0
+
+        // Convert progress fraction back to card index
+        return (deck.progress * cardCount).toInt().coerceIn(0, cardCount - 1)
     }
 
     /**
      * Update progress when a card is reviewed
+     * Now persists to database instead of in-memory map
      * @param deckId The deck's unique identifier
      * @param newIndex The new card index after review
      */
     fun onCardReviewed(deckId: String, newIndex: Int) {
-        // Find the deck to get card count
-        val deck = _decks.value.find { it.id == deckId } ?: return
-        val cardCount = deck.cards.size
+        scope.launch {
+            // Find the deck to get card count
+            val deck = _decks.value.find { it.id == deckId } ?: return@launch
+            val cardCount = deck.cards.size
 
-        // Reset progress if we've completed the deck (reached the end)
-        val actualIndex = if (newIndex >= cardCount) 0 else newIndex
+            // Reset progress if we've completed the deck (reached the end)
+            val actualIndex = if (newIndex >= cardCount) 0 else newIndex
 
-        // Save the card index for resume
-        deckProgress[deckId] = actualIndex
+            // Persist to database instead of in-memory map
+            repository.updateDeckProgress(deckId, actualIndex)
 
-        // Calculate progress fraction (0.0 to 1.0)
-        val progressFraction = if (cardCount > 0) {
-            actualIndex.toFloat() / cardCount.toFloat()
-        } else {
-            0f
-        }
-
-        // Update the deck in the list to trigger UI updates
-        _decks.value = _decks.value.map { currentDeck ->
-            if (currentDeck.id == deckId) {
-                currentDeck.copy(progress = progressFraction)
-            } else {
-                currentDeck
-            }
+            // Database Flow will automatically update _decks with new progress
+            // No need to manually update _decks here (reactive architecture)
         }
     }
 }

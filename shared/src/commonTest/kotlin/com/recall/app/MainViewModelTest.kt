@@ -161,6 +161,7 @@ class MainViewModelTest {
 
         // Act - review first card (move to index 1)
         viewModel.onCardReviewed("deck1", 1)
+        testDispatcher.scheduler.advanceUntilIdle() // Wait for coroutine and Flow update
 
         // Assert - use public getStartIndex() to verify progress
         val progress = viewModel.getStartIndex("deck1")
@@ -184,12 +185,15 @@ class MainViewModelTest {
 
         // Act - review cards sequentially
         viewModel.onCardReviewed("deck1", 1)
+        testDispatcher.scheduler.advanceUntilIdle()
         assertEquals(1, viewModel.getStartIndex("deck1"), "Progress should be 1 after first card")
 
         viewModel.onCardReviewed("deck1", 2)
+        testDispatcher.scheduler.advanceUntilIdle()
         assertEquals(2, viewModel.getStartIndex("deck1"), "Progress should be 2 after second card")
 
         viewModel.onCardReviewed("deck1", 3)
+        testDispatcher.scheduler.advanceUntilIdle()
         assertEquals(3, viewModel.getStartIndex("deck1"), "Progress should be 3 after third card")
     }
 
@@ -223,6 +227,7 @@ class MainViewModelTest {
         // Act - review cards from different decks
         viewModel.onCardReviewed("deck1", 1)
         viewModel.onCardReviewed("deck2", 1)
+        testDispatcher.scheduler.advanceUntilIdle() // Wait for both coroutines and Flow updates
 
         // Assert
         assertEquals(1, viewModel.getStartIndex("deck1"), "Deck 1 progress should be 1")
@@ -257,6 +262,7 @@ class MainViewModelTest {
         viewModel.onCardReviewed("deck1", 1)
         viewModel.onCardReviewed("deck1", 2)
         viewModel.onCardReviewed("deck1", 3)
+        testDispatcher.scheduler.advanceUntilIdle() // Wait for all coroutines and Flow updates
 
         // Act
         val startIndex = viewModel.getStartIndex("deck1")
@@ -280,6 +286,7 @@ class MainViewModelTest {
 
         // Review 5 out of 10 cards (move to index 5)
         viewModel.onCardReviewed("deck1", 5)
+        testDispatcher.scheduler.advanceUntilIdle() // Wait for coroutine and Flow update
 
         // Act
         val deck = viewModel.decks.value.first()
@@ -329,5 +336,25 @@ class FakeRecallRepository : RecallRepository {
         }
         // Successfully "refreshed" - Flow already updated via decksToReturn setter
         _decksFlow.value = decksToReturn
+    }
+
+    /**
+     * Simulates progress update operation
+     * Updates the deck's progress in the Flow
+     */
+    override suspend fun updateDeckProgress(deckId: String, cardIndex: Int) {
+        _decksFlow.value = _decksFlow.value.map { deck ->
+            if (deck.id == deckId) {
+                val cardCount = deck.cards.size
+                val progressFraction = if (cardCount > 0) {
+                    cardIndex.toFloat() / cardCount.toFloat()
+                } else {
+                    0f
+                }
+                deck.copy(progress = progressFraction)
+            } else {
+                deck
+            }
+        }
     }
 }
