@@ -10,4 +10,9 @@
         <item quantity="one">%1$d carta</item>
         <item quantity="other">%1$d cartas</item>
     </plurals>
+
+    <!-- Accessibility -->
+    <string name="label_open_deck">Abrir mazo</string>
+    <string name="showing_question">Mostrando Pregunta</string>
+    <string name="showing_answer">Mostrando Respuesta</string>
 </resources>

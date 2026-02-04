@@ -1,31 +1,19 @@
-# 🏁 Solution 9: Internationalization
-**Branch:** `solution-module-9`
+# 🏁 Solution 10: Accessibility
+**Branch:** `solution-module-10`
 
-This branch refactors the application to support multi-language environments using the **Compose Multiplatform Resources** library.
+This branch optimizes the app for assistive technologies like TalkBack and VoiceOver.
 
 ## 🛠️ Implementation Summary
 
-### 1. Resource Architecture
-We transitioned from hardcoded strings to a structured resource system:
-* **`commonMain/composeResources/values/`**: Contains the base `strings.xml` (English).
-* **`commonMain/composeResources/values-es/`**: Contains the Spanish localization.
-* **Mechanism**: The app now uses `stringResource()` and `pluralStringResource()` which dynamically resolve the correct text based on the user's system locale.
+### 1. Semantic Merging
+We applied `mergeDescendants = true` to the `DeckCard`. This groups the icon, title, and counts into a single focusable node, drastically improving navigation speed for screen-reader users.
 
-### 2. Advanced Pluralization
-We implemented the `<plurals>` resource type to handle grammatical variations in card counts.
-* **Benefit**: This ensures that "1 card" and "12 cards" use the correct singular/plural suffixes, providing a polished, professional user experience.
+### 2. State Descriptions
+We implemented `stateDescription` for the flashcards. This ensures that users always know their current context (Question vs. Answer) without needing to guess based on content alone.
 
-### 3. Smart Fallbacks
-The system is configured with English as the default. If a user sets their device to a language we don't support (e.g., French), the app will gracefully fall back to the English resources in the base `values/` directory.
-
-## 📂 Key Files
-| File Path | Description |
-| :--- | :--- |
-| `composeApp/.../values/strings.xml` | Primary English resource file. |
-| `composeApp/.../values-es/strings.xml` | Spanish translation resource file. |
-| `ui/LibraryScreen.kt` | Refactored to use dynamic string resolution. |
-| `ui/components/DeckCard.kt` | Refactored to use the pluralization engine. |
+### 3. Navigation Headings
+By marking screen titles with `.heading()`, we allow users to navigate the app's structure quickly using standard accessibility gestures (like swiping up/down to jump between headers).
 
 ## 🧪 Verification
-1.  **Locale Switching**: Change the device language in System Settings. The app title and labels should update immediately.
-2.  **Plural Check**: Verify that a deck with a single card displays "1 card" and a deck with multiple cards displays "X cards".
+1.  **TalkBack Test**: Enable TalkBack in Android Settings. Ensure you can navigate the deck list with one swipe per card.
+2.  **Scanner Test**: Run the **Accessibility Scanner** app to verify color contrast and touch target sizes.

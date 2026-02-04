@@ -15,6 +15,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -25,6 +30,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.*
 import com.recall.app.domain.models.Card
 import com.recall.app.domain.models.Deck
+import org.jetbrains.compose.resources.stringResource
+import recall.composeapp.generated.resources.Res
+import recall.composeapp.generated.resources.showing_answer
+import recall.composeapp.generated.resources.showing_question
 
 /**
  * Study screen for reviewing flashcards with spaced repetition
@@ -240,14 +249,16 @@ private fun TopBar(
                 text = deckTitle,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1F2937)
+                color = Color(0xFF1F2937),
+                modifier = Modifier.semantics { heading() }
             )
 
             // Progress counter
             Text(
                 text = "$currentIndex / $totalCards",
                 style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFF6B7280)
+                color = Color(0xFF6B7280),
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
             )
         }
 
@@ -281,8 +292,16 @@ private fun FlashCard(
         label = "cardFlip"
     )
 
+    // Accessibility: Announce card state to screen readers
+    val cardState = if (isFlipped) {
+        stringResource(Res.string.showing_answer)
+    } else {
+        stringResource(Res.string.showing_question)
+    }
+
     Card(
         modifier = modifier
+            .semantics { stateDescription = cardState }
             .clickable(onClick = onCardTap)
             .graphicsLayer {
                 rotationY = rotation

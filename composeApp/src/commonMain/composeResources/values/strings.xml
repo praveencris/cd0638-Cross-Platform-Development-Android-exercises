@@ -10,4 +10,9 @@
         <item quantity="one">%1$d card</item>
         <item quantity="other">%1$d cards</item>
     </plurals>
+
+    <!-- Accessibility -->
+    <string name="label_open_deck">Open deck</string>
+    <string name="showing_question">Showing Question</string>
+    <string name="showing_answer">Showing Answer</string>
 </resources>

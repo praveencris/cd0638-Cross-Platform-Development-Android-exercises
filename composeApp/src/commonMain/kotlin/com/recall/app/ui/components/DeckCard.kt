@@ -14,6 +14,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,6 +32,7 @@ import recall.composeapp.generated.resources.biotech_24px
 import recall.composeapp.generated.resources.cards_count
 import recall.composeapp.generated.resources.cards_due
 import recall.composeapp.generated.resources.history_edu_24px
+import recall.composeapp.generated.resources.label_open_deck
 import recall.composeapp.generated.resources.language_chinese_dayi_24px
 import recall.composeapp.generated.resources.logo_dev_24px
 
@@ -116,10 +120,20 @@ fun DeckCard(
         WindowSize.Expanded -> 240.dp
     }
 
+    // Accessibility: Build comprehensive content description
+    val progressPercent = (progress * 100).toInt()
+    val cardCountText = pluralStringResource(Res.plurals.cards_count, dueCount, dueCount)
+    val accessibilityDescription = "${deck.title}, $cardCountText due, $progressPercent percent complete"
+    val openDeckLabel = stringResource(Res.string.label_open_deck)
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(cardHeight)
+            .semantics(mergeDescendants = true) {
+                contentDescription = accessibilityDescription
+                onClick(label = openDeckLabel, action = null)
+            }
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
