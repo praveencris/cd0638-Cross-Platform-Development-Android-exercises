@@ -20,6 +20,15 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
+    // Workaround for duplicate Kotlin Native libraries in ~/.konan and /var/root/.konan
+    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
+        compilations.all {
+            compilerOptions.configure {
+                freeCompilerArgs.add("-Xklib-duplicated-unique-name-strategy=allow-first-with-warning")
+            }
+        }
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kotlinx.datetime)

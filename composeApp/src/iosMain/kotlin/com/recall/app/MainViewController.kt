@@ -3,6 +3,7 @@ package com.recall.app
 import androidx.compose.ui.window.ComposeUIViewController
 import com.recall.app.di.appModule
 import com.recall.app.di.initKoin
+import com.recall.app.di.iosModule
 import org.koin.core.context.startKoin
 import org.koin.mp.KoinPlatform.getKoin
 
@@ -18,7 +19,7 @@ fun MainViewController() = ComposeUIViewController {
     } catch (e: Exception) {
         // Koin not started, initialize it
         initKoin {
-            modules(appModule)
+            modules(iosModule, appModule)
         }
     }
 

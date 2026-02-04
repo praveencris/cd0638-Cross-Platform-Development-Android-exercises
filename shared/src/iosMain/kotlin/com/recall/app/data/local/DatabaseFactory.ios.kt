@@ -2,6 +2,7 @@ package com.recall.app.data.local
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import platform.Foundation.NSHomeDirectory
 
 /**
@@ -13,6 +14,8 @@ actual class DatabaseFactory {
         val dbFilePath = NSHomeDirectory() + "/recall.db"
         return Room.databaseBuilder<RecallDatabase>(
             name = dbFilePath
-        ).addMigrations(MIGRATION_1_2)
+        )
+            .setDriver(BundledSQLiteDriver())
+            .addMigrations(MIGRATION_1_2)
     }
 }

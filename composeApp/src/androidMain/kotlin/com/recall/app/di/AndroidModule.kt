@@ -1,5 +1,7 @@
 package com.recall.app.di
 
+import com.recall.app.data.local.DatabaseFactory
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 /**
@@ -7,6 +9,6 @@ import org.koin.dsl.module
  * Provides Android platform dependencies
  */
 val androidModule = module {
-    // Android-specific dependencies can be added here
-    // MainViewModel is now registered in the shared module
+    // DatabaseFactory - requires Android Context for Room database file path
+    single { DatabaseFactory(androidContext()) }
 }
