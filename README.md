@@ -1,25 +1,57 @@
-# 🏁 Solution 8c: Performance & Polish
-**Branch:** `solution-module-8c`
+# ⚡ Exercise 8c: Performance & Polish
+**Module:** Persistence & Performance
+**Prerequisite:** Completed Module 8b
+**Estimated Time:** 60 Minutes (90 with Bonus)
 
-This is the "Production Candidate" build. It is optimized for speed, memory, and user experience.
+### **🎓 Objective**
+The app works, but is it *fast*? In this exercise, you will use the **Android Profiler** to find two serious bugs: a database bottleneck and a memory leak.
+* **Required:** Fix the N+1 Query and the Memory Leak.
+* **Optional Bonus:** Implement a professional "Shimmer" loading state.
 
-## 🛠️ Implementation Summary
+---
 
-### 1. Performance Optimizations
-* **Fixed N+1 Query:** Replaced manual loops with Room's `@Relation` and `DeckWithCards`. This reduces database access time by ~80% for large lists.
-* **Fixed Memory Leak:** Removed the static Context reference in `MainActivity`, preventing `OutOfMemoryError` during long sessions.
-* **R8 Enabled:** Configured `build.gradle.kts` to shrink and obfuscate the release APK.
+### **🕵️ Part 1: The Performance Hunt (Required)**
 
-### 2. UI Polish (Shimmer)
-We implemented the "Skeleton Loading" pattern.
-* **`Shimmer.kt`:** A custom modifier that animates a linear gradient brush.
-* **`DeckCardPlaceholder.kt`:** A "ghost" version of our card component.
-* **`LibraryScreen.kt`:** Updated to show the skeleton only during the *initial* load (when the DB is empty), ensuring users see immediate feedback.
+#### **Case 1: The "N+1" Query**
+1.  **Profile:** Open **App Inspection > Database Inspector**. Notice that loading the list triggers 1 query for Decks + 1 query *per* Deck for cards.
+2.  **Fix:**
+    * Create `DeckWithCards` entity (`@Embedded deck`, `@Relation cards`).
+    * Update `RecallDao` to use `@Transaction` and fetch everything in one query.
+    * Update `RecallRepository` to use this new efficient method.
 
-## 📂 Key Files
-| File Path | Description |
-| :--- | :--- |
-| `shared/.../local/entity/DeckWithCards.kt` | The optimized database relation. |
-| `ui/components/Shimmer.kt` | The animation logic. |
-| `ui/components/DeckCardPlaceholder.kt` | The skeleton UI. |
-| `composeApp/build.gradle.kts` | Release build configuration. |
+#### **Case 2: The Memory Leak**
+1.  **Profile:** Run the **Memory Profiler**. Rotate the screen 5 times. Capture a **Heap Dump**.
+2.  **Analyze:** Find `MainActivity`. You will see multiple instances!
+3.  **Fix:** Remove the static `companion object` reference in `MainActivity.kt`.
+
+---
+
+### **✨ Part 2: The UI Polish (Optional Bonus)**
+*Make your app feel professional by replacing the loading spinner with a skeleton screen.*
+
+#### **Task A: The Skeleton Card**
+We provided a helper `Shimmer.kt` that contains the animation logic.
+1.  **Open** `ui/components/DeckCardPlaceholder.kt`.
+2.  **Build the UI:** Create a Composable that mimics the layout of `DeckCard` (Row, Column, Boxes), but:
+    * Replace `Text` and `Icons` with simple `Box` shapes.
+    * Apply the `.shimmerEffect()` modifier to these boxes.
+    * *Tip:* Match the `height` (~200dp) and `padding` of the real card exactly to prevent layout shifts.
+
+#### **Task B: Smart Loading**
+1.  **Open** `LibraryScreen.kt`.
+2.  **Logic:** Instead of just showing the list, check the state:
+    ```kotlin
+    if (decks.isEmpty() && isRefreshing) {
+        // Show 6 DeckCardPlaceholders
+    } else {
+        // Show the real list
+    }
+    ```
+3.  **Test:** Uninstall the app (to clear DB) and launch it. You should see the pulsing skeleton UI before the data loads!
+
+---
+
+### **🚀 Definition of Done**
+* [ ] **Profiler:** Database Inspector shows only 1 query for the list.
+* [ ] **Profiler:** Memory Heap Dump shows only 1 `MainActivity`.
+* [ ] **(Bonus)** App launch shows a "Shimmer" effect instead of a blank screen.

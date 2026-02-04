@@ -116,20 +116,15 @@ private fun CompactLayout(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        if (isInitialLoad && isRefreshing) {
-            // Show shimmer placeholders while loading
-            items(6) {
-                DeckCardPlaceholder(windowSize = windowSize)
-            }
-        } else {
-            itemsIndexed(decks) { index, deck ->
-                DeckCard(
-                    deck = deck,
-                    index = index,
-                    windowSize = windowSize,
-                    onClick = { onDeckClick(deck) }
-                )
-            }
+        // TODO (Optional Bonus): Handle 'Empty + Loading' state to show placeholders
+        // Hint: Check if (isInitialLoad && isRefreshing) to show 6 DeckCardPlaceholder items
+        itemsIndexed(decks) { index, deck ->
+            DeckCard(
+                deck = deck,
+                index = index,
+                windowSize = windowSize,
+                onClick = { onDeckClick(deck) }
+            )
         }
     }
 }
@@ -155,20 +150,15 @@ private fun GridLayout(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        if (isInitialLoad && isRefreshing) {
-            // Show shimmer placeholders while loading
-            items(6) {
-                DeckCardPlaceholder(windowSize = windowSize)
-            }
-        } else {
-            itemsIndexed(decks) { index, deck ->
-                DeckCard(
-                    deck = deck,
-                    index = index,
-                    windowSize = windowSize,
-                    onClick = { onDeckClick(deck) }
-                )
-            }
+        // TODO (Optional Bonus): Handle 'Empty + Loading' state to show placeholders
+        // Hint: Check if (isInitialLoad && isRefreshing) to show 6 DeckCardPlaceholder items
+        itemsIndexed(decks) { index, deck ->
+            DeckCard(
+                deck = deck,
+                index = index,
+                windowSize = windowSize,
+                onClick = { onDeckClick(deck) }
+            )
         }
     }
 }

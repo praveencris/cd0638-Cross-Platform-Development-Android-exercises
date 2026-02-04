@@ -71,26 +71,12 @@ class RecallRepositoryImpl(
     private val dao: RecallDao
 ) : RecallRepository {
     override fun getDecks(): Flow<List<Deck>> {
-        // PERFORMANCE OPTIMIZATION (Module 8c):
-        // Fixed N+1 query pattern by using Room @Relation
-        //
-        // BEFORE (N+1 pattern):
-        // - 1 query: SELECT * FROM DeckEntity
-        // - N queries: SELECT * FROM CardEntity WHERE deckId = ? (one per deck)
-        // - Total: 1+N queries (11 queries for 10 decks)
-        //
-        // AFTER (single JOIN query):
-        // - 1 query: SELECT DeckEntity.*, CardEntity.* FROM DeckEntity LEFT JOIN CardEntity...
-        // - Total: 1 query (regardless of number of decks)
-        //
-        // Impact: Instant loading, smooth UI, no database bottleneck
-        return dao.getDecksWithCards().map { decksWithCards ->
-            decksWithCards.map { deckWithCards ->
-                // Convert cards from entity to domain model
-                val cards = deckWithCards.cards.map { it.toDomain() }
-
-                // Convert deck from entity to domain model with cards
-                deckWithCards.deck.toDomain(cards = cards)
+        // N+1 Query Pattern (inefficient - will be fixed in exercise)
+        return dao.getDecks().map { deckEntities ->
+            deckEntities.map { deckEntity ->
+                // This triggers a separate query for EACH deck
+                val cards = dao.getCardsForDeck(deckEntity.id).map { it.toDomain() }
+                deckEntity.toDomain(cards = cards)
             }
         }
     }
