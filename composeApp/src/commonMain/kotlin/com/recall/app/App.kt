@@ -25,57 +25,66 @@ fun App() {
                 val isLoading by viewModel.isLoading.collectAsState()
                 val error by viewModel.error.collectAsState()
                 val selectedDeck by viewModel.selectedDeck.collectAsState()
+                val snackbarHostState = remember { SnackbarHostState() }
 
-                // Trigger data loading when the composable enters composition
+                // Show error as snackbar (non-blocking)
+                LaunchedEffect(error) {
+                    error?.let {
+                        val result = snackbarHostState.showSnackbar(
+                            message = it,
+                            actionLabel = "Retry",
+                            duration = SnackbarDuration.Long
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            viewModel.retry()
+                        }
+                        viewModel.clearError()
+                    }
+                }
+
+                // Trigger initial data loading
                 LaunchedEffect(Unit) {
                     viewModel.fetchDecks()
                 }
 
-                Surface(
+                Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    when {
-                        isLoading -> {
+                    snackbarHost = { SnackbarHost(snackbarHostState) }
+                ) { paddingValues ->
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        if (decks.isEmpty()) {
+                            // Empty state - only shown when truly no data
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                        error != null -> {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = "Error: $error",
-                                    color = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.padding(bottom = 16.dp)
-                                )
-                                Button(onClick = { viewModel.retry() }) {
-                                    Text("Retry")
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    if (isLoading) {
+                                        CircularProgressIndicator()
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                    Text(
+                                        text = if (isLoading) "Loading..." else "No decks available",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
                                 }
                             }
-                        }
-                        decks.isEmpty() -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "No decks available",
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            }
-                        }
-                        else -> {
+                        } else {
+                            // Show decks with pull-to-refresh
                             MasterDetailLayout(
                                 windowSize = windowSize,
                                 selectedDeck = selectedDeck,
                                 decks = decks,
+                                isRefreshing = isLoading,
+                                onRefresh = viewModel::fetchDecks,
                                 onDeckSelected = viewModel::selectDeck,
                                 getStartIndex = viewModel::getStartIndex,
                                 onCardReviewed = viewModel::onCardReviewed

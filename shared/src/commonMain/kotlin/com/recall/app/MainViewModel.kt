@@ -80,6 +80,14 @@ class MainViewModel(
         fetchDecks()
     }
 
+    /**
+     * Clear the error state
+     * Called after error is shown to user via snackbar
+     */
+    fun clearError() {
+        _error.value = null
+    }
+
     fun selectDeck(deck: Deck?) {
         _selectedDeck.value = deck
     }

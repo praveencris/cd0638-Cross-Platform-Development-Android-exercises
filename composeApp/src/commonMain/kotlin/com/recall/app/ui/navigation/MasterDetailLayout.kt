@@ -41,6 +41,8 @@ fun MasterDetailLayout(
     windowSize: WindowSize,
     selectedDeck: Deck?,
     decks: List<Deck>,
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
     onDeckSelected: (Deck?) -> Unit,
     getStartIndex: (String) -> Int,
     onCardReviewed: (String, Int) -> Unit,
@@ -52,6 +54,8 @@ fun MasterDetailLayout(
         SplitLayout(
             selectedDeck = selectedDeck,
             decks = decks,
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
             onDeckSelected = onDeckSelected,
             getStartIndex = getStartIndex,
             onCardReviewed = onCardReviewed,
@@ -61,6 +65,8 @@ fun MasterDetailLayout(
         CompactLayout(
             selectedDeck = selectedDeck,
             decks = decks,
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
             onDeckSelected = onDeckSelected,
             getStartIndex = getStartIndex,
             onCardReviewed = onCardReviewed,
@@ -77,6 +83,8 @@ fun MasterDetailLayout(
 private fun CompactLayout(
     selectedDeck: Deck?,
     decks: List<Deck>,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     onDeckSelected: (Deck?) -> Unit,
     getStartIndex: (String) -> Int,
     onCardReviewed: (String, Int) -> Unit,
@@ -98,6 +106,8 @@ private fun CompactLayout(
         LibraryScreen(
             windowSize = WindowSize.Compact,
             decks = decks,
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
             onDeckClick = { deck -> onDeckSelected(deck) },
             modifier = modifier
         )
@@ -112,6 +122,8 @@ private fun CompactLayout(
 private fun SplitLayout(
     selectedDeck: Deck?,
     decks: List<Deck>,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     onDeckSelected: (Deck?) -> Unit,
     getStartIndex: (String) -> Int,
     onCardReviewed: (String, Int) -> Unit,
@@ -124,6 +136,8 @@ private fun SplitLayout(
             LibraryScreen(
                 windowSize = WindowSize.Compact,
                 decks = decks,
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh,
                 onDeckClick = { deck -> onDeckSelected(deck) }
             )
         }

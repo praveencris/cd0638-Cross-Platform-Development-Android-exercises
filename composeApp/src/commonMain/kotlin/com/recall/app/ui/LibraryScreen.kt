@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +26,8 @@ import com.recall.app.ui.components.DeckCard
  *
  * @param windowSize Current window size category for responsive layout
  * @param decks List of decks to display
+ * @param isRefreshing Whether the content is currently refreshing
+ * @param onRefresh Callback for pull-to-refresh gesture
  * @param onDeckClick Callback when a deck is clicked
  * @param modifier Optional modifier for the screen
  */
@@ -33,35 +36,43 @@ fun LibraryScreen(
     windowSize: WindowSize,
     decks: List<Deck>,
     onDeckClick: (Deck) -> Unit = {},
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        modifier = modifier.fillMaxSize()
     ) {
-        // Header
-        Text(
-            text = "My Library",
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 20.dp)
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+        ) {
+            // Header
+            Text(
+                text = "My Library",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 20.dp)
+            )
 
-        // Adaptive content based on window size
-        when (windowSize) {
-            WindowSize.Compact -> {
-                // Single column list for phones
-                CompactLayout(decks = decks, windowSize = windowSize, onDeckClick = onDeckClick)
-            }
-            WindowSize.Medium -> {
-                // 2-column grid for small tablets
-                GridLayout(decks = decks, columns = 2, windowSize = windowSize, onDeckClick = onDeckClick)
-            }
-            WindowSize.Expanded -> {
-                // 3-column grid for large tablets and desktop
-                GridLayout(decks = decks, columns = 3, windowSize = windowSize, onDeckClick = onDeckClick)
+            // Adaptive content based on window size
+            when (windowSize) {
+                WindowSize.Compact -> {
+                    // Single column list for phones
+                    CompactLayout(decks = decks, windowSize = windowSize, onDeckClick = onDeckClick)
+                }
+                WindowSize.Medium -> {
+                    // 2-column grid for small tablets
+                    GridLayout(decks = decks, columns = 2, windowSize = windowSize, onDeckClick = onDeckClick)
+                }
+                WindowSize.Expanded -> {
+                    // 3-column grid for large tablets and desktop
+                    GridLayout(decks = decks, columns = 3, windowSize = windowSize, onDeckClick = onDeckClick)
+                }
             }
         }
     }
