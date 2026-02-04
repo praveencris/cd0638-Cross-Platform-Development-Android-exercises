@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Library Screen -->
-    <string name="library_title">Mi Biblioteca</string>
-    <string name="study_button">Estudiar</string>
-    <string name="cards_due">%1$d pendientes</string>
+    <!-- TODO 3: Translate all strings from values/strings.xml to Spanish -->
+    <!-- Examples: -->
+    <!-- - "My Library" → "Mi Biblioteca" -->
+    <!-- - "Study" → "Estudiar" -->
+    <!-- - "%1$d due" → "%1$d pendientes" -->
 
-    <!-- Plurals -->
-    <plurals name="cards_count">
-        <item quantity="one">%1$d carta</item>
-        <item quantity="other">%1$d cartas</item>
-    </plurals>
+    <!-- TODO 4: Translate the plural forms -->
+    <!-- Examples: -->
+    <!-- - "%1$d card" → "%1$d carta" (singular) -->
+    <!-- - "%1$d cards" → "%1$d cartas" (plural) -->
 </resources>

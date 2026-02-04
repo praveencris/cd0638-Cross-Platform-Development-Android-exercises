@@ -22,12 +22,8 @@ import com.recall.app.domain.models.DeckCategory
 import com.recall.app.ui.WindowSize
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.pluralStringResource
-import org.jetbrains.compose.resources.stringResource
 import recall.composeapp.generated.resources.Res
 import recall.composeapp.generated.resources.biotech_24px
-import recall.composeapp.generated.resources.cards_count
-import recall.composeapp.generated.resources.cards_due
 import recall.composeapp.generated.resources.history_edu_24px
 import recall.composeapp.generated.resources.language_chinese_dayi_24px
 import recall.composeapp.generated.resources.logo_dev_24px
@@ -168,13 +164,14 @@ fun DeckCard(
                     }
 
                     // Due count pill
+                    // TODO: Refactor to use stringResource(Res.string.cards_due, dueCount)
                     if (dueCount > 0) {
                         Surface(
                             shape = RoundedCornerShape(12.dp),
                             color = Color.White.copy(alpha = 0.6f)
                         ) {
                             Text(
-                                text = stringResource(Res.string.cards_due, dueCount),
+                                text = "$dueCount due",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = colorPalette.accent,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
@@ -245,6 +242,7 @@ private fun calculateDueCount(deck: Deck): Int {
  */
 @Composable
 private fun generateDescription(deck: Deck): String {
-    val cardCountText = pluralStringResource(Res.plurals.cards_count, deck.cards.size, deck.cards.size)
+    // TODO: Refactor to use pluralStringResource(Res.plurals.cards_count, deck.cards.size, deck.cards.size)
+    val cardCountText = "${deck.cards.size} cards"
     return "Vocabulary • $cardCountText"
 }

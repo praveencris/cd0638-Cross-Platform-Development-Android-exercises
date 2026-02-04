@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Library Screen -->
-    <string name="library_title">My Library</string>
-    <string name="study_button">Study</string>
-    <string name="cards_due">%1$d due</string>
+    <!-- TODO 1: Extract all UI strings to this file -->
+    <!-- Define string resources for: -->
+    <!-- - library_title: "My Library" -->
+    <!-- - study_button: "Study" -->
+    <!-- - cards_due: "%1$d due" (use positional format %1$d for Compose Multiplatform) -->
 
-    <!-- Plurals -->
-    <plurals name="cards_count">
-        <item quantity="one">%1$d card</item>
-        <item quantity="other">%1$d cards</item>
-    </plurals>
+    <!-- TODO 2: Define a plural for card counts -->
+    <!-- Hint: Use <plurals name="cards_count"> with: -->
+    <!-- - <item quantity="one">%1$d card</item> -->
+    <!-- - <item quantity="other">%1$d cards</item> -->
 </resources>
