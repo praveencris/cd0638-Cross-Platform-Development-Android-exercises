@@ -1,0 +1,83 @@
+package com.recall.app.data
+
+import com.recall.app.data.local.dao.RecallDao
+import com.recall.app.data.local.toDomain
+import com.recall.app.data.local.toEntity
+import com.recall.app.domain.models.Deck
+import com.recall.app.network.RecallApiService
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+/**
+ * Repository implementing Offline-First architecture
+ *
+ * Key Principles:
+ * - Single Source of Truth: Room Database
+ * - UI always observes database (instant data, no loading spinners for cached data)
+ * - Network fetches only write to database, never return directly to UI
+ * - App works offline with cached data
+ *
+ * Data Flow:
+ * 1. UI observes getDecks() Flow → always returns from database
+ * 2. UI triggers refreshDecks() → fetches from network and updates database
+ * 3. Database change → Flow automatically emits → UI updates
+ */
+class RecallRepository(
+    private val api: RecallApiService,
+    private val dao: RecallDao
+) {
+    /**
+     * Observe all decks from database (Single Source of Truth)
+     *
+     * This Flow:
+     * - Returns cached data immediately (instant app launch)
+     * - Automatically emits when database changes (reactive updates)
+     * - Works offline (no network required)
+     *
+     * @return Flow that emits list of decks whenever database changes
+     */
+    fun getDecks(): Flow<List<Deck>> {
+        return dao.getDecks().map { deckEntities ->
+            deckEntities.map { deckEntity ->
+                // For each deck, fetch its cards from database
+                // Note: This is intentionally using N+1 query pattern for pedagogical purposes
+                // Future profiling lesson (8c) will identify and optimize this
+                val cardEntities = dao.getCardsForDeck(deckEntity.id)
+                val cards = cardEntities.map { it.toDomain() }
+
+                // Convert entity to domain model with cards
+                deckEntity.toDomain(cards = cards)
+            }
+        }
+    }
+
+    /**
+     * Fetch fresh data from network and update database
+     *
+     * This function:
+     * - Fetches from network (requires connectivity)
+     * - Updates local database with fresh data
+     * - Database Flow automatically notifies observers
+     * - UI updates silently in background
+     *
+     * Throws exception on network error - let ViewModel handle error state
+     */
+    suspend fun refreshDecks() {
+        // 1. Fetch from network
+        val decksFromApi = api.fetchAllDecks()
+
+        // 2. Convert domain models to entities and save to database
+        decksFromApi.forEach { deck ->
+            // Insert deck entity
+            dao.insertDeck(deck.toEntity())
+
+            // Insert card entities for this deck
+            val cardEntities = deck.cards.map { card ->
+                card.toEntity(deckId = deck.id)
+            }
+            dao.insertCards(cardEntities)
+        }
+
+        // 3. Database Flow automatically notifies observers (no return needed)
+    }
+}

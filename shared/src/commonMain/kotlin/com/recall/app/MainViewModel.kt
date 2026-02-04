@@ -1,7 +1,7 @@
 package com.recall.app
 
+import com.recall.app.data.RecallRepository
 import com.recall.app.domain.models.Deck
-import com.recall.app.network.RecallApiService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,10 +11,16 @@ import kotlinx.coroutines.launch
 
 /**
  * Shared ViewModel for managing deck state across platforms
- * Fetches decks from the API and exposes them via StateFlow
+ *
+ * Offline-First Architecture:
+ * - Always observes database via Repository (Single Source of Truth)
+ * - Provides instant data on app launch (cached from previous session)
+ * - Network refreshes update database silently in background
+ * - UI automatically updates when database changes (reactive Flow)
+ * - Works completely offline with cached data
  */
 class MainViewModel(
-    private val apiService: RecallApiService
+    private val repository: RecallRepository
 ) {
     private val scope = CoroutineScope(Dispatchers.Main)
 
@@ -33,17 +39,35 @@ class MainViewModel(
     // Track current card index for each deck to support resume functionality
     private val deckProgress = mutableMapOf<String, Int>()
 
+    init {
+        // Observe database Flow for automatic UI updates
+        // This provides instant data on app launch (offline-first)
+        scope.launch {
+            repository.getDecks().collect { decksFromDb ->
+                _decks.value = decksFromDb
+            }
+        }
+    }
+
     /**
-     * Fetch all decks from the API
-     * Call this from the UI when ready to load data (e.g., in LaunchedEffect)
+     * Refresh decks from network and update database
+     *
+     * Offline-First Behavior:
+     * - UI shows cached data immediately (from init block)
+     * - This function triggers network sync in background
+     * - Database Flow automatically updates UI when new data arrives
+     * - Loading spinner shows sync progress, but doesn't block cached data
+     *
+     * Call this from UI pull-to-refresh or initial load trigger
      */
     fun fetchDecks() {
         scope.launch {
             _isLoading.value = true
             _error.value = null
             try {
-                val fetchedDecks = apiService.fetchAllDecks()
-                _decks.value = fetchedDecks
+                // Fetch from network and update database
+                // The Flow collection in init will automatically update _decks
+                repository.refreshDecks()
             } catch (e: Exception) {
                 _error.value = e.message ?: "Unknown error occurred"
             } finally {
