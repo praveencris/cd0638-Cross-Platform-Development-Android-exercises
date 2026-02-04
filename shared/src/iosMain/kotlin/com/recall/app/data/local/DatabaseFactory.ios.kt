@@ -16,6 +16,6 @@ actual class DatabaseFactory {
             name = dbFilePath
         )
             .setDriver(BundledSQLiteDriver())
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
     }
 }

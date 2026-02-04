@@ -25,6 +25,7 @@ fun App() {
                 val isLoading by viewModel.isLoading.collectAsState()
                 val error by viewModel.error.collectAsState()
                 val selectedDeck by viewModel.selectedDeck.collectAsState()
+                val isInitialLoad by viewModel.isInitialLoad.collectAsState()
                 val snackbarHostState = remember { SnackbarHostState() }
 
                 // Show error as snackbar (non-blocking)
@@ -57,8 +58,8 @@ fun App() {
                             .padding(paddingValues),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        if (decks.isEmpty()) {
-                            // Empty state - only shown when truly no data
+                        if (decks.isEmpty() && !isInitialLoad) {
+                            // Empty state - only shown when truly no data AFTER initial load
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
@@ -87,7 +88,8 @@ fun App() {
                                 onRefresh = viewModel::fetchDecks,
                                 onDeckSelected = viewModel::selectDeck,
                                 getStartIndex = viewModel::getStartIndex,
-                                onCardReviewed = viewModel::onCardReviewed
+                                onCardReviewed = viewModel::onCardReviewed,
+                                isInitialLoad = isInitialLoad
                             )
                         }
                     }

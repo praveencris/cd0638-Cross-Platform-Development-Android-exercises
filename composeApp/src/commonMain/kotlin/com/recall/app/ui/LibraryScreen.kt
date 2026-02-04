@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.recall.app.domain.models.Deck
 import com.recall.app.ui.components.DeckCard
+import com.recall.app.ui.components.DeckCardPlaceholder
 
 /**
  * Responsive library screen that displays decks in an adaptive layout
@@ -38,6 +39,7 @@ fun LibraryScreen(
     onDeckClick: (Deck) -> Unit = {},
     isRefreshing: Boolean = false,
     onRefresh: () -> Unit = {},
+    isInitialLoad: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     PullToRefreshBox(
@@ -63,15 +65,35 @@ fun LibraryScreen(
             when (windowSize) {
                 WindowSize.Compact -> {
                     // Single column list for phones
-                    CompactLayout(decks = decks, windowSize = windowSize, onDeckClick = onDeckClick)
+                    CompactLayout(
+                        decks = decks,
+                        windowSize = windowSize,
+                        onDeckClick = onDeckClick,
+                        isRefreshing = isRefreshing,
+                        isInitialLoad = isInitialLoad
+                    )
                 }
                 WindowSize.Medium -> {
                     // 2-column grid for small tablets
-                    GridLayout(decks = decks, columns = 2, windowSize = windowSize, onDeckClick = onDeckClick)
+                    GridLayout(
+                        decks = decks,
+                        columns = 2,
+                        windowSize = windowSize,
+                        onDeckClick = onDeckClick,
+                        isRefreshing = isRefreshing,
+                        isInitialLoad = isInitialLoad
+                    )
                 }
                 WindowSize.Expanded -> {
                     // 3-column grid for large tablets and desktop
-                    GridLayout(decks = decks, columns = 3, windowSize = windowSize, onDeckClick = onDeckClick)
+                    GridLayout(
+                        decks = decks,
+                        columns = 3,
+                        windowSize = windowSize,
+                        onDeckClick = onDeckClick,
+                        isRefreshing = isRefreshing,
+                        isInitialLoad = isInitialLoad
+                    )
                 }
             }
         }
@@ -86,19 +108,28 @@ private fun CompactLayout(
     decks: List<Deck>,
     windowSize: WindowSize,
     onDeckClick: (Deck) -> Unit,
+    isRefreshing: Boolean,
+    isInitialLoad: Boolean,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        itemsIndexed(decks) { index, deck ->
-            DeckCard(
-                deck = deck,
-                index = index,
-                windowSize = windowSize,
-                onClick = { onDeckClick(deck) }
-            )
+        if (isInitialLoad && isRefreshing) {
+            // Show shimmer placeholders while loading
+            items(6) {
+                DeckCardPlaceholder(windowSize = windowSize)
+            }
+        } else {
+            itemsIndexed(decks) { index, deck ->
+                DeckCard(
+                    deck = deck,
+                    index = index,
+                    windowSize = windowSize,
+                    onClick = { onDeckClick(deck) }
+                )
+            }
         }
     }
 }
@@ -114,6 +145,8 @@ private fun GridLayout(
     columns: Int,
     windowSize: WindowSize,
     onDeckClick: (Deck) -> Unit,
+    isRefreshing: Boolean,
+    isInitialLoad: Boolean,
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -122,13 +155,20 @@ private fun GridLayout(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        itemsIndexed(decks) { index, deck ->
-            DeckCard(
-                deck = deck,
-                index = index,
-                windowSize = windowSize,
-                onClick = { onDeckClick(deck) }
-            )
+        if (isInitialLoad && isRefreshing) {
+            // Show shimmer placeholders while loading
+            items(6) {
+                DeckCardPlaceholder(windowSize = windowSize)
+            }
+        } else {
+            itemsIndexed(decks) { index, deck ->
+                DeckCard(
+                    deck = deck,
+                    index = index,
+                    windowSize = windowSize,
+                    onClick = { onDeckClick(deck) }
+                )
+            }
         }
     }
 }

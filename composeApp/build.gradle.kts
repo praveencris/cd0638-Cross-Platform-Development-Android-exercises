@@ -69,7 +69,17 @@ android {
     }
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+            // Enable R8 code shrinking, obfuscation, and optimization
+            isMinifyEnabled = true
+
+            // Remove unused resources (drawables, layouts, etc.)
+            isShrinkResources = true
+
+            // ProGuard rules to preserve Room and Koin reflection
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {

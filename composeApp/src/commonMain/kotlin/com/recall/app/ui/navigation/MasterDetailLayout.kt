@@ -46,6 +46,7 @@ fun MasterDetailLayout(
     onDeckSelected: (Deck?) -> Unit,
     getStartIndex: (String) -> Int,
     onCardReviewed: (String, Int) -> Unit,
+    isInitialLoad: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     // Only use Split View for Expanded (Landscape Tablet/Desktop)
@@ -59,6 +60,7 @@ fun MasterDetailLayout(
             onDeckSelected = onDeckSelected,
             getStartIndex = getStartIndex,
             onCardReviewed = onCardReviewed,
+            isInitialLoad = isInitialLoad,
             modifier = modifier
         )
     } else {
@@ -70,6 +72,7 @@ fun MasterDetailLayout(
             onDeckSelected = onDeckSelected,
             getStartIndex = getStartIndex,
             onCardReviewed = onCardReviewed,
+            isInitialLoad = isInitialLoad,
             modifier = modifier
         )
     }
@@ -88,6 +91,7 @@ private fun CompactLayout(
     onDeckSelected: (Deck?) -> Unit,
     getStartIndex: (String) -> Int,
     onCardReviewed: (String, Int) -> Unit,
+    isInitialLoad: Boolean,
     modifier: Modifier = Modifier
 ) {
     if (selectedDeck != null) {
@@ -109,6 +113,7 @@ private fun CompactLayout(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
             onDeckClick = { deck -> onDeckSelected(deck) },
+            isInitialLoad = isInitialLoad,
             modifier = modifier
         )
     }
@@ -127,6 +132,7 @@ private fun SplitLayout(
     onDeckSelected: (Deck?) -> Unit,
     getStartIndex: (String) -> Int,
     onCardReviewed: (String, Int) -> Unit,
+    isInitialLoad: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(modifier = modifier.fillMaxSize()) {
@@ -138,7 +144,8 @@ private fun SplitLayout(
                 decks = decks,
                 isRefreshing = isRefreshing,
                 onRefresh = onRefresh,
-                onDeckClick = { deck -> onDeckSelected(deck) }
+                onDeckClick = { deck -> onDeckSelected(deck) },
+                isInitialLoad = isInitialLoad
             )
         }
 

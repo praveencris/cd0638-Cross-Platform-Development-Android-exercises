@@ -30,6 +30,9 @@ class MainViewModel(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _isInitialLoad = MutableStateFlow(true)
+    val isInitialLoad: StateFlow<Boolean> = _isInitialLoad.asStateFlow()
+
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
@@ -45,6 +48,10 @@ class MainViewModel(
         scope.launch {
             repository.getDecks().collect { decksFromDb ->
                 _decks.value = decksFromDb
+                // Mark initial load as complete once we have data from any source
+                if (decksFromDb.isNotEmpty()) {
+                    _isInitialLoad.value = false
+                }
             }
         }
     }
@@ -68,8 +75,12 @@ class MainViewModel(
                 // Fetch from network and update database
                 // The Flow collection in init will automatically update _decks
                 repository.refreshDecks()
+                // Mark initial load complete even if network fetch returns empty
+                _isInitialLoad.value = false
             } catch (e: Exception) {
                 _error.value = e.message ?: "Unknown error occurred"
+                // Still mark initial load complete on error
+                _isInitialLoad.value = false
             } finally {
                 _isLoading.value = false
             }
