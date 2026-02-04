@@ -1,7 +1,7 @@
 # ⚡ Exercise 8c: Performance & Polish
 **Module:** Persistence & Performance
 **Prerequisite:** Completed Module 8b
-**Estimated Time:** 60 Minutes (90 with Bonus)
+**Estimated Time:** 40 Minutes (80 with Bonus)
 
 ### **🎓 Objective**
 The app works, but is it *fast*? In this exercise, you will use the **Android Profiler** to find two serious bugs: a database bottleneck and a memory leak.
