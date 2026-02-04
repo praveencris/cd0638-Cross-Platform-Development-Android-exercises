@@ -1,15 +1,28 @@
 # 🏁 Solution 8b: Offline Intelligence
-**Branch:** `solution-module-8b`
+**Branch:** `sol-lesson-8b-db-foundation-setup`
 
 This branch completes the Offline-First implementation. The app is now fully robust against network flakiness.
 
 ## 🛠️ Implementation Summary
 
 ### 1. Database Instantiation (KMP)
-Creating a Room database requires platform-specific context.
-* **Android:** Used `DatabaseFactory(context)` to pass the Application Context.
-* **iOS:** Used `NSHomeDirectory()` to find a valid file path for `recall.db`.
-* **Koin:** We registered `RecallDatabase` as a `Single` in our DI graph, ensuring only one database connection exists.
+Creating a Room database requires platform-specific context and configuration.
+
+**Android Setup:**
+* Uses `DatabaseFactory(context)` to pass the Application Context
+* SQLiteDriver is automatically provided by Room
+* Database file location: `context.getDatabasePath("recall.db")`
+
+**iOS Setup:**
+* Uses `NSHomeDirectory()` to find a valid file path for `recall.db`
+* Requires explicit `BundledSQLiteDriver()` configuration via `.setDriver()`
+* Requires `@ConstructedBy` annotation on database class for Room KMP code generation
+* Must declare `expect object RecallDatabaseConstructor` for platform-specific instantiation
+
+**Koin DI:**
+* Platform-specific modules (`androidModule`, `iosModule`) provide `DatabaseFactory`
+* Shared `sharedModule` creates `RecallDatabase` singleton from factory
+* Only one database connection exists across the entire app
 
 ### 2. Single Source of Truth (SSOT)
 The `RecallRepository` no longer returns API results directly to the UI.
@@ -35,8 +48,12 @@ Study progress now persists across app restarts using database storage.
 | File Path | Description |
 | :--- | :--- |
 | `RecallRepository.kt` | The brain of the Offline-First logic. |
-| `DatabaseFactory.kt` | Platform-specific code to create the DB file. |
-| `Koin.kt` | Dependency Injection wiring. |
+| `DatabaseFactory.kt` | Platform-agnostic expect/actual pattern for DB instantiation. |
+| `DatabaseFactory.android.kt` | Android-specific database creation with Context. |
+| `DatabaseFactory.ios.kt` | iOS-specific database creation with NSHomeDirectory and BundledSQLiteDriver. |
+| `AndroidModule.kt` | Android DI module providing DatabaseFactory with context. |
+| `IosModule.kt` | iOS DI module providing DatabaseFactory (no context). |
+| `Koin.kt` | Shared dependency injection wiring (sharedModule). |
 | `RecallDatabase.kt` | Database schema definition and migration (v1 → v2). |
 | `RecallDao.kt` | Data access methods including `updateDeckProgress()`. |
 | `Mappers.kt` | Bidirectional conversion between entities and domain models. |
