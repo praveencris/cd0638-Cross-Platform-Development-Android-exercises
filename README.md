@@ -1,66 +1,56 @@
-# 🏁 Solution 8b: Offline Intelligence
-**Branch:** `sol-lesson-8b-db-foundation-setup`
+# 🧠 Exercise 8b: Offline Intelligence
+**Branch:** `lesson-8b-db-foundation-setup`
+**Module:** Persistence & Performance
+**Prerequisite:** Completed Module 8a (Database Defined)
+**Estimated Time:** 45 Minutes
 
-This branch completes the Offline-First implementation. The app is now fully robust against network flakiness.
+### **🎓 Objective**
+In this exercise, you will implement the **Offline-First** pattern. You will "wire up" the database you created in Part 8a and rewire the `RecallRepository` so that the app *always* shows data from the local database (instant load), and only uses the network to update that database in the background.
 
-## 🛠️ Implementation Summary
+### **✅ Task 1: The "Wiring" (Dependency Injection)**
+We defined the Database class in 8a, but our app doesn't know how to create it or provide it to the Repository. We need to register it in **Koin**.
 
-### 1. Database Instantiation (KMP)
-Creating a Room database requires platform-specific context and configuration.
+1.  **Open** `composeApp/src/androidMain/kotlin/com/recall/app/di/AndroidModule.kt`.
+    * **Action:** Register the `DatabaseFactory` as a `single`.
+    * *Hint:* `single { DatabaseFactory(androidContext()) }`
 
-**Android Setup:**
-* Uses `DatabaseFactory(context)` to pass the Application Context
-* SQLiteDriver is automatically provided by Room
-* Database file location: `context.getDatabasePath("recall.db")`
+2.  **Open** `shared/src/commonMain/kotlin/com/recall/app/di/Koin.kt`.
+    * **Action:** Register the `RecallDatabase` as a `single`.
+    * *Hint:* Use `get<DatabaseFactory>().create()` to build it.
+    * **Action:** Register the `RecallDao` as a `single`.
+    * *Hint:* Call `.recallDao()` on the database instance.
 
-**iOS Setup:**
-* Uses `NSHomeDirectory()` to find a valid file path for `recall.db`
-* Requires explicit `BundledSQLiteDriver()` configuration via `.setDriver()`
-* Requires `@ConstructedBy` annotation on database class for Room KMP code generation
-* Must declare `expect object RecallDatabaseConstructor` for platform-specific instantiation
+### **✅ Task 2: The Repository Switch**
+Currently, `RecallRepository` talks directly to the API. Let's change that to use the DAO.
 
-**Koin DI:**
-* Platform-specific modules (`androidModule`, `iosModule`) provide `DatabaseFactory`
-* Shared `sharedModule` creates `RecallDatabase` singleton from factory
-* Only one database connection exists across the entire app
+1.  **Open** `shared/src/commonMain/kotlin/com/recall/app/data/RecallRepository.kt`.
+2.  **Constructor:** Add `private val recallDao: RecallDao` to the constructor arguments.
+3.  **Refactor `getDecks()`:**
+    * **Old:** `flow { emit(api.getDecks()) }`
+    * **New:** `recallDao.getDecks()`
+    * **Mapping:** You will need to map the `List<DeckEntity>` from the DB to the domain `List<Deck>`.
+    * *Hint:* Use the `.map { ... }` operator on the Flow.
 
-### 2. Single Source of Truth (SSOT)
-The `RecallRepository` no longer returns API results directly to the UI.
-* **Flow:** `DAO -> Repository -> ViewModel -> UI`.
-* **Sync:** `ViewModel -> Repository.refresh() -> API -> DAO`.
-* **Benefit:** The UI never sees a "Loading" spinner for cached data. It shows the old data immediately, then silently updates when the new data arrives.
+### **✅ Task 3: The "Refresh" Logic**
+Since `getDecks()` now reads from the disk, we need a way to put data *onto* the disk.
 
-### 3. Data Mapping
-We implemented mappers to convert between layers:
-* `DeckEntity.toDomain()`: Used when reading from DB.
-* `Deck.toEntity()`: Used when writing API results to DB.
-* *Why?* This decouples our database schema from our business logic.
+1.  **Refactor `refreshDecks()`:**
+    * Make it `suspend`.
+    * **Step 1:** Call `api.getDecks()` to get fresh data.
+    * **Step 2:** Map the domain models to `DeckEntity` and `CardEntity`.
+    * **Step 3:** Call `recallDao.insertDecks(...)` and `insertCards(...)`.
+    * **Benefit:** When this saves to disk, the Flow in Task 2 will *automatically* emit the new data to the UI!
 
-### 4. Persistent Progress Tracking
-Study progress now persists across app restarts using database storage.
-* **Database Schema:** Added `currentCardIndex` column to `DeckEntity` (v1 → v2 migration).
-* **Migration:** Uses `ALTER TABLE` to safely add column to existing databases (defaults to 0).
-* **Resume Functionality:** `getStartIndex()` reads progress from database, `onCardReviewed()` persists updates.
-* **Network Sync:** `refreshDecks()` preserves existing progress when syncing from API (prevents reset on pull-to-refresh).
-* **Reactive Updates:** Database Flow automatically updates UI when progress changes.
+### **✅ Task 4: Verify "Airplane Mode"**
+1.  **Run** the app on Android.
+2.  **Load** the decks once (to cache them).
+3.  **Kill** the app.
+4.  **Turn off WiFi/Data** (Airplane Mode).
+5.  **Relaunch** the app.
+6.  **Success:** The decks should appear instantly! (Loaded from Room).
 
-## 📂 Key Files
-| File Path | Description |
-| :--- | :--- |
-| `RecallRepository.kt` | The brain of the Offline-First logic. |
-| `DatabaseFactory.kt` | Platform-agnostic expect/actual pattern for DB instantiation. |
-| `DatabaseFactory.android.kt` | Android-specific database creation with Context. |
-| `DatabaseFactory.ios.kt` | iOS-specific database creation with NSHomeDirectory and BundledSQLiteDriver. |
-| `AndroidModule.kt` | Android DI module providing DatabaseFactory with context. |
-| `IosModule.kt` | iOS DI module providing DatabaseFactory (no context). |
-| `Koin.kt` | Shared dependency injection wiring (sharedModule). |
-| `RecallDatabase.kt` | Database schema definition and migration (v1 → v2). |
-| `RecallDao.kt` | Data access methods including `updateDeckProgress()`. |
-| `Mappers.kt` | Bidirectional conversion between entities and domain models. |
-| `MainViewModel.kt` | Database-backed progress tracking and resume logic. |
-
-## 🧪 Verification
-1.  **Offline Test:** Turn on Airplane mode and launch the app. It works.
-2.  **Sync Test:** Add a deck on the server (mock), pull-to-refresh, and see it appear.
-3.  **Progress Test:** Study 4 cards in a deck, close the app, reopen it, and verify you resume at card 5.
-4.  **Progress Preservation:** Pull-to-refresh after studying and verify your progress is maintained.
+### **🚀 Definition of Done**
+* [ ] The app compiles (Koin wiring is correct).
+* [ ] `RecallRepository` uses `recallDao` as the primary data source.
+* [ ] The app displays data even when the device is offline.
+* [ ] Pull-to-refresh updates the local database.

@@ -64,56 +64,74 @@ interface RecallRepository {
 }
 
 /**
- * Implementation of RecallRepository using Room Database and Ktor API
+ * Implementation of RecallRepository
+ *
+ * EXERCISE STARTER CODE:
+ * This repository currently uses the API directly. Your task is to refactor it
+ * to implement the Offline-First pattern by using the database as the Single Source of Truth.
  */
 class RecallRepositoryImpl(
-    private val api: RecallApiService,
-    private val dao: RecallDao
+    private val api: RecallApiService
+    // TODO 4: Inject RecallDao into the constructor
+    // Hint: Add a parameter: private val dao: RecallDao
+    // Remember to update the Koin registration in Koin.kt after adding this!
 ) : RecallRepository {
     override fun getDecks(): Flow<List<Deck>> {
-        return dao.getDecks().map { deckEntities ->
-            deckEntities.map { deckEntity ->
-                // For each deck, fetch its cards from database
-                // Note: This is intentionally using N+1 query pattern for pedagogical purposes
-                // Future profiling lesson (8c) will identify and optimize this
-                val cardEntities = dao.getCardsForDeck(deckEntity.id)
-                val cards = cardEntities.map { it.toDomain() }
+        // TODO 5: Refactor to return data from database (Single Source of Truth)
+        // Current: Returns API data directly (not offline-first)
+        // Goal: return dao.getDecks().map { deckEntities -> ... }
+        //
+        // Steps:
+        // 1. Call dao.getDecks() to get Flow<List<DeckEntity>>
+        // 2. Use .map{} to transform each DeckEntity to Deck domain model
+        // 3. For each deck, fetch cards using dao.getCardsForDeck(deckId)
+        // 4. Use toDomain() extension functions to convert entities to domain models
+        //
+        // Once implemented, the UI will:
+        // - Show cached data instantly (no loading spinner)
+        // - Update automatically when database changes
+        // - Work offline with cached data
 
-                // Convert entity to domain model with cards
-                deckEntity.toDomain(cards = cards)
-            }
+        // TEMPORARY: Direct API call (remove this after implementing TODO 5)
+        return kotlinx.coroutines.flow.flow {
+            val decksFromApi = api.fetchAllDecks()
+            emit(decksFromApi)
         }
     }
 
     override suspend fun refreshDecks() {
-        // 1. Fetch from network
+        // TODO 6: Write fetched data to database instead of just fetching
+        // Current: Only fetches from API (data not persisted)
+        // Goal: Fetch from API, then save to database
+        //
+        // Steps:
+        // 1. Fetch decks from API: val decksFromApi = api.fetchAllDecks()
+        // 2. For each deck:
+        //    a. Convert to DeckEntity using deck.toEntity()
+        //    b. Save deck using dao.insertDeck(deckEntity)
+        //    c. Convert cards using card.toEntity(deckId)
+        //    d. Save cards using dao.insertCards(cardEntities)
+        // 3. Database Flow will automatically notify observers (no return needed)
+        //
+        // BONUS: Preserve existing progress when syncing
+        // - Before step 2, fetch existing decks: dao.getDecks().first()
+        // - When creating deckEntity, copy currentCardIndex from existing deck
+        //
+        // Once implemented:
+        // - Pull-to-refresh will update database
+        // - UI updates automatically via database Flow
+        // - Data persists across app restarts
+
+        // TEMPORARY: Just fetch without saving (remove this after implementing TODO 6)
         val decksFromApi = api.fetchAllDecks()
-
-        // 2. Get existing decks to preserve progress
-        val existingDecks = dao.getDecks().map { deckEntities ->
-            deckEntities.associateBy { it.id }
-        }.first()
-
-        // 3. Convert domain models to entities and save to database
-        decksFromApi.forEach { deck ->
-            // Preserve progress if deck already exists
-            val deckEntity = deck.toEntity().copy(
-                currentCardIndex = existingDecks[deck.id]?.currentCardIndex ?: 0
-            )
-            dao.insertDeck(deckEntity)
-
-            // Insert card entities for this deck
-            val cardEntities = deck.cards.map { card ->
-                card.toEntity(deckId = deck.id)
-            }
-            dao.insertCards(cardEntities)
-        }
-
-        // 4. Database Flow automatically notifies observers (no return needed)
+        // Not saving to database yet - students will implement this
     }
 
     override suspend fun updateDeckProgress(deckId: String, cardIndex: Int) {
-        dao.updateDeckProgress(deckId, cardIndex)
+        // ✅ PRE-IMPLEMENTED: This method is complete
+        // It will work once you complete TODO 4 (inject dao)
+        TODO("Complete TODO 4 first: Inject dao into constructor, then uncomment below")
+        // dao.updateDeckProgress(deckId, cardIndex)
         // Database Flow automatically notifies observers (reactive update)
     }
 }

@@ -9,6 +9,7 @@ import org.koin.dsl.module
  * Provides Android platform dependencies
  */
 val androidModule = module {
-    // DatabaseFactory - requires Android Context for Room database file path
-    single { DatabaseFactory(androidContext()) }
+    // TODO 1: Register DatabaseFactory as a single definition
+    // Hint: DatabaseFactory needs Android Context to create the Room database file path
+    // Use: single { DatabaseFactory(androidContext()) }
 }

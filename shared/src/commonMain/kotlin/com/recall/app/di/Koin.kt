@@ -27,27 +27,25 @@ val sharedModule = module {
     // Note: DatabaseFactory must be provided by platform-specific code
     // Android: Provides Context, iOS: No parameters needed
 
-    // RecallDatabase - Room database instance
-    single<RecallDatabase> {
-        get<DatabaseFactory>()
-            .create()
-            .build()
-    }
+    // TODO 2: Register RecallDatabase as a single definition
+    // Hint: Get the DatabaseFactory, call create(), then build()
+    // Example: single<RecallDatabase> { get<DatabaseFactory>().create().build() }
 
-    // RecallDao - Data Access Object from database
-    single { get<RecallDatabase>().recallDao() }
+    // TODO 3: Register RecallDao as a single definition
+    // Hint: Get the RecallDatabase and call recallDao()
+    // Example: single { get<RecallDatabase>().recallDao() }
 
     // ==================== Network Layer ====================
     // RecallApiService - HTTP client for remote API
     single { RecallApiService(NetworkClient.httpClient) }
 
     // ==================== Repository Layer ====================
-    // RecallRepository - Mediates between network and database (Single Source of Truth)
-    single<RecallRepository> { RecallRepositoryImpl(api = get(), dao = get()) }
+    // RecallRepository - Currently uses API directly (will refactor to use DAO)
+    // After completing TODOs 4-6, update this to: RecallRepositoryImpl(api = get(), dao = get())
+    single<RecallRepository> { RecallRepositoryImpl(api = get()) }
 
     // ==================== ViewModel Layer ====================
     // MainViewModel - Observes repository and manages UI state
-    // Now injects RecallRepository instead of RecallApiService
     factory { MainViewModel(repository = get()) }
 }
 
