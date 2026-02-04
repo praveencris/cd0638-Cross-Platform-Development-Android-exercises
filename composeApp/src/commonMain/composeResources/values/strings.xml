@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Library Screen -->
+    <string name="library_title">My Library</string>
+    <string name="study_button">Study</string>
+    <string name="cards_due">%1$d due</string>
+
+    <!-- Plurals -->
+    <plurals name="cards_count">
+        <item quantity="one">%1$d card</item>
+        <item quantity="other">%1$d cards</item>
+    </plurals>
+</resources>

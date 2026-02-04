@@ -22,8 +22,12 @@ import com.recall.app.domain.models.DeckCategory
 import com.recall.app.ui.WindowSize
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import recall.composeapp.generated.resources.Res
 import recall.composeapp.generated.resources.biotech_24px
+import recall.composeapp.generated.resources.cards_count
+import recall.composeapp.generated.resources.cards_due
 import recall.composeapp.generated.resources.history_edu_24px
 import recall.composeapp.generated.resources.language_chinese_dayi_24px
 import recall.composeapp.generated.resources.logo_dev_24px
@@ -170,7 +174,7 @@ fun DeckCard(
                             color = Color.White.copy(alpha = 0.6f)
                         ) {
                             Text(
-                                text = "$dueCount due",
+                                text = stringResource(Res.string.cards_due, dueCount),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = colorPalette.accent,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
@@ -239,6 +243,8 @@ private fun calculateDueCount(deck: Deck): Int {
  * For now, returns a simple "Vocabulary" placeholder
  * In production, could derive from deck metadata or card content
  */
+@Composable
 private fun generateDescription(deck: Deck): String {
-    return "Vocabulary • ${deck.cards.size} cards"
+    val cardCountText = pluralStringResource(Res.plurals.cards_count, deck.cards.size, deck.cards.size)
+    return "Vocabulary • $cardCountText"
 }

@@ -16,6 +16,9 @@ import androidx.compose.ui.unit.dp
 import com.recall.app.domain.models.Deck
 import com.recall.app.ui.components.DeckCard
 import com.recall.app.ui.components.DeckCardPlaceholder
+import org.jetbrains.compose.resources.stringResource
+import recall.composeapp.generated.resources.Res
+import recall.composeapp.generated.resources.library_title
 
 /**
  * Responsive library screen that displays decks in an adaptive layout
@@ -55,7 +58,7 @@ fun LibraryScreen(
         ) {
             // Header
             Text(
-                text = "My Library",
+                text = stringResource(Res.string.library_title),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 20.dp)

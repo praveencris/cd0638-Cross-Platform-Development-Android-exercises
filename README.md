@@ -1,25 +1,31 @@
-# 🏁 Solution 8c: Performance & Polish
-**Branch:** `solution-module-8c`
+# 🏁 Solution 9: Internationalization
+**Branch:** `solution-module-9`
 
-This is the "Production Candidate" build. It is optimized for speed, memory, and user experience.
+This branch refactors the application to support multi-language environments using the **Compose Multiplatform Resources** library.
 
 ## 🛠️ Implementation Summary
 
-### 1. Performance Optimizations
-* **Fixed N+1 Query:** Replaced manual loops with Room's `@Relation` and `DeckWithCards`. This reduces database access time by ~80% for large lists.
-* **Fixed Memory Leak:** Removed the static Context reference in `MainActivity`, preventing `OutOfMemoryError` during long sessions.
-* **R8 Enabled:** Configured `build.gradle.kts` to shrink and obfuscate the release APK.
+### 1. Resource Architecture
+We transitioned from hardcoded strings to a structured resource system:
+* **`commonMain/composeResources/values/`**: Contains the base `strings.xml` (English).
+* **`commonMain/composeResources/values-es/`**: Contains the Spanish localization.
+* **Mechanism**: The app now uses `stringResource()` and `pluralStringResource()` which dynamically resolve the correct text based on the user's system locale.
 
-### 2. UI Polish (Shimmer)
-We implemented the "Skeleton Loading" pattern.
-* **`Shimmer.kt`:** A custom modifier that animates a linear gradient brush.
-* **`DeckCardPlaceholder.kt`:** A "ghost" version of our card component.
-* **`LibraryScreen.kt`:** Updated to show the skeleton only during the *initial* load (when the DB is empty), ensuring users see immediate feedback.
+### 2. Advanced Pluralization
+We implemented the `<plurals>` resource type to handle grammatical variations in card counts.
+* **Benefit**: This ensures that "1 card" and "12 cards" use the correct singular/plural suffixes, providing a polished, professional user experience.
+
+### 3. Smart Fallbacks
+The system is configured with English as the default. If a user sets their device to a language we don't support (e.g., French), the app will gracefully fall back to the English resources in the base `values/` directory.
 
 ## 📂 Key Files
 | File Path | Description |
 | :--- | :--- |
-| `shared/.../local/entity/DeckWithCards.kt` | The optimized database relation. |
-| `ui/components/Shimmer.kt` | The animation logic. |
-| `ui/components/DeckCardPlaceholder.kt` | The skeleton UI. |
-| `composeApp/build.gradle.kts` | Release build configuration. |
+| `composeApp/.../values/strings.xml` | Primary English resource file. |
+| `composeApp/.../values-es/strings.xml` | Spanish translation resource file. |
+| `ui/LibraryScreen.kt` | Refactored to use dynamic string resolution. |
+| `ui/components/DeckCard.kt` | Refactored to use the pluralization engine. |
+
+## 🧪 Verification
+1.  **Locale Switching**: Change the device language in System Settings. The app title and labels should update immediately.
+2.  **Plural Check**: Verify that a deck with a single card displays "1 card" and a deck with multiple cards displays "X cards".

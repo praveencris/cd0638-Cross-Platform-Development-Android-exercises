@@ -48,3 +48,16 @@ actual fun getDatabaseBuilder(): RoomDatabase.Builder<RecallDatabase> {
         name = "recall.db"
     )
 }
+
+/**
+ * Actual implementation of date formatting for Android
+ * Uses java.time API with locale-aware SHORT format
+ * Respects system locale (e.g., MM/DD/YY for US, DD/MM/YY for Europe)
+ */
+actual fun formatShortDate(epochMillis: Long): String {
+    val instant = java.time.Instant.ofEpochMilli(epochMillis)
+    val formatter = java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.SHORT)
+        .withLocale(java.util.Locale.getDefault())
+        .withZone(java.time.ZoneId.systemDefault())
+    return formatter.format(instant)
+}

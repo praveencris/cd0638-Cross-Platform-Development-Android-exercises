@@ -34,6 +34,15 @@ expect fun generateUUID(): String
 expect fun getDatabaseBuilder(): RoomDatabase.Builder<RecallDatabase>
 
 /**
+ * Expected platform-specific date formatting
+ * Formats epoch milliseconds into a short, locale-aware date string
+ * Respects platform locale settings (MM/DD for US, DD/MM for Europe, etc.)
+ * @param epochMillis Time in milliseconds since epoch
+ * @return Formatted date string according to platform locale
+ */
+expect fun formatShortDate(epochMillis: Long): String
+
+/**
  * Greeting function that displays platform name and current date
  * @return String containing platform name and today's date
  */
