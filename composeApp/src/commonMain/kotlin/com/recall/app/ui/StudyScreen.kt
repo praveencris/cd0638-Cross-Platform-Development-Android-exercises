@@ -245,20 +245,20 @@ private fun TopBar(
             }
 
             // Deck title
+            // TODO 4: Add Modifier.semantics { heading() } to mark this as a navigation heading
             Text(
                 text = deckTitle,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1F2937),
-                modifier = Modifier.semantics { heading() }
+                color = Color(0xFF1F2937)
             )
 
             // Progress counter
+            // TODO 5 (Bonus): Add Modifier.semantics { liveRegion = LiveRegionMode.Polite } to auto-announce progress
             Text(
                 text = "$currentIndex / $totalCards",
                 style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFF6B7280),
-                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+                color = Color(0xFF6B7280)
             )
         }
 
@@ -292,16 +292,11 @@ private fun FlashCard(
         label = "cardFlip"
     )
 
-    // Accessibility: Announce card state to screen readers
-    val cardState = if (isFlipped) {
-        stringResource(Res.string.showing_answer)
-    } else {
-        stringResource(Res.string.showing_question)
-    }
+    // TODO 6: Add stateDescription to announce "Showing Question" or "Showing Answer"
+    // Hint: Use stringResource(Res.string.showing_question) and stringResource(Res.string.showing_answer)
 
     Card(
         modifier = modifier
-            .semantics { stateDescription = cardState }
             .clickable(onClick = onCardTap)
             .graphicsLayer {
                 rotationY = rotation

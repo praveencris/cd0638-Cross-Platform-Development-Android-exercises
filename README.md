@@ -1,19 +1,27 @@
-# 🏁 Solution 10: Accessibility
-**Branch:** `solution-module-10`
+# ♿ Exercise 10: Accessibility
+**Module:** Accessibility & Inclusion
+**Estimated Time:** 35 Minutes
 
-This branch optimizes the app for assistive technologies like TalkBack and VoiceOver.
+### **🎓 Objective**
+In this exercise, you will make the app usable for users with vision impairments. You will reduce "swipe fatigue" by grouping elements and provide clear context for interactive states.
 
-## 🛠️ Implementation Summary
+### **✅ Task 1: The "Chatty" Card**
+By default, a screen reader makes you swipe once for the icon, once for the title, and once for the progress bar. We want the entire card to be one single "thought."
+1.  **Open** `ui/components/DeckCard.kt`.
+2.  **Action**: Add `Modifier.semantics(mergeDescendants = true)` to the top-level `Card`.
+3.  **Refine**: Set a `contentDescription` that summarizes the deck (e.g., "${deck.title}, ${deck.cards.size} cards").
 
-### 1. Semantic Merging
-We applied `mergeDescendants = true` to the `DeckCard`. This groups the icon, title, and counts into a single focusable node, drastically improving navigation speed for screen-reader users.
+### **✅ Task 2: Custom Click Labels**
+"Double tap to activate" doesn't tell a user what happens next.
+1.  **Action**: In your semantics block, add `onClick(label = "Open Deck", action = null)`.
+2.  **Result**: TalkBack will now say: "Physics 101. Double tap to **Open Deck**."
 
-### 2. State Descriptions
-We implemented `stateDescription` for the flashcards. This ensures that users always know their current context (Question vs. Answer) without needing to guess based on content alone.
+### **✅ Task 3: Flashcard Context**
+In Study Mode, users need to know if they are looking at the Question side or the Answer side of a card.
+1.  **Open** `ui/StudyScreen.kt`.
+2.  **Action**: Add `stateDescription = if (isFlipped) "Answer" else "Question"` to the card's semantics.
 
-### 3. Navigation Headings
-By marking screen titles with `.heading()`, we allow users to navigate the app's structure quickly using standard accessibility gestures (like swiping up/down to jump between headers).
-
-## 🧪 Verification
-1.  **TalkBack Test**: Enable TalkBack in Android Settings. Ensure you can navigate the deck list with one swipe per card.
-2.  **Scanner Test**: Run the **Accessibility Scanner** app to verify color contrast and touch target sizes.
+### **🚀 Definition of Done**
+* [ ] TalkBack selects the whole `DeckCard` in one swipe.
+* [ ] The app announces "Open Deck" when a card is selected.
+* [ ] When flipping a flashcard, the app announces its state (Question/Answer).

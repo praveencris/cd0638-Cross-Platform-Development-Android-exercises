@@ -120,20 +120,14 @@ fun DeckCard(
         WindowSize.Expanded -> 240.dp
     }
 
-    // Accessibility: Build comprehensive content description
-    val progressPercent = (progress * 100).toInt()
-    val cardCountText = pluralStringResource(Res.plurals.cards_count, dueCount, dueCount)
-    val accessibilityDescription = "${deck.title}, $cardCountText due, $progressPercent percent complete"
-    val openDeckLabel = stringResource(Res.string.label_open_deck)
+    // TODO 1: Add Modifier.semantics(mergeDescendants = true) to group all card elements
+    // TODO 2: Add contentDescription that summarizes: title, card count, and progress
+    // TODO 3: Add onClick(label = stringResource(Res.string.label_open_deck), action = null)
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(cardHeight)
-            .semantics(mergeDescendants = true) {
-                contentDescription = accessibilityDescription
-                onClick(label = openDeckLabel, action = null)
-            }
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
