@@ -1,16 +1,13 @@
 package com.recall.app
 
+import com.recall.app.data.RecallRepository
 import com.recall.app.domain.models.Card
 import com.recall.app.domain.models.Deck
-import com.recall.app.network.RecallApiService
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.headersOf
-import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -28,26 +25,31 @@ import kotlin.test.assertTrue
 /**
  * Unit tests for MainViewModel
  *
- * Tests state management, business logic, and API integration
- * without requiring Android framework dependencies.
+ * Tests state management, business logic, and repository integration
+ * without requiring Android framework dependencies or Room database.
+ *
+ * Updated for offline-first architecture with RecallRepository.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var viewModel: MainViewModel
-    private lateinit var fakeApiService: FakeRecallApiService
+    private lateinit var fakeRepository: FakeRecallRepository
 
     @BeforeTest
     fun setup() {
         // Set main dispatcher for coroutine testing
         Dispatchers.setMain(testDispatcher)
 
-        // Create fake API service with test data
-        fakeApiService = FakeRecallApiService()
+        // Create fake repository with in-memory Flow
+        fakeRepository = FakeRecallRepository()
 
-        // Create ViewModel with fake service
-        viewModel = MainViewModel(fakeApiService)
+        // Create ViewModel with fake repository
+        viewModel = MainViewModel(fakeRepository)
+
+        // Advance dispatcher to process init{} block collection
+        testDispatcher.scheduler.advanceUntilIdle()
     }
 
     @AfterTest
@@ -90,7 +92,7 @@ class MainViewModelTest {
                 )
             )
         )
-        fakeApiService.decksToReturn = expectedDecks
+        fakeRepository.decksToReturn = expectedDecks
 
         // Act
         viewModel.fetchDecks()
@@ -105,8 +107,8 @@ class MainViewModelTest {
     fun test_fetchDecks_failure_setsError() = runTest {
         // Arrange
         val errorMessage = "Network error"
-        fakeApiService.shouldThrowError = true
-        fakeApiService.errorMessage = errorMessage
+        fakeRepository.shouldThrowError = true
+        fakeRepository.errorMessage = errorMessage
 
         // Act
         viewModel.fetchDecks()
@@ -120,13 +122,16 @@ class MainViewModelTest {
     @Test
     fun test_retry_clearsError() = runTest {
         // Arrange - set error first
-        fakeApiService.shouldThrowError = true
+        fakeRepository.shouldThrowError = true
         viewModel.fetchDecks()
         testDispatcher.scheduler.advanceUntilIdle()
         assertNotNull(viewModel.error.value, "Error should be set initially")
 
         // Change fake to succeed
-        fakeApiService.shouldThrowError = false
+        fakeRepository.shouldThrowError = false
+        fakeRepository.decksToReturn = listOf(
+            Deck(id = "deck1", title = "Test", colorHex = "#FF0000", cards = emptyList())
+        )
 
         // Act
         viewModel.retry()
@@ -150,7 +155,7 @@ class MainViewModelTest {
                 Card(id = "card2", front = "Q2", back = "A2")
             )
         )
-        fakeApiService.decksToReturn = listOf(testDeck)
+        fakeRepository.decksToReturn = listOf(testDeck)
         viewModel.fetchDecks()
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -173,7 +178,7 @@ class MainViewModelTest {
                 Card(id = "card$index", front = "Q$index", back = "A$index")
             }
         )
-        fakeApiService.decksToReturn = listOf(testDeck)
+        fakeRepository.decksToReturn = listOf(testDeck)
         viewModel.fetchDecks()
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -211,7 +216,7 @@ class MainViewModelTest {
                 )
             )
         )
-        fakeApiService.decksToReturn = decks
+        fakeRepository.decksToReturn = decks
         viewModel.fetchDecks()
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -244,7 +249,7 @@ class MainViewModelTest {
             colorHex = "#FFFF00",
             cards = List(5) { Card(id = "c$it", front = "Q$it", back = "A$it") }
         )
-        fakeApiService.decksToReturn = listOf(testDeck)
+        fakeRepository.decksToReturn = listOf(testDeck)
         viewModel.fetchDecks()
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -269,7 +274,7 @@ class MainViewModelTest {
             colorHex = "#00FFFF",
             cards = List(10) { Card(id = "c$it", front = "Q$it", back = "A$it") }
         )
-        fakeApiService.decksToReturn = listOf(testDeck)
+        fakeRepository.decksToReturn = listOf(testDeck)
         viewModel.fetchDecks()
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -287,30 +292,42 @@ class MainViewModelTest {
 }
 
 /**
- * Fake implementation of RecallApiService for testing
- * Allows controlled responses without network calls
+ * Fake implementation of RecallRepository for testing
+ *
+ * Provides in-memory Flow instead of real Room database.
+ * Allows controlled behavior for testing success/failure scenarios.
+ *
+ * Updated for offline-first architecture testing.
  */
-class FakeRecallApiService : RecallApiService(
-    HttpClient(MockEngine) {
-        engine {
-            addHandler { request ->
-                respond(
-                    content = ByteReadChannel("{}"),
-                    status = HttpStatusCode.OK,
-                    headers = headersOf("Content-Type", "application/json")
-                )
-            }
-        }
-    }
-) {
+class FakeRecallRepository : RecallRepository {
+    private val _decksFlow = MutableStateFlow<List<Deck>>(emptyList())
+
     var decksToReturn: List<Deck> = emptyList()
+        set(value) {
+            field = value
+            _decksFlow.value = value
+        }
+
     var shouldThrowError: Boolean = false
     var errorMessage: String = "Test error"
+    var refreshCallCount: Int = 0
 
-    override suspend fun fetchAllDecks(): List<Deck> {
+    /**
+     * Returns in-memory Flow for testing
+     * Emits whenever decksToReturn is updated
+     */
+    override fun getDecks(): Flow<List<Deck>> = _decksFlow.asStateFlow()
+
+    /**
+     * Simulates refresh operation
+     * Updates in-memory Flow if successful, throws error if configured to fail
+     */
+    override suspend fun refreshDecks() {
+        refreshCallCount++
         if (shouldThrowError) {
             throw Exception(errorMessage)
         }
-        return decksToReturn
+        // Successfully "refreshed" - Flow already updated via decksToReturn setter
+        _decksFlow.value = decksToReturn
     }
 }

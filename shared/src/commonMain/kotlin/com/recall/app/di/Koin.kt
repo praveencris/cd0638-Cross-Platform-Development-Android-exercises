@@ -2,6 +2,7 @@ package com.recall.app.di
 
 import com.recall.app.MainViewModel
 import com.recall.app.data.RecallRepository
+import com.recall.app.data.RecallRepositoryImpl
 import com.recall.app.data.local.DatabaseFactory
 import com.recall.app.data.local.RecallDatabase
 import com.recall.app.network.NetworkClient
@@ -42,7 +43,7 @@ val sharedModule = module {
 
     // ==================== Repository Layer ====================
     // RecallRepository - Mediates between network and database (Single Source of Truth)
-    single { RecallRepository(api = get(), dao = get()) }
+    single<RecallRepository> { RecallRepositoryImpl(api = get(), dao = get()) }
 
     // ==================== ViewModel Layer ====================
     // MainViewModel - Observes repository and manages UI state

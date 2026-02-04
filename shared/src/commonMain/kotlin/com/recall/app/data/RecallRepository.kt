@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /**
- * Repository implementing Offline-First architecture
+ * Repository interface for Offline-First architecture
  *
  * Key Principles:
  * - Single Source of Truth: Room Database
@@ -22,10 +22,7 @@ import kotlinx.coroutines.flow.map
  * 2. UI triggers refreshDecks() → fetches from network and updates database
  * 3. Database change → Flow automatically emits → UI updates
  */
-class RecallRepository(
-    private val api: RecallApiService,
-    private val dao: RecallDao
-) {
+interface RecallRepository {
     /**
      * Observe all decks from database (Single Source of Truth)
      *
@@ -36,7 +33,30 @@ class RecallRepository(
      *
      * @return Flow that emits list of decks whenever database changes
      */
-    fun getDecks(): Flow<List<Deck>> {
+    fun getDecks(): Flow<List<Deck>>
+
+    /**
+     * Fetch fresh data from network and update database
+     *
+     * This function:
+     * - Fetches from network (requires connectivity)
+     * - Updates local database with fresh data
+     * - Database Flow automatically notifies observers
+     * - UI updates silently in background
+     *
+     * Throws exception on network error - let ViewModel handle error state
+     */
+    suspend fun refreshDecks()
+}
+
+/**
+ * Implementation of RecallRepository using Room Database and Ktor API
+ */
+class RecallRepositoryImpl(
+    private val api: RecallApiService,
+    private val dao: RecallDao
+) : RecallRepository {
+    override fun getDecks(): Flow<List<Deck>> {
         return dao.getDecks().map { deckEntities ->
             deckEntities.map { deckEntity ->
                 // For each deck, fetch its cards from database
@@ -51,18 +71,7 @@ class RecallRepository(
         }
     }
 
-    /**
-     * Fetch fresh data from network and update database
-     *
-     * This function:
-     * - Fetches from network (requires connectivity)
-     * - Updates local database with fresh data
-     * - Database Flow automatically notifies observers
-     * - UI updates silently in background
-     *
-     * Throws exception on network error - let ViewModel handle error state
-     */
-    suspend fun refreshDecks() {
+    override suspend fun refreshDecks() {
         // 1. Fetch from network
         val decksFromApi = api.fetchAllDecks()
 
