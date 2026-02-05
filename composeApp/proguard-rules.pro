@@ -2,95 +2,43 @@
 # These rules preserve classes and methods that use reflection (Room, Koin)
 # R8/ProGuard would otherwise strip them during code shrinking
 
+# TODO 4: Add ProGuard rules to prevent R8 from breaking reflection-dependent libraries
+#
+# Your app uses libraries that rely on reflection and runtime code generation:
+# - Room Database (@Entity, @Dao, @Database annotations)
+# - Koin Dependency Injection (needs Kotlin Metadata for type resolution)
+# - Kotlin Serialization (needs $$serializer classes and Companion objects)
+#
+# Without proper -keep rules, R8 will aggressively remove these classes, causing runtime crashes.
+#
+# TASK: Add the following types of rules:
+#
+# 1. Room Database Rules:
+#    - Keep all Room base classes: -keep class androidx.room.** { *; }
+#    - Keep @Entity annotated classes: -keep @androidx.room.Entity class * { *; }
+#    - Keep @Dao annotated interfaces: -keep @androidx.room.Dao class * { *; }
+#    - Keep @Database annotated classes: -keep @androidx.room.Database class * { *; }
+#    - Keep your app's database package: -keep class com.recall.app.data.local.** { *; }
+#
+# 2. Koin Dependency Injection Rules:
+#    - Keep Koin core classes: -keep class org.koin.** { *; }
+#    - Keep Kotlin Metadata: -keep class kotlin.Metadata { *; }
+#    - Keep your DI modules: -keep class com.recall.app.di.** { *; }
+#
+# 3. Kotlin Serialization Rules (if using serialization):
+#    - Keep serializer classes: -keep,includedescriptorclasses class com.recall.app.**$$serializer { *; }
+#    - Keep Companion objects: -keepclassmembers class com.recall.app.** { *** Companion; }
+#
+# 4. SLF4J Logging (suppress warnings):
+#    - Add -dontwarn rules for optional SLF4J implementations
+#
+# 5. General Android:
+#    - Keep native methods: -keepclasseswithmembernames class * { native <methods>; }
+#
+# Example format:
+# -keep class package.name.ClassName { *; }
+# -keep @annotation.Name class * { *; }
+# -dontwarn package.name.**
+#
+# Add your rules below this line:
 # ============================================================
-# Room Database
-# ============================================================
-# Room uses annotation processing and reflection for query generation
-# Keep all database-related classes to prevent runtime crashes
-
-# Keep Room base classes
--keep class androidx.room.** { *; }
--dontwarn androidx.room.**
-
-# Keep all @Entity annotated classes (database tables)
--keep @androidx.room.Entity class * { *; }
-
-# Keep all @Dao annotated interfaces (data access objects)
--keep @androidx.room.Dao class * { *; }
-
-# Keep all @Database annotated classes (database definition)
--keep @androidx.room.Database class * { *; }
-
-# Keep Recall app's database entities and DAOs
--keep class com.recall.app.data.local.entity.** { *; }
--keep class com.recall.app.data.local.dao.** { *; }
--keep class com.recall.app.data.local.RecallDatabase { *; }
-
-# ============================================================
-# Koin Dependency Injection
-# ============================================================
-# Koin uses reflection for dependency resolution
-# Keep Koin classes and Kotlin metadata for proper DI
-
-# Keep Koin core classes
--keep class org.koin.** { *; }
--dontwarn org.koin.**
-
-# Keep Kotlin metadata (used by Koin for type resolution)
--keep class kotlin.Metadata { *; }
-
-# Keep Koin module definitions
--keep class com.recall.app.di.** { *; }
-
-# ============================================================
-# Kotlin Coroutines
-# ============================================================
-# Keep coroutines for proper async operation
--keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
--keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
-
-# ============================================================
-# Kotlin Serialization (if used by Ktor)
-# ============================================================
--keepattributes *Annotation*, InnerClasses
--dontnote kotlinx.serialization.AnnotationsKt
-
--keepclassmembers class kotlinx.serialization.json.** {
-    *** Companion;
-}
--keepclasseswithmembers class kotlinx.serialization.json.** {
-    kotlinx.serialization.KSerializer serializer(...);
-}
-
-# Keep Serializable classes
--keep,includedescriptorclasses class com.recall.app.**$$serializer { *; }
--keepclassmembers class com.recall.app.** {
-    *** Companion;
-}
--keepclasseswithmembers class com.recall.app.** {
-    kotlinx.serialization.KSerializer serializer(...);
-}
-
-# ============================================================
-# SLF4J Logging
-# ============================================================
-# SLF4J is a logging facade - the actual implementation is optional
-# Ignore missing implementation bindings during R8 processing
--dontwarn org.slf4j.impl.StaticLoggerBinder
--dontwarn org.slf4j.impl.StaticMDCBinder
--dontwarn org.slf4j.impl.StaticMarkerBinder
-
-# ============================================================
-# General Android
-# ============================================================
-# Keep native methods (used by JNI)
--keepclasseswithmembernames,includedescriptorclasses class * {
-    native <methods>;
-}
-
-# Keep custom views
--keep public class * extends android.view.View {
-    public <init>(android.content.Context);
-    public <init>(android.content.Context, android.util.AttributeSet);
-    public <init>(android.content.Context, android.util.AttributeSet, int);
-}

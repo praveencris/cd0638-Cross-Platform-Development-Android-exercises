@@ -1,24 +1,32 @@
-# 🏁 Solution 11: Production Release
-**Branch:** `solution-module-11`
+# 📦 Exercise 11: Production Release Preparation
+**Module:** Release & Deployment
+**Estimated Time:** 45 Minutes
 
-This branch contains the final production-ready configuration for the Recall app.
+### **🎓 Objective**
+It is time to ship! In this exercise, you will move beyond the "Debug" environment. You will configure the app to be smaller, faster, and cryptographically signed so it can be uploaded to the Google Play Store.
 
-## 🛠️ Implementation Summary
+### **✅ Task 1: Create a Release Keystore**
+Android apps must be signed with a digital certificate.
+1. **Action:** In Android Studio, go to **Build > Generate Signed Bundle / APK**.
+2. **Action:** Choose **Bundle**, then click **Create new** under Key store path.
+3. **Action:** Save it as `release.keystore` in your project root (Note: Never commit this to Git in a real project!).
 
-### 1. Secure Signing
-We implemented `signingConfigs` using a detached keystore.
-* **Security:** In this solution, we used `local.properties` or environment variables to inject passwords, ensuring no sensitive credentials are hardcoded in the build script.
+### **✅ Task 2: Configure Signing in Gradle**
+1. **Open** `composeApp/build.gradle.kts`.
+2. **Action**: Implement the `signingConfigs` block. Reference your new keystore file and the passwords you created.
+3. **Action**: Ensure the `release` build type uses this signing configuration.
 
-### 2. R8 & Resource Shrinking
-* **Code Shrinking:** We enabled R8, which removed unused code and renamed classes to obfuscate the logic.
-* **Resource Stripping:** We enabled resource shrinking, which removed unused drawables and XML files, resulting in a ~30% smaller download size.
+### **✅ Task 3: Optimization (R8)**
+A debug APK is large and contains "leaking" info. We need to shrink it.
+1. **Action**: Set `isMinifyEnabled = true` in the release build type.
+2. **Action**: Set `isShrinkResources = true` to remove unused icons and layouts.
 
-### 3. ProGuard Stability
-We added specific rules to `proguard-rules.pro` to support our KMP stack:
-* **Koin:** Kept constructor metadata so DI doesn't fail at runtime.
-* **Room:** Kept generated database implementations.
-* **Serialization:** Kept `@Serializable` class metadata.
+### **✅ Task 4: ProGuard Rules**
+R8 is aggressive. It might "shrink" away code that Koin or Room needs to function via reflection.
+1. **Open** `composeApp/proguard-rules.pro`.
+2. **Action**: Add `-keep` rules for your `shared` module classes and third-party libraries.
 
-## 🧪 Verification
-1. **Bundle Generation:** Successfully generated a signed App Bundle.
-2. **Install Test:** Installed the release APK on a physical device to ensure R8 didn't break the database or network calls.
+### **🚀 Definition of Done**
+* [ ] You can run `./gradlew :composeApp:bundleRelease` successfully.
+* [ ] A signed `.aab` (Android App Bundle) file is generated in `composeApp/build/outputs/bundle/release/`.
+* [ ] The release APK size is significantly smaller than the debug version.

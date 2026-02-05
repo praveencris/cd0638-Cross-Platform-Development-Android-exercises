@@ -68,53 +68,32 @@ android {
         }
     }
 
-    // Signing configuration for release builds
-    // Credentials are injected via environment variables to keep them out of version control
-    signingConfigs {
-        create("release") {
-            // Keystore file path from environment or local.properties
-            val keystorePath = System.getenv("KEYSTORE_PATH")
-                ?: project.findProperty("keystorePath") as String?
-
-            // Only configure signing if keystore path is provided
-            if (keystorePath != null) {
-                storeFile = file(keystorePath)
-
-                // Keystore password
-                storePassword = System.getenv("KEYSTORE_PASSWORD")
-                    ?: project.findProperty("keystorePassword") as String?
-
-                // Key alias
-                keyAlias = System.getenv("KEY_ALIAS")
-                    ?: project.findProperty("keyAlias") as String?
-
-                // Key password
-                keyPassword = System.getenv("KEY_PASSWORD")
-                    ?: project.findProperty("keyPassword") as String?
-            }
-        }
-    }
+    // TODO 1: Create a signingConfigs block for release builds
+    // - Create a "release" signing configuration
+    // - Reference a keystore file (use System.getenv("KEYSTORE_PATH") or project.findProperty("keystorePath"))
+    // - Include storeFile, storePassword, keyAlias, and keyPassword
+    // - Use environment variables or local.properties to keep credentials out of version control
+    // Example structure:
+    // signingConfigs {
+    //     create("release") {
+    //         storeFile = file("path/to/release.keystore")
+    //         storePassword = "your-store-password"
+    //         keyAlias = "your-key-alias"
+    //         keyPassword = "your-key-password"
+    //     }
+    // }
 
     buildTypes {
         getByName("release") {
-            // Enable R8 code shrinking, obfuscation, and optimization
-            isMinifyEnabled = true
+            // TODO 2: Enable R8 code shrinking and resource optimization
+            // - Set isMinifyEnabled = true to enable R8 code shrinking
+            // - Set isShrinkResources = true to remove unused resources
+            // - Add proguardFiles() to link ProGuard rules:
+            //   proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
 
-            // Remove unused resources (drawables, layouts, etc.)
-            isShrinkResources = true
-
-            // ProGuard rules to preserve Room and Koin reflection
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-
-            // Link signing configuration only if keystore is available
-            val keystorePath = System.getenv("KEYSTORE_PATH")
-                ?: project.findProperty("keystorePath") as String?
-            if (keystorePath != null) {
-                signingConfig = signingConfigs.getByName("release")
-            }
+            // TODO 3: Connect the signing configuration to the release build type
+            // - Set signingConfig = signingConfigs.getByName("release")
+            // - Make it conditional: only apply if keystore path is provided
         }
     }
     compileOptions {
