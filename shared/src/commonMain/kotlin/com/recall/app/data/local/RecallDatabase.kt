@@ -48,7 +48,7 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
 
 @Database(
     entities = [DeckEntity::class, CardEntity::class],
-    version = 3,  // Bumped from 2 to 3 for DeckWithCards relation entity
+    version = 4,  // Bumped from 3 to 4 to add category column to DeckEntity
     exportSchema = false  // Disabled to avoid schema export warnings in KMP
 )
 @ConstructedBy(RecallDatabaseConstructor::class)  // Required for Room KMP (non-Android platforms)
