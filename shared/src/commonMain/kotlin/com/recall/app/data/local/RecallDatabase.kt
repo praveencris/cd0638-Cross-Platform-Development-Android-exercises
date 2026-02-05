@@ -23,9 +23,23 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
     }
 }
 
+/**
+ * Migration from version 2 to version 3: Add index on CardEntity.deckId
+ * This index improves performance for foreign key lookups when querying cards by deck
+ */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.prepare(
+            "CREATE INDEX IF NOT EXISTS `index_CardEntity_deckId` ON `CardEntity` (`deckId`)"
+        ).use {
+            it.step()
+        }
+    }
+}
+
 @Database(
     entities = [DeckEntity::class, CardEntity::class],
-    version = 2,  // Bumped from 1 to 2 for progress tracking feature
+    version = 3,  // Bumped from 2 to 3 for CardEntity.deckId index
     exportSchema = false  // Disabled to avoid schema export warnings in KMP
 )
 @ConstructedBy(RecallDatabaseConstructor::class)  // Required for Room KMP (non-Android platforms)
