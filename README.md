@@ -1,19 +1,24 @@
-# 🏁 Solution 10: Accessibility
-**Branch:** `solution-module-10`
+# 🏁 Solution 11: Production Release
+**Branch:** `solution-module-11`
 
-This branch optimizes the app for assistive technologies like TalkBack and VoiceOver.
+This branch contains the final production-ready configuration for the Recall app.
 
 ## 🛠️ Implementation Summary
 
-### 1. Semantic Merging
-We applied `mergeDescendants = true` to the `DeckCard`. This groups the icon, title, and counts into a single focusable node, drastically improving navigation speed for screen-reader users.
+### 1. Secure Signing
+We implemented `signingConfigs` using a detached keystore.
+* **Security:** In this solution, we used `local.properties` or environment variables to inject passwords, ensuring no sensitive credentials are hardcoded in the build script.
 
-### 2. State Descriptions
-We implemented `stateDescription` for the flashcards. This ensures that users always know their current context (Question vs. Answer) without needing to guess based on content alone.
+### 2. R8 & Resource Shrinking
+* **Code Shrinking:** We enabled R8, which removed unused code and renamed classes to obfuscate the logic.
+* **Resource Stripping:** We enabled resource shrinking, which removed unused drawables and XML files, resulting in a ~30% smaller download size.
 
-### 3. Navigation Headings
-By marking screen titles with `.heading()`, we allow users to navigate the app's structure quickly using standard accessibility gestures (like swiping up/down to jump between headers).
+### 3. ProGuard Stability
+We added specific rules to `proguard-rules.pro` to support our KMP stack:
+* **Koin:** Kept constructor metadata so DI doesn't fail at runtime.
+* **Room:** Kept generated database implementations.
+* **Serialization:** Kept `@Serializable` class metadata.
 
 ## 🧪 Verification
-1.  **TalkBack Test**: Enable TalkBack in Android Settings. Ensure you can navigate the deck list with one swipe per card.
-2.  **Scanner Test**: Run the **Accessibility Scanner** app to verify color contrast and touch target sizes.
+1. **Bundle Generation:** Successfully generated a signed App Bundle.
+2. **Install Test:** Installed the release APK on a physical device to ensure R8 didn't break the database or network calls.

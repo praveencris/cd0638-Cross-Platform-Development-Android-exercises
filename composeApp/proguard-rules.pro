@@ -72,6 +72,15 @@
 }
 
 # ============================================================
+# SLF4J Logging
+# ============================================================
+# SLF4J is a logging facade - the actual implementation is optional
+# Ignore missing implementation bindings during R8 processing
+-dontwarn org.slf4j.impl.StaticLoggerBinder
+-dontwarn org.slf4j.impl.StaticMDCBinder
+-dontwarn org.slf4j.impl.StaticMarkerBinder
+
+# ============================================================
 # General Android
 # ============================================================
 # Keep native methods (used by JNI)
