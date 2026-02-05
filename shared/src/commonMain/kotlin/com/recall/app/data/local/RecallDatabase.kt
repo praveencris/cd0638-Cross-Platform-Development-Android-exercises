@@ -37,9 +37,25 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
     }
 }
 
+/**
+ * Migration from version 3 to version 4: Add category column to DeckEntity
+ * This fixes the bug where all decks showed the same category icon
+ * Default value is LANGUAGE for existing decks
+ */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(connection: SQLiteConnection) {
+        // Add category column with default value LANGUAGE for existing decks
+        connection.prepare(
+            "ALTER TABLE DeckEntity ADD COLUMN category TEXT NOT NULL DEFAULT 'LANGUAGE'"
+        ).use {
+            it.step()
+        }
+    }
+}
+
 @Database(
     entities = [DeckEntity::class, CardEntity::class],
-    version = 3,  // Bumped from 2 to 3 for CardEntity.deckId index
+    version = 4,  // Bumped from 3 to 4 to add category column to DeckEntity
     exportSchema = false  // Disabled to avoid schema export warnings in KMP
 )
 @ConstructedBy(RecallDatabaseConstructor::class)  // Required for Room KMP (non-Android platforms)
