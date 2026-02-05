@@ -34,7 +34,11 @@ fun DeckEntity.toDomain(cards: List<Card> = emptyList()): Deck {
         id = id,
         title = title,
         colorHex = "#6200EE", // Default color - could be stored in DB in future
-        category = DeckCategory.LANGUAGE, // Default category - could be stored in DB in future
+        category = try {
+            DeckCategory.valueOf(category)
+        } catch (e: IllegalArgumentException) {
+            DeckCategory.LANGUAGE // Fallback if invalid category
+        },
         cards = cards,
         progress = progressFraction // Now computed from persisted currentCardIndex
     )
@@ -71,6 +75,7 @@ fun Deck.toEntity(): DeckEntity {
     return DeckEntity(
         id = id,
         title = title,
+        category = category.name, // Persist category to database
         currentCardIndex = cardIndex // Now persists progress
     )
 }
