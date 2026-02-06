@@ -1,0 +1,55 @@
+# Fastfile - Automation Lanes for Recall iOS App
+
+# Define iOS platform
+platform :ios do
+  desc "Package and prepare beta build for TestFlight distribution"
+  lane :package_beta do
+    # Step 1: Increment build number automatically
+    # This prevents "Duplicate Build Number" errors in App Store Connect
+    # The build number is stored in CURRENT_PROJECT_VERSION in Info.plist
+    # Each run will bump it: 1 -> 2 -> 3 -> etc.
+    increment_build_number(
+      xcodeproj: "iosApp/iosApp.xcodeproj"
+    )
+
+    # Step 2: Build the app archive (.xcarchive) and export as .ipa
+    # The build_app action (alias: gym) replaces manual "Product > Archive" workflow
+    #
+    # Key parameters:
+    # - scheme: The Xcode scheme to build (default scheme is "iosApp")
+    # - export_method: "app-store" produces a production-ready .ipa for TestFlight/App Store
+    #   Other options: "ad-hoc", "development", "enterprise"
+    #
+    # Output files (created in current directory):
+    # - iosApp.ipa (distributable binary)
+    # - iosApp.app.dSYM.zip (debug symbols for crash reporting)
+    build_app(
+      scheme: "iosApp",
+      export_method: "app-store"
+    )
+
+    # Step 3: Upload to TestFlight (COMMENTED OUT)
+    # Uncomment when you have an Apple Developer Program account ($99/year)
+    #
+    # To enable:
+    # 1. Enroll in Apple Developer Program (https://developer.apple.com/programs/)
+    # 2. Create an App Store Connect API Key:
+    #    - Go to App Store Connect > Users and Access > Keys
+    #    - Generate new API key with "Developer" role
+    #    - Download the .p8 file
+    # 3. Add API key authentication to this Fastfile
+    # 4. Uncomment the lines below
+    # 5. Run: fastlane ios package_beta
+    #
+    # upload_to_testflight(
+    #   skip_waiting_for_build_processing: true  # Don't wait for Apple's processing (can take 10-30 min)
+    # )
+
+    # Success message
+    UI.success("✅ iOS beta build created successfully!")
+    UI.message("📦 Output files:")
+    UI.message("   - iosApp.ipa (distributable binary)")
+    UI.message("   - iosApp.app.dSYM.zip (debug symbols)")
+    UI.message("💡 To publish to TestFlight: Uncomment upload_to_testflight in Fastfile")
+  end
+end

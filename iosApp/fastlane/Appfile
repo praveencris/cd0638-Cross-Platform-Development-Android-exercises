@@ -1,0 +1,16 @@
+# Appfile - Fastlane Configuration for Recall iOS App
+
+# App Identifier (Bundle ID)
+# This must match the PRODUCT_BUNDLE_IDENTIFIER in iosApp/Configuration/Config.xcconfig
+# For Recall, the base identifier is "com.recall.app"
+app_identifier("com.recall.app")
+
+# Apple ID for App Store Connect authentication
+# Students will replace this with their own Apple ID when they have an Apple Developer Program account
+# For this solution, we use a placeholder email
+apple_id("student@example.com")
+
+# Note: For production use, students would also need to configure:
+# - team_id (from Apple Developer Portal)
+# - itc_team_id (App Store Connect Team ID, if multiple teams exist)
+# These can be added when ready to upload to TestFlight

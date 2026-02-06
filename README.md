@@ -1,39 +1,45 @@
-# 🏁 Solution 12a: Android Packaging
-**Branch:** `sol-lesson-12a-android-playstore-publish`
+# 🏁 Solution 12b: iOS Packaging
+**Branch:** `sol-lesson-12b-ios-appstore-publish`
 
-This solution implements automated packaging for Play Store distribution using Fastlane, the industry-standard CI/CD tool for mobile apps.
+This solution implements automated packaging for TestFlight and App Store distribution using Fastlane, the industry-standard CI/CD tool for mobile apps.
 
 ## 🛠️ Implementation Summary
 
-### 1. The `gradle` Action
-We used Fastlane's built-in `gradle` action to orchestrate the build process.
+### 1. The `build_app` (gym) Action
+We replaced the manual "Product > Archive" workflow with the `build_app` command.
 
-**Why?** It ensures that whoever runs the build (you, or a CI server like GitHub Actions) uses the exact same flags and configuration, producing consistent results across all environments.
+**Why?** Xcode's UI can change between versions, but the underlying command line tools (`xcodebuild` and `xcrun`) are stable and scriptable. This automation ensures that whoever runs the build (you, or a CI server like GitHub Actions) produces identical results every time.
 
-**Result:** It produces a standardized `.aab` (Android App Bundle) file that has been:
-- Signed with release configuration (from Module 11)
-- Optimized with R8 code shrinking and obfuscation
-- Stripped of unused resources
-- Ready for Play Store submission
+**Result:** It produces standardized distribution files:
+- **iosApp.ipa** - The distributable binary for TestFlight/App Store
+- **iosApp.app.dSYM.zip** - Debug symbols for crash reporting (uploaded alongside the .ipa)
 
-### 2. Future-Proofing (The "Hidden" Upload)
-We included the `upload_to_play_store` action but commented it out.
+### 2. Version Management
+We included `increment_build_number` to automatically bump the build version on each run.
+
+**Benefit:** This solves the #1 error developers face when uploading to Apple: **"Duplicate Build Number"**
+
+Every time you run `fastlane ios package_beta`, it increments the build number (1 → 2 → 3 → etc.) inside the Xcode project. You never have to manually change version numbers again.
+
+### 3. Future-Proofing
+Like the Android solution, we included the `upload_to_testflight` command but left it commented out.
 
 **Benefit:** When you're ready to publish, you simply:
-1. Remove the `#` comment characters
-2. Add your Google Play API JSON key
-3. Run the same command
+1. Enroll in Apple Developer Program ($99/year)
+2. Create an App Store Connect API key
+3. Remove the `#` comment character
+4. Run the same command
 
-You don't need to write new code later - the infrastructure is pre-built and ready to activate.
+You are now just one hashtag away from shipping to beta testers!
 
 ## 📂 Key Files
 
 | File Path | Description |
 | :--- | :--- |
-| `android/fastlane/Appfile` | Global Fastlane configuration containing package name and API key file path |
-| `android/fastlane/Fastfile` | Lane definitions for automation workflows (clean, build, upload) |
-| `composeApp/build.gradle.kts` | Android build configuration with signing, R8, and resource shrinking (from Module 11) |
-| `composeApp/proguard-rules.pro` | ProGuard rules preserving Koin, Room, and Serialization classes (from Module 11) |
+| `iosApp/fastlane/Appfile` | Global Fastlane configuration containing app identifier and Apple ID |
+| `iosApp/fastlane/Fastfile` | Lane definitions for automation workflows (increment version, build, upload) |
+| `iosApp/iosApp.xcodeproj` | Xcode project containing build settings and configurations |
+| `iosApp/Configuration/Config.xcconfig` | Build configuration with version numbers (CURRENT_PROJECT_VERSION, MARKETING_VERSION) |
 
 ## 🚀 Build & Verification Steps
 
@@ -53,6 +59,10 @@ brew install fastlane
 fastlane -v
 ```
 
+**3. Install Xcode:**
+- Xcode 15.0+ from the Mac App Store
+- Accept Xcode license: `sudo xcodebuild -license accept`
+
 ### Running the Packaging Lane
 
 **1. Navigate to project root:**
@@ -62,28 +72,38 @@ cd /Users/kshitizbali/AndroidStudioProjects/Recall
 
 **2. Run the packaging lane:**
 ```bash
-fastlane android package_release
+fastlane ios package_beta
 ```
 
 **What happens:**
-- Cleans previous build artifacts
-- Compiles Kotlin code
-- Applies R8 optimization and ProGuard rules
-- Generates signed release bundle
-- Displays bundle location
+- Increments build number in `iosApp.xcodeproj`
+- Compiles Swift/Kotlin code
+- Archives the app with Release configuration
+- Exports as .ipa with app-store provisioning
+- Generates dSYM files for crash symbolication
+- Displays output file locations
 
 **3. Verify the output:**
 ```bash
-ls -la composeApp/build/outputs/bundle/release/
+ls -la iosApp.ipa
+ls -la iosApp.app.dSYM.zip
 ```
 
-You should see: `composeApp-release.aab`
+Both files should be present in the project root directory.
 
 ## 🎯 Learning Objectives
 
 After completing this module, you understand:
 
-- **CI/CD Automation:** How Fastlane standardizes mobile app builds across development, testing, and production environments
-- **Infrastructure as Code:** How to define repeatable build workflows that work identically on local machines and CI servers
-- **Progressive Deployment:** How to prepare publishing infrastructure before actually publishing (reducing go-live friction)
-- **Android App Bundles:** How `.aab` files enable Play Store to generate optimized APKs for each device configuration
+- **CI/CD Automation:** How Fastlane standardizes iOS app builds across development, testing, and production environments
+- **Xcode CLI Tools:** How `xcodebuild` and `xcrun` work under the hood when you click "Archive" in Xcode
+- **Version Management:** Why automatic build number incrementing prevents App Store submission errors
+- **Distribution Formats:** The difference between .ipa (distributable) and .app (local simulator build)
+- **Debug Symbols:** Why dSYM files are critical for crash reporting in production apps
+
+## 📚 Additional Resources
+
+- [Fastlane iOS Documentation](https://docs.fastlane.tools/getting-started/ios/setup/)
+- [Apple Developer Program](https://developer.apple.com/programs/)
+- [TestFlight Beta Testing Guide](https://developer.apple.com/testflight/)
+- [App Store Connect API Keys](https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api)
