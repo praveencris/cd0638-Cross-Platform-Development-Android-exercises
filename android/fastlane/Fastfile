@@ -1,0 +1,42 @@
+# Fastfile - Automation Lanes for Recall App
+
+# Set Android as the default platform
+default_platform(:android)
+
+platform :android do
+  desc "Package and prepare release bundle for Play Store"
+  lane :package_release do
+    # Step 1: Clean previous build artifacts
+    # This ensures a fresh build without cached artifacts
+    gradle(task: "clean")
+
+    # Step 2: Build release bundle (optimized with R8 & resource shrinking)
+    # The bundleRelease task:
+    # - Applies signing configuration from Module 11
+    # - Runs R8 code shrinking and obfuscation
+    # - Applies ProGuard rules for Koin, Room, and Serialization
+    # - Strips unused resources
+    # - Produces an optimized .aab file for Play Store
+    gradle(task: "bundleRelease")
+
+    # Step 3: Upload to Play Store (COMMENTED OUT)
+    # Uncomment when you have a Google Play Developer Account and API credentials
+    # To enable:
+    # 1. Create a Google Play Developer Account ($25 one-time fee)
+    # 2. Set up API access in Google Play Console
+    # 3. Download the JSON key file and place it in android/
+    # 4. Uncomment the lines below
+    # 5. Run: fastlane android package_release
+    #
+    # upload_to_play_store(
+    #   track: 'internal',           # Upload to internal testing track
+    #   release_status: 'draft',     # Create as draft (manual promotion later)
+    #   aab: lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
+    # )
+
+    # Success message
+    UI.success("✅ Release bundle created successfully!")
+    UI.message("📦 Bundle location: #{lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]}")
+    UI.message("💡 To publish: Uncomment upload_to_play_store in Fastfile")
+  end
+end
