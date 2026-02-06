@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
+    kotlin("native.cocoapods")
 }
 
 kotlin {
@@ -20,11 +21,34 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
+    // Configure CocoaPods for Firebase iOS dependencies
+    cocoapods {
+        summary = "Recall Shared Module"
+        homepage = "https://github.com/udacity/recall"
+        ios.deploymentTarget = "15.0"
+
+        // Firebase pods for iOS
+        pod("FirebaseAnalytics") {
+            version = "~> 11.8.0"
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
+        pod("FirebaseCrashlytics") {
+            version = "~> 11.8.0"
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
+        pod("FirebaseRemoteConfig") {
+            version = "~> 11.8.0"
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
+    }
+
     // Workaround for duplicate Kotlin Native libraries in ~/.konan and /var/root/.konan
     targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
         compilations.all {
-            compilerOptions.configure {
-                freeCompilerArgs.add("-Xklib-duplicated-unique-name-strategy=allow-first-with-warning")
+            compileTaskProvider.configure {
+                compilerOptions {
+                    freeCompilerArgs.add("-Xklib-duplicated-unique-name-strategy=allow-first-with-warning")
+                }
             }
         }
     }
@@ -43,6 +67,13 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)
+
+            // Firebase dependencies for Android
+            // Using explicit versions since platform() is deprecated in KMP with Kotlin 2.3+
+            // These versions match Firebase BOM 33.7.0 defined in libs.versions.toml
+            implementation("com.google.firebase:firebase-analytics:22.1.2")
+            implementation("com.google.firebase:firebase-crashlytics:19.2.1")
+            implementation("com.google.firebase:firebase-config:22.0.1")
         }
 
         iosMain.dependencies {

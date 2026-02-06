@@ -1,0 +1,35 @@
+{
+  "project_info": {
+    "project_number": "123456789000",
+    "firebase_url": "https://recall-app-example.firebaseio.com",
+    "project_id": "recall-app-example",
+    "storage_bucket": "recall-app-example.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123456789000:android:abcdef1234567890",
+        "android_client_info": {
+          "package_name": "com.recall.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "123456789000-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-Example-Key-Replace-With-Your-Own"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

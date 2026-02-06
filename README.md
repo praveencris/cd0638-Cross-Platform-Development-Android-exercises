@@ -1,109 +1,239 @@
-# 🏁 Solution 12b: iOS Packaging
-**Branch:** `sol-lesson-12b-ios-appstore-publish`
+# 🏁 Solution 13: Monitoring & Analytics
+**Branch:** `sol-lesson-13-monitor-analytics`
 
-This solution implements automated packaging for TestFlight and App Store distribution using Fastlane, the industry-standard CI/CD tool for mobile apps.
+This solution implements a unified observability stack for the Recall app, providing cross-platform analytics, crash reporting, and remote configuration capabilities.
 
 ## 🛠️ Implementation Summary
 
-### 1. The `build_app` (gym) Action
-We replaced the manual "Product > Archive" workflow with the `build_app` command.
+### 1. The `expect/actual` Bridge
+We created a lightweight wrapper `AnalyticsService` instead of depending on a heavy third-party KMP library.
 
-**Why?** Xcode's UI can change between versions, but the underlying command line tools (`xcodebuild` and `xcrun`) are stable and scriptable. This automation ensures that whoever runs the build (you, or a CI server like GitHub Actions) produces identical results every time.
+**Why?** This keeps our shared dependency graph small and maintainable. We only bridged the 3-4 methods we actually need (`logEvent`, `setUserProperty`, `recordException`, `fetchWelcomeMessage`) rather than importing a heavyweight multiplatform SDK that brings unnecessary complexity.
 
-**Result:** It produces standardized distribution files:
-- **iosApp.ipa** - The distributable binary for TestFlight/App Store
-- **iosApp.app.dSYM.zip** - Debug symbols for crash reporting (uploaded alongside the .ipa)
+**Pattern:** The `expect object AnalyticsProvider` in commonMain provides the interface, while `actual object AnalyticsProvider` in androidMain and iosMain provide platform-specific implementations.
 
-### 2. Version Management
-We included `increment_build_number` to automatically bump the build version on each run.
+### 2. Platform Specifics
 
-**Benefit:** This solves the #1 error developers face when uploading to Apple: **"Duplicate Build Number"**
+**Android Implementation:**
+- Uses the standard Firebase Android SDK via Gradle dependencies
+- Leverages Firebase BOM for consistent versioning across Firebase libraries
+- Converts Kotlin `Map<String, Any>` to Android `Bundle` for Firebase Analytics
+- Uses `google-services` plugin to process `google-services.json` configuration
 
-Every time you run `fastlane ios package_beta`, it increments the build number (1 → 2 → 3 → etc.) inside the Xcode project. You never have to manually change version numbers again.
+**iOS Implementation:**
+- Uses native Objective-C Firebase SDKs accessed through Kotlin/Native cinterop
+- Configured via CocoaPods in `shared/build.gradle.kts`
+- Converts Kotlin data types to iOS equivalents (NSNumber, NSDictionary, NSError)
+- Uses `GoogleService-Info.plist` for Firebase configuration
 
-### 3. Future-Proofing
-Like the Android solution, we included the `upload_to_testflight` command but left it commented out.
+### 3. Remote Config
+We implemented a basic `fetchWelcomeMessage()` feature as a demonstration of Firebase Remote Config capabilities.
 
-**Benefit:** When you're ready to publish, you simply:
-1. Enroll in Apple Developer Program ($99/year)
-2. Create an App Store Connect API key
-3. Remove the `#` comment character
-4. Run the same command
-
-You are now just one hashtag away from shipping to beta testers!
+**Use Case:** This allows us to change the text on the Home Screen (e.g., "Happy Holidays!" or "New Year Sale!") without releasing a new app update to the store. This is incredibly powerful for:
+- A/B testing different messaging
+- Seasonal promotions
+- Emergency communications
+- Gradual feature rollouts
 
 ## 📂 Key Files
 
 | File Path | Description |
 | :--- | :--- |
-| `iosApp/fastlane/Appfile` | Global Fastlane configuration containing app identifier and Apple ID |
-| `iosApp/fastlane/Fastfile` | Lane definitions for automation workflows (increment version, build, upload) |
-| `iosApp/iosApp.xcodeproj` | Xcode project containing build settings and configurations |
-| `iosApp/Configuration/Config.xcconfig` | Build configuration with version numbers (CURRENT_PROJECT_VERSION, MARKETING_VERSION) |
+| `shared/src/commonMain/kotlin/com/recall/app/analytics/AnalyticsService.kt` | Shared interface and expect declaration for cross-platform analytics |
+| `shared/src/androidMain/kotlin/com/recall/app/analytics/AnalyticsService.android.kt` | Android implementation using Firebase SDK |
+| `shared/src/iosMain/kotlin/com/recall/app/analytics/AnalyticsService.ios.kt` | iOS implementation using Firebase via CocoaPods |
+| `gradle/libs.versions.toml` | Firebase dependency versions and plugin declarations |
+| `shared/build.gradle.kts` | CocoaPods configuration for iOS Firebase pods and Android dependencies |
+| `composeApp/build.gradle.kts` | Google Services and Crashlytics plugin applications |
+| `composeApp/google-services.json` | Android Firebase configuration (gitignored, .example provided) |
+| `iosApp/iosApp/GoogleService-Info.plist` | iOS Firebase configuration (gitignored, .example provided) |
 
-## 🚀 Build & Verification Steps
+## 🚀 Setup Instructions
 
 ### Prerequisites
 
-**1. Install Fastlane:**
-```bash
-# Using RubyGems (recommended)
-sudo gem install fastlane -NV
+**1. Create a Firebase Project:**
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Click "Add project" and follow the wizard
+3. Enable Analytics, Crashlytics, and Remote Config in the Firebase console
 
-# Or using Homebrew (macOS)
-brew install fastlane
+**2. Download Configuration Files:**
+
+For Android:
+1. In Firebase Console, go to Project Settings → Your Apps
+2. Add an Android app with package name `com.recall.app`
+3. Download `google-services.json`
+4. Place it in `composeApp/google-services.json`
+
+For iOS:
+1. In Firebase Console, go to Project Settings → Your Apps
+2. Add an iOS app with bundle ID `com.recall.app`
+3. Download `GoogleService-Info.plist`
+4. Place it in `iosApp/iosApp/GoogleService-Info.plist`
+
+**Note:** `.example` templates are provided. Copy them to the actual filenames and replace with your real Firebase credentials.
+
+### Android Setup
+
+**1. Verify google-services plugin is applied:**
+The `composeApp/build.gradle.kts` already includes:
+```kotlin
+plugins {
+    // ...
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.firebaseCrashlytics)
+}
 ```
 
-**2. Verify installation:**
-```bash
-fastlane -v
+**2. Initialize Analytics in your Application class:**
+```kotlin
+class RecallApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        AnalyticsProvider.initialize(this)
+    }
+}
 ```
 
-**3. Install Xcode:**
-- Xcode 15.0+ from the Mac App Store
-- Accept Xcode license: `sudo xcodebuild -license accept`
-
-### Running the Packaging Lane
-
-**1. Navigate to project root:**
-```bash
-cd /Users/kshitizbali/AndroidStudioProjects/Recall
+**3. Use the analytics service:**
+```kotlin
+val analytics = AnalyticsProvider.get()
+analytics.logEvent("deck_created", mapOf(
+    "deck_name" to "Spanish Vocabulary",
+    "card_count" to 25
+))
 ```
 
-**2. Run the packaging lane:**
-```bash
-fastlane ios package_beta
+### iOS Setup
+
+**1. Initialize Firebase in AppDelegate:**
+Add to `iosApp/iosApp/iOSApp.swift`:
+```swift
+import FirebaseCore
+
+@main
+struct iOSApp: App {
+    init() {
+        FirebaseApp.configure()
+    }
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
 ```
 
-**What happens:**
-- Increments build number in `iosApp.xcodeproj`
-- Compiles Swift/Kotlin code
-- Archives the app with Release configuration
-- Exports as .ipa with app-store provisioning
-- Generates dSYM files for crash symbolication
-- Displays output file locations
-
-**3. Verify the output:**
+**2. Run CocoaPods setup:**
 ```bash
-ls -la iosApp.ipa
-ls -la iosApp.app.dSYM.zip
+cd shared
+./gradlew podInstall
 ```
 
-Both files should be present in the project root directory.
+This generates the Podfile and installs Firebase pods.
+
+**3. Use the analytics service:**
+```kotlin
+val analytics = AnalyticsProvider.get()
+analytics.logEvent("study_session_completed", mapOf(
+    "deck_id" to deckId,
+    "cards_reviewed" to cardCount,
+    "duration_seconds" to duration
+))
+```
+
+## 📊 Analytics Events
+
+Common events to track in Recall:
+
+| Event Name | Parameters | Purpose |
+| :--- | :--- | :--- |
+| `deck_created` | `deck_name`, `card_count` | Track deck creation activity |
+| `study_session_started` | `deck_id`, `card_count` | Monitor study engagement |
+| `study_session_completed` | `deck_id`, `cards_reviewed`, `duration_seconds` | Measure completion rates |
+| `card_flipped` | `deck_id`, `card_id` | Track user interactions |
+| `card_marked_known` | `deck_id`, `card_id` | Understand learning progress |
+
+## 🐛 Crash Reporting
+
+**Recording Non-Fatal Exceptions:**
+```kotlin
+try {
+    riskyOperation()
+} catch (e: Exception) {
+    AnalyticsProvider.get().recordException(e)
+    // Handle gracefully
+}
+```
+
+**Setting User Context:**
+```kotlin
+AnalyticsProvider.get().setUserProperty("deck_count", deckCount.toString())
+AnalyticsProvider.get().setUserProperty("user_tier", "premium")
+```
+
+## 🔧 Remote Config Example
+
+**Fetching Configuration:**
+```kotlin
+suspend fun getWelcomeMessage(): String {
+    return AnalyticsProvider.get().fetchWelcomeMessage()
+}
+```
+
+**In Firebase Console:**
+1. Go to Remote Config
+2. Add parameter `welcome_message`
+3. Set value to "Welcome to Recall!" (default)
+4. Create conditions for A/B testing or targeting
+5. Publish changes
+
+Your app will fetch the latest value on next launch!
 
 ## 🎯 Learning Objectives
 
 After completing this module, you understand:
 
-- **CI/CD Automation:** How Fastlane standardizes iOS app builds across development, testing, and production environments
-- **Xcode CLI Tools:** How `xcodebuild` and `xcrun` work under the hood when you click "Archive" in Xcode
-- **Version Management:** Why automatic build number incrementing prevents App Store submission errors
-- **Distribution Formats:** The difference between .ipa (distributable) and .app (local simulator build)
-- **Debug Symbols:** Why dSYM files are critical for crash reporting in production apps
+- **expect/actual Pattern:** How to create clean abstractions for platform-specific code in KMP
+- **Dependency Management:** Using Firebase BOM for Android and CocoaPods for iOS
+- **Type Conversion:** Mapping Kotlin types to platform-specific types (Bundle, NSDictionary, NSError)
+- **Analytics Best Practices:** What events to track and why
+- **Crash Reporting:** How to capture and analyze non-fatal exceptions
+- **Remote Configuration:** Changing app behavior without app updates
+- **Lightweight Wrappers:** Why minimal bridges are better than heavyweight multiplatform SDKs
+
+## 🔍 Verification
+
+**Test Analytics:**
+1. Run the app on Android or iOS
+2. Trigger an analytics event
+3. Check Firebase Console → Analytics → Events (may take a few hours to appear)
+
+**Test Crashlytics:**
+1. Record a test exception
+2. Force-close the app
+3. Reopen the app to send crash reports
+4. Check Firebase Console → Crashlytics
+
+**Test Remote Config:**
+1. Change `welcome_message` value in Firebase Console
+2. Call `fetchWelcomeMessage()` in your app
+3. Verify the new message is retrieved
+
+## 💡 Best Practices
+
+1. **Initialize Early:** Set up Analytics in Application.onCreate() (Android) or AppDelegate.init() (iOS)
+2. **Meaningful Event Names:** Use descriptive, consistent naming (snake_case recommended)
+3. **Parameter Limits:** Firebase has limits on event parameters (25 per event, 100 chars per string)
+4. **User Privacy:** Always comply with GDPR/CCPA - provide opt-out mechanisms
+5. **Test Thoroughly:** Use Firebase Test Lab for comprehensive testing
+6. **Monitor Budgets:** Analytics and Crashlytics have free tier limits
 
 ## 📚 Additional Resources
 
-- [Fastlane iOS Documentation](https://docs.fastlane.tools/getting-started/ios/setup/)
-- [Apple Developer Program](https://developer.apple.com/programs/)
-- [TestFlight Beta Testing Guide](https://developer.apple.com/testflight/)
-- [App Store Connect API Keys](https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api)
+- [Firebase Analytics Documentation](https://firebase.google.com/docs/analytics)
+- [Firebase Crashlytics Documentation](https://firebase.google.com/docs/crashlytics)
+- [Firebase Remote Config Documentation](https://firebase.google.com/docs/remote-config)
+- [Kotlin Multiplatform expect/actual](https://kotlinlang.org/docs/multiplatform-expect-actual.html)
+- [CocoaPods Integration with KMP](https://kotlinlang.org/docs/native-cocoapods.html)
