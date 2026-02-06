@@ -1,14 +1,25 @@
 # Appfile - Fastlane Configuration for Recall App
 
-# Package name for the Recall app
-# This must match the applicationId in build.gradle.kts
-package_name("com.recall.app")
+# TODO 4: Define the 'package_name' and 'json_key_file' path here.
+#
+# The package_name identifies your app in the Google Play Store.
+# It must match the applicationId in composeApp/build.gradle.kts
+#
+# Syntax:
+#   package_name("com.your.app.id")
+#
+# For this app, use: package_name("com.recall.app")
 
-# Path to the JSON key file for Google Play API authentication
-# This file is generated from the Google Play Console:
-# 1. Go to Google Play Console
-# 2. Navigate to Settings > API access
-# 3. Create a service account or use existing one
-# 4. Download the JSON key file
-# 5. Place it in the android/ directory
-json_key_file("fastlane_json_key.json")
+# Your code here for package_name
+
+
+# The json_key_file is used for Google Play API authentication.
+# This file is generated from the Google Play Console and enables automated uploads.
+# For this exercise, you don't need an actual key file - just define the path.
+#
+# Syntax:
+#   json_key_file("path/to/file.json")
+#
+# For this app, use: json_key_file("fastlane_json_key.json")
+
+# Your code here for json_key_file
