@@ -1,16 +1,33 @@
 # Appfile - Fastlane Configuration for Recall iOS App
 
-# App Identifier (Bundle ID)
-# This must match the PRODUCT_BUNDLE_IDENTIFIER in iosApp/Configuration/Config.xcconfig
-# For Recall, the base identifier is "com.recall.app"
-app_identifier("com.recall.app")
+# TODO 5: Configure the app identifier and Apple ID
+#
+# The app_identifier must match your bundle ID from Xcode
+# For Recall, this is: "com.recall.app"
+#
+# Syntax:
+#   app_identifier("your.bundle.id")
+#
+# Hint: Check iosApp/Configuration/Config.xcconfig for PRODUCT_BUNDLE_IDENTIFIER
 
-# Apple ID for App Store Connect authentication
-# Students will replace this with their own Apple ID when they have an Apple Developer Program account
-# For this solution, we use a placeholder email
-apple_id("student@example.com")
+# Your code here for app_identifier
 
-# Note: For production use, students would also need to configure:
-# - team_id (from Apple Developer Portal)
-# - itc_team_id (App Store Connect Team ID, if multiple teams exist)
-# These can be added when ready to upload to TestFlight
+
+# The apple_id is your Apple Developer account email
+# Even without a paid Apple Developer Program account, Fastlane needs to know
+# who is attempting to build and sign the app.
+#
+# For this exercise, use the placeholder: "student@example.com"
+# In production, you would replace this with your real Apple ID email
+#
+# Syntax:
+#   apple_id("your.email@example.com")
+
+# Your code here for apple_id
+
+
+# Note: For production use, you may also need to configure:
+# - team_id("YOUR_TEAM_ID")  # Found in Apple Developer Portal
+# - itc_team_id("YOUR_ITC_TEAM_ID")  # App Store Connect Team ID (if multiple teams)
+#
+# These are only needed when uploading to TestFlight, not for local builds.

@@ -1,55 +1,62 @@
 # Fastfile - Automation Lanes for Recall iOS App
 
-# Define iOS platform
-platform :ios do
-  desc "Package and prepare beta build for TestFlight distribution"
-  lane :package_beta do
-    # Step 1: Increment build number automatically
-    # This prevents "Duplicate Build Number" errors in App Store Connect
-    # The build number is stored in CURRENT_PROJECT_VERSION in Info.plist
-    # Each run will bump it: 1 -> 2 -> 3 -> etc.
-    increment_build_number(
-      xcodeproj: "iosApp/iosApp.xcodeproj"
-    )
+# TODO 1: Define a platform block for iOS
+# Hint: Use 'platform :ios do' ... 'end'
+# Inside this block, you will define lanes specific to iOS builds
+#
+# Example syntax:
+#   platform :ios do
+#     # lanes go here
+#   end
 
-    # Step 2: Build the app archive (.xcarchive) and export as .ipa
-    # The build_app action (alias: gym) replaces manual "Product > Archive" workflow
+# Your code here for TODO 1
+
+
+  # TODO 2: Define a lane named 'package_beta'
+  # Hint: Use 'lane :package_beta do' ... 'end'
+  # This lane will automate the iOS build and packaging process
+  #
+  # Example syntax:
+  #   lane :package_beta do
+  #     # build actions go here
+  #   end
+
+  # Your code here for TODO 2
+
+
+    # TODO 3: Add 'increment_build_number' to automatically bump version
+    # Why? Prevents "Duplicate Build Number" errors in App Store Connect
+    # Each run will bump the build number: 1 -> 2 -> 3 -> etc.
     #
-    # Key parameters:
-    # - scheme: The Xcode scheme to build (default scheme is "iosApp")
-    # - export_method: "app-store" produces a production-ready .ipa for TestFlight/App Store
-    #   Other options: "ad-hoc", "development", "enterprise"
+    # Syntax:
+    #   increment_build_number(xcodeproj: "iosApp/iosApp.xcodeproj")
+
+    # Your code here for TODO 3
+
+
+    # TODO 4: Add 'build_app' action to compile and package the app
+    # This replaces the manual "Product > Archive" workflow in Xcode
     #
-    # Output files (created in current directory):
-    # - iosApp.ipa (distributable binary)
+    # Syntax:
+    #   build_app(
+    #     scheme: "iosApp",
+    #     export_method: "app-store"
+    #   )
+    #
+    # Parameters explained:
+    # - scheme: The Xcode scheme to build (matches your project name)
+    # - export_method: "app-store" for production builds (generates .ipa + .dSYM)
+    #   Other options: "development" (for local testing), "ad-hoc", "enterprise"
+    #
+    # Output files (created in project root):
+    # - iosApp.ipa (distributable binary for TestFlight/App Store)
     # - iosApp.app.dSYM.zip (debug symbols for crash reporting)
-    build_app(
-      scheme: "iosApp",
-      export_method: "app-store"
-    )
 
-    # Step 3: Upload to TestFlight (COMMENTED OUT)
-    # Uncomment when you have an Apple Developer Program account ($99/year)
-    #
-    # To enable:
-    # 1. Enroll in Apple Developer Program (https://developer.apple.com/programs/)
-    # 2. Create an App Store Connect API Key:
-    #    - Go to App Store Connect > Users and Access > Keys
-    #    - Generate new API key with "Developer" role
-    #    - Download the .p8 file
-    # 3. Add API key authentication to this Fastfile
-    # 4. Uncomment the lines below
-    # 5. Run: fastlane ios package_beta
-    #
-    # upload_to_testflight(
-    #   skip_waiting_for_build_processing: true  # Don't wait for Apple's processing (can take 10-30 min)
-    # )
+    # Your code here for TODO 4
 
-    # Success message
+
+    # Success message (pre-implemented - you can keep this!)
     UI.success("✅ iOS beta build created successfully!")
-    UI.message("📦 Output files:")
-    UI.message("   - iosApp.ipa (distributable binary)")
-    UI.message("   - iosApp.app.dSYM.zip (debug symbols)")
-    UI.message("💡 To publish to TestFlight: Uncomment upload_to_testflight in Fastfile")
-  end
-end
+    UI.message("📦 Output files: iosApp.ipa, iosApp.app.dSYM.zip")
+  # End of lane (remove this comment after implementing TODO 2)
+# End of platform block (remove this comment after implementing TODO 1)
