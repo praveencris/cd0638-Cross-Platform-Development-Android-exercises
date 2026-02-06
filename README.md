@@ -22,6 +22,7 @@ We created a lightweight wrapper `AnalyticsService` instead of depending on a he
 
 **iOS Implementation:**
 - Uses native Objective-C Firebase SDKs accessed through Kotlin/Native cinterop
+- Requires `@OptIn(ExperimentalForeignApi::class)` annotation due to Kotlin/Native cinterop usage
 - Configured via CocoaPods in `shared/build.gradle.kts`
 - Converts Kotlin data types to iOS equivalents (NSNumber, NSDictionary, NSError)
 - Uses `GoogleService-Info.plist` for Firebase configuration
@@ -126,12 +127,21 @@ struct iOSApp: App {
 ```
 
 **2. Run CocoaPods setup:**
+
+From the project root directory:
+```bash
+./gradlew :shared:podInstall
+```
+
+Or navigate to shared first:
 ```bash
 cd shared
 ./gradlew podInstall
 ```
 
-This generates the Podfile and installs Firebase pods.
+This generates the Podfile and installs Firebase pods. If you encounter errors, see the [Troubleshooting](#-troubleshooting) section below.
+
+**Note:** The iOS implementation uses `@OptIn(ExperimentalForeignApi::class)` to access Firebase's Objective-C APIs through Kotlin/Native cinterop. This is already included in the solution code.
 
 **3. Use the analytics service:**
 ```kotlin
@@ -229,6 +239,75 @@ After completing this module, you understand:
 4. **User Privacy:** Always comply with GDPR/CCPA - provide opt-out mechanisms
 5. **Test Thoroughly:** Use Firebase Test Lab for comprehensive testing
 6. **Monitor Budgets:** Analytics and Crashlytics have free tier limits
+
+## 🔧 Troubleshooting
+
+### iOS Issues
+
+**Compilation Error: ExperimentalForeignApi**
+```
+Error: This declaration needs opt-in. Its usage must be marked with '@OptIn(ExperimentalForeignApi::class)'
+```
+**Solution:** The iOS implementation requires `@OptIn(ExperimentalForeignApi::class)` annotation for Kotlin/Native cinterop. This is already included in the solution code (`AnalyticsService.ios.kt`).
+
+**CocoaPods Installation Fails**
+```
+Error: pod install failed
+```
+**Solutions:**
+1. Ensure CocoaPods is installed: `sudo gem install cocoapods`
+2. Run from project root: `./gradlew :shared:podInstall`
+3. If Podfile.lock conflicts exist, delete `shared/build/cocoapods/` and retry
+4. Verify Xcode command line tools: `xcode-select --install`
+
+**Framework Not Found in Xcode**
+- Ensure you opened the `.xcworkspace` file, not `.xcodeproj`
+- Run `./gradlew :shared:podInstall` again
+- Clean build folder in Xcode (Cmd+Shift+K)
+
+### Android Issues
+
+**AnalyticsProvider Not Initialized**
+```
+IllegalStateException: AnalyticsProvider not initialized. Call initialize(context) first.
+```
+**Solution:** Call `AnalyticsProvider.initialize(this)` in your Application class's `onCreate()` method before accessing analytics.
+
+**google-services.json Not Found**
+```
+Error: File google-services.json is missing
+```
+**Solution:**
+1. Download from Firebase Console → Project Settings → Your Apps → Download google-services.json
+2. Place in `composeApp/google-services.json` (not in project root)
+3. Verify package name in JSON matches `"com.recall.app"`
+4. Ensure file is not in `.gitignore` by mistake
+
+**Release Build Crashes with Firebase**
+
+If analytics work in debug but crash in release builds, add ProGuard rules to `composeApp/proguard-rules.pro`:
+
+```proguard
+# Firebase
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**
+
+# Crashlytics
+-keepattributes SourceFile,LineNumberTable
+-keep public class * extends java.lang.Exception
+```
+
+### Common Issues
+
+**Events Not Appearing in Firebase Console**
+- Events can take 24-48 hours to appear in the Firebase dashboard
+- Use **DebugView** for real-time testing (enable debug mode in your app)
+- Verify configuration files have correct project IDs matching your Firebase project
+
+**iOS Simulator Warnings**
+Warnings like `Failed to send CA Event` or `nw_socket_set_connection_idle` are harmless iOS system warnings. They don't affect Firebase functionality and can be safely ignored.
 
 ## 📚 Additional Resources
 
