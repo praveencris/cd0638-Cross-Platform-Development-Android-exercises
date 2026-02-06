@@ -18,7 +18,7 @@
           "client_id": "123456789000-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com",
           "client_type": 3
         }
-      },
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA-Example-Key-Replace-With-Your-Own"
