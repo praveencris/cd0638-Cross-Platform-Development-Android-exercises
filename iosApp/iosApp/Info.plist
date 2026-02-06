@@ -5,8 +5,11 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>0.0.1</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>0</string>
+	<!-- TODO: Task 1 - Sync these versions with the Android production build.
+	     Hint: Check composeApp/build.gradle.kts for versionCode and versionName.
+	     Expected values: CFBundleVersion="1", CFBundleShortVersionString="1.0" -->
 </dict>
 </plist>
