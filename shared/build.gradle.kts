@@ -25,6 +25,7 @@ kotlin {
     cocoapods {
         summary = "Recall Shared Module"
         homepage = "https://github.com/udacity/recall"
+        version = "1.0"
         ios.deploymentTarget = "15.0"
 
         // Firebase pods for iOS
