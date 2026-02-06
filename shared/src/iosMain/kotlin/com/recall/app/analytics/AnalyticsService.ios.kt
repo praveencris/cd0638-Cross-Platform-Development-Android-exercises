@@ -8,6 +8,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.Foundation.NSError
 import platform.Foundation.NSNumber
 import kotlin.coroutines.resume
+import kotlinx.cinterop.ExperimentalForeignApi
 
 /**
  * iOS implementation of AnalyticsService using Firebase SDK via CocoaPods.
@@ -16,6 +17,7 @@ import kotlin.coroutines.resume
  * Firebase SDK. The Podfile includes Firebase/Analytics, Firebase/Crashlytics,
  * and Firebase/RemoteConfig.
  */
+@OptIn(ExperimentalForeignApi::class)
 class IOSAnalyticsService : AnalyticsService {
     private val remoteConfig: FIRRemoteConfig = FIRRemoteConfig.remoteConfig().apply {
         val settings = FIRRemoteConfigSettings().apply {
@@ -99,6 +101,7 @@ class IOSAnalyticsService : AnalyticsService {
  * Firebase is initialized in the iOS app's AppDelegate (iosApp/iosApp/iOSApp.swift)
  * by calling FirebaseApp.configure(), so we can create the service instance directly.
  */
+@OptIn(ExperimentalForeignApi::class)
 actual object AnalyticsProvider {
     private val instance: AnalyticsService by lazy {
         IOSAnalyticsService()
