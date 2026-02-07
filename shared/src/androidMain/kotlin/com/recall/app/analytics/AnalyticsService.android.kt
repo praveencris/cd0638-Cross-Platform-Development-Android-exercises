@@ -3,18 +3,31 @@ package com.recall.app.analytics
 import android.content.Context
 import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 /**
  * Android implementation of AnalyticsService using Firebase SDK.
  *
- * Solution for Exercise 13a: Firebase Analytics fully implemented.
- * Crashlytics and Remote Config will be added in Exercise 13b.
+ * Exercise 13b: Building on completed Analytics from 13a, add Crashlytics and Remote Config.
  */
 class AndroidAnalyticsService(context: Context) : AnalyticsService {
+    // ✅ Analytics complete from Exercise 13a
     private val analytics: FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
 
+    // TODO 1: Initialize Firebase Crashlytics and Remote Config
+    // 1. Initialize crashlytics: FirebaseCrashlytics.getInstance()
+    // 2. Initialize remoteConfig: FirebaseRemoteConfig.getInstance()
+    // 3. Set Remote Config fetch interval to 3600 seconds using:
+    //    - FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(3600).build()
+    //    - remoteConfig.setConfigSettingsAsync(settings)
+    // 4. Set default values: remoteConfig.setDefaultsAsync(mapOf("welcome_message" to "Welcome to Recall!"))
+
+    // ✅ Analytics implementation complete from Exercise 13a
     override fun logEvent(name: String, params: Map<String, Any>?) {
-        // Convert Kotlin Map to Android Bundle
         val bundle = params?.let { mapToBundle(it) }
         analytics.logEvent(name, bundle)
     }
@@ -24,23 +37,23 @@ class AndroidAnalyticsService(context: Context) : AnalyticsService {
     }
 
     override fun recordException(throwable: Throwable) {
-        // Stub implementation for Exercise 13a
-        // Full implementation coming in Exercise 13b
-        println("Analytics: Exception recorded - ${throwable.message}")
+        // TODO 2: Implement recordException() method
+        // One line: crashlytics.recordException(throwable)
     }
 
     override suspend fun fetchWelcomeMessage(): String {
-        // Stub implementation for Exercise 13a
-        // Full implementation coming in Exercise 13b
-        return "Welcome to Recall!"
+        // TODO 3: Implement fetchWelcomeMessage() suspend function
+        // Use suspendCancellableCoroutine to wrap Firebase's async callback:
+        // 1. Call remoteConfig.fetchAndActivate()
+        // 2. Add OnCompleteListener { task ->
+        // 3. If task.isSuccessful, get value: remoteConfig.getString("welcome_message")
+        // 4. Otherwise, return default: "Welcome to Recall!"
+        // 5. Resume continuation with result: continuation.resume(message)
+
+        return "Welcome to Recall!" // Temporary placeholder
     }
 
-    /**
-     * Converts a Kotlin Map to an Android Bundle for Firebase Analytics.
-     *
-     * Firebase Analytics requires Bundle for event parameters, but our common interface
-     * uses Map for better Kotlin ergonomics. This helper handles the conversion.
-     */
+    // ✅ Type conversion helper complete from Exercise 13a
     private fun mapToBundle(map: Map<String, Any>): Bundle {
         val bundle = Bundle()
         map.forEach { (key, value) ->
@@ -65,8 +78,6 @@ class AndroidAnalyticsService(context: Context) : AnalyticsService {
  * 1. Initialize this in your Application class
  * 2. Store the instance in a dependency injection container (e.g., Koin)
  * 3. Inject it wherever analytics are needed
- *
- * For this solution branch, we'll document the setup requirements in README.
  */
 actual object AnalyticsProvider {
     private lateinit var instance: AnalyticsService
