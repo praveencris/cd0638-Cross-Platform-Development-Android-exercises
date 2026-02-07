@@ -1,7 +1,13 @@
-# 🏁 Solution 13: Monitoring & Analytics
-**Branch:** `sol-lesson-13-monitor-analytics`
+# 🔥 Exercise 13b: Crashlytics & Remote Config - Solution
+**Module:** Monitoring & Analytics
+**Part:** 2 of 2 (Building on Exercise 13a)
 
-This solution implements a unified observability stack for the Recall app, providing cross-platform analytics, crash reporting, and remote configuration capabilities.
+This solution implements the complete Firebase integration for Recall, including:
+- ✅ Firebase Analytics (from Exercise 13a)
+- ✅ Firebase Crashlytics for crash reporting
+- ✅ Firebase Remote Config for dynamic app configuration
+
+This provides a unified observability stack with cross-platform analytics, crash reporting, and remote configuration capabilities.
 
 ## 🛠️ Implementation Summary
 
