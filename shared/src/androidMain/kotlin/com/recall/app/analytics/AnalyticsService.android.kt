@@ -3,30 +3,15 @@ package com.recall.app.analytics
 import android.content.Context
 import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
 
 /**
  * Android implementation of AnalyticsService using Firebase SDK.
  *
- * This class wraps Firebase Analytics, Crashlytics, and Remote Config to provide
- * a clean Kotlin API that works seamlessly with KMP architecture.
+ * Solution for Exercise 13a: Firebase Analytics fully implemented.
+ * Crashlytics and Remote Config will be added in Exercise 13b.
  */
 class AndroidAnalyticsService(context: Context) : AnalyticsService {
     private val analytics: FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
-    private val crashlytics: FirebaseCrashlytics = FirebaseCrashlytics.getInstance()
-    private val remoteConfig: FirebaseRemoteConfig = FirebaseRemoteConfig.getInstance().apply {
-        val configSettings = FirebaseRemoteConfigSettings.Builder()
-            .setMinimumFetchIntervalInSeconds(3600) // Fetch at most once per hour
-            .build()
-        setConfigSettingsAsync(configSettings)
-
-        // Set default values
-        setDefaultsAsync(mapOf("welcome_message" to "Welcome to Recall!"))
-    }
 
     override fun logEvent(name: String, params: Map<String, Any>?) {
         // Convert Kotlin Map to Android Bundle
@@ -39,20 +24,15 @@ class AndroidAnalyticsService(context: Context) : AnalyticsService {
     }
 
     override fun recordException(throwable: Throwable) {
-        crashlytics.recordException(throwable)
+        // Stub implementation for Exercise 13a
+        // Full implementation coming in Exercise 13b
+        println("Analytics: Exception recorded - ${throwable.message}")
     }
 
-    override suspend fun fetchWelcomeMessage(): String = suspendCancellableCoroutine { continuation ->
-        remoteConfig.fetchAndActivate()
-            .addOnCompleteListener { task ->
-                val message = if (task.isSuccessful) {
-                    remoteConfig.getString("welcome_message")
-                } else {
-                    // Fallback to default if fetch fails
-                    "Welcome to Recall!"
-                }
-                continuation.resume(message)
-            }
+    override suspend fun fetchWelcomeMessage(): String {
+        // Stub implementation for Exercise 13a
+        // Full implementation coming in Exercise 13b
+        return "Welcome to Recall!"
     }
 
     /**
