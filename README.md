@@ -1,318 +1,226 @@
-# 🏁 Solution 13: Monitoring & Analytics
-**Branch:** `sol-lesson-13-monitor-analytics`
-
-This solution implements a unified observability stack for the Recall app, providing cross-platform analytics, crash reporting, and remote configuration capabilities.
-
-## 🛠️ Implementation Summary
-
-### 1. The `expect/actual` Bridge
-We created a lightweight wrapper `AnalyticsService` instead of depending on a heavy third-party KMP library.
-
-**Why?** This keeps our shared dependency graph small and maintainable. We only bridged the 3-4 methods we actually need (`logEvent`, `setUserProperty`, `recordException`, `fetchWelcomeMessage`) rather than importing a heavyweight multiplatform SDK that brings unnecessary complexity.
-
-**Pattern:** The `expect object AnalyticsProvider` in commonMain provides the interface, while `actual object AnalyticsProvider` in androidMain and iosMain provide platform-specific implementations.
-
-### 2. Platform Specifics
-
-**Android Implementation:**
-- Uses the standard Firebase Android SDK via Gradle dependencies
-- Leverages Firebase BOM for consistent versioning across Firebase libraries
-- Converts Kotlin `Map<String, Any>` to Android `Bundle` for Firebase Analytics
-- Uses `google-services` plugin to process `google-services.json` configuration
-
-**iOS Implementation:**
-- Uses native Objective-C Firebase SDKs accessed through Kotlin/Native cinterop
-- Requires `@OptIn(ExperimentalForeignApi::class)` annotation due to Kotlin/Native cinterop usage
-- Configured via CocoaPods in `shared/build.gradle.kts`
-- Converts Kotlin data types to iOS equivalents (NSNumber, NSDictionary, NSError)
-- Uses `GoogleService-Info.plist` for Firebase configuration
-
-### 3. Remote Config
-We implemented a basic `fetchWelcomeMessage()` feature as a demonstration of Firebase Remote Config capabilities.
-
-**Use Case:** This allows us to change the text on the Home Screen (e.g., "Happy Holidays!" or "New Year Sale!") without releasing a new app update to the store. This is incredibly powerful for:
-- A/B testing different messaging
-- Seasonal promotions
-- Emergency communications
-- Gradual feature rollouts
-
-## 📂 Key Files
-
-| File Path | Description |
-| :--- | :--- |
-| `shared/src/commonMain/kotlin/com/recall/app/analytics/AnalyticsService.kt` | Shared interface and expect declaration for cross-platform analytics |
-| `shared/src/androidMain/kotlin/com/recall/app/analytics/AnalyticsService.android.kt` | Android implementation using Firebase SDK |
-| `shared/src/iosMain/kotlin/com/recall/app/analytics/AnalyticsService.ios.kt` | iOS implementation using Firebase via CocoaPods |
-| `gradle/libs.versions.toml` | Firebase dependency versions and plugin declarations |
-| `shared/build.gradle.kts` | CocoaPods configuration for iOS Firebase pods and Android dependencies |
-| `composeApp/build.gradle.kts` | Google Services and Crashlytics plugin applications |
-| `composeApp/google-services.json` | Android Firebase configuration (gitignored, .example provided) |
-| `iosApp/iosApp/GoogleService-Info.plist` | iOS Firebase configuration (gitignored, .example provided) |
-
-## 🚀 Setup Instructions
-
-### Prerequisites
-
-**1. Create a Firebase Project:**
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Click "Add project" and follow the wizard
-3. Enable Analytics, Crashlytics, and Remote Config in the Firebase console
-
-**2. Download Configuration Files:**
-
-For Android:
-1. In Firebase Console, go to Project Settings → Your Apps
-2. Add an Android app with package name `com.recall.app`
-3. Download `google-services.json`
-4. Place it in `composeApp/google-services.json`
-
-For iOS:
-1. In Firebase Console, go to Project Settings → Your Apps
-2. Add an iOS app with bundle ID `com.recall.app`
-3. Download `GoogleService-Info.plist`
-4. Place it in `iosApp/iosApp/GoogleService-Info.plist`
-
-**Note:** `.example` templates are provided. Copy them to the actual filenames and replace with your real Firebase credentials.
-
-### Android Setup
-
-**1. Verify google-services plugin is applied:**
-The `composeApp/build.gradle.kts` already includes:
-```kotlin
-plugins {
-    // ...
-    alias(libs.plugins.googleServices)
-    alias(libs.plugins.firebaseCrashlytics)
-}
-```
-
-**2. Initialize Analytics in your Application class:**
-```kotlin
-class RecallApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        AnalyticsProvider.initialize(this)
-    }
-}
-```
-
-**3. Use the analytics service:**
-```kotlin
-val analytics = AnalyticsProvider.get()
-analytics.logEvent("deck_created", mapOf(
-    "deck_name" to "Spanish Vocabulary",
-    "card_count" to 25
-))
-```
-
-### iOS Setup
-
-**1. Initialize Firebase in AppDelegate:**
-Add to `iosApp/iosApp/iOSApp.swift`:
-```swift
-import FirebaseCore
-
-@main
-struct iOSApp: App {
-    init() {
-        FirebaseApp.configure()
-    }
-
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
-}
-```
-
-**2. Run CocoaPods setup:**
-
-From the project root directory:
-```bash
-./gradlew :shared:podInstall
-```
-
-Or navigate to shared first:
-```bash
-cd shared
-./gradlew podInstall
-```
-
-This generates the Podfile and installs Firebase pods. If you encounter errors, see the [Troubleshooting](#-troubleshooting) section below.
-
-**Note:** The iOS implementation uses `@OptIn(ExperimentalForeignApi::class)` to access Firebase's Objective-C APIs through Kotlin/Native cinterop. This is already included in the solution code.
-
-**3. Use the analytics service:**
-```kotlin
-val analytics = AnalyticsProvider.get()
-analytics.logEvent("study_session_completed", mapOf(
-    "deck_id" to deckId,
-    "cards_reviewed" to cardCount,
-    "duration_seconds" to duration
-))
-```
-
-## 📊 Analytics Events
-
-Common events to track in Recall:
-
-| Event Name | Parameters | Purpose |
-| :--- | :--- | :--- |
-| `deck_created` | `deck_name`, `card_count` | Track deck creation activity |
-| `study_session_started` | `deck_id`, `card_count` | Monitor study engagement |
-| `study_session_completed` | `deck_id`, `cards_reviewed`, `duration_seconds` | Measure completion rates |
-| `card_flipped` | `deck_id`, `card_id` | Track user interactions |
-| `card_marked_known` | `deck_id`, `card_id` | Understand learning progress |
-
-## 🐛 Crash Reporting
-
-**Recording Non-Fatal Exceptions:**
-```kotlin
-try {
-    riskyOperation()
-} catch (e: Exception) {
-    AnalyticsProvider.get().recordException(e)
-    // Handle gracefully
-}
-```
-
-**Setting User Context:**
-```kotlin
-AnalyticsProvider.get().setUserProperty("deck_count", deckCount.toString())
-AnalyticsProvider.get().setUserProperty("user_tier", "premium")
-```
-
-## 🔧 Remote Config Example
-
-**Fetching Configuration:**
-```kotlin
-suspend fun getWelcomeMessage(): String {
-    return AnalyticsProvider.get().fetchWelcomeMessage()
-}
-```
-
-**In Firebase Console:**
-1. Go to Remote Config
-2. Add parameter `welcome_message`
-3. Set value to "Welcome to Recall!" (default)
-4. Create conditions for A/B testing or targeting
-5. Publish changes
-
-Your app will fetch the latest value on next launch!
-
-## 🎯 Learning Objectives
-
-After completing this module, you understand:
-
-- **expect/actual Pattern:** How to create clean abstractions for platform-specific code in KMP
-- **Dependency Management:** Using Firebase BOM for Android and CocoaPods for iOS
-- **Type Conversion:** Mapping Kotlin types to platform-specific types (Bundle, NSDictionary, NSError)
-- **Analytics Best Practices:** What events to track and why
-- **Crash Reporting:** How to capture and analyze non-fatal exceptions
-- **Remote Configuration:** Changing app behavior without app updates
-- **Lightweight Wrappers:** Why minimal bridges are better than heavyweight multiplatform SDKs
-
-## 🔍 Verification
-
-**Test Analytics:**
-1. Run the app on Android or iOS
-2. Trigger an analytics event
-3. Check Firebase Console → Analytics → Events (may take a few hours to appear)
-
-**Test Crashlytics:**
-1. Record a test exception
-2. Force-close the app
-3. Reopen the app to send crash reports
-4. Check Firebase Console → Crashlytics
-
-**Test Remote Config:**
-1. Change `welcome_message` value in Firebase Console
-2. Call `fetchWelcomeMessage()` in your app
-3. Verify the new message is retrieved
-
-## 💡 Best Practices
-
-1. **Initialize Early:** Set up Analytics in Application.onCreate() (Android) or AppDelegate.init() (iOS)
-2. **Meaningful Event Names:** Use descriptive, consistent naming (snake_case recommended)
-3. **Parameter Limits:** Firebase has limits on event parameters (25 per event, 100 chars per string)
-4. **User Privacy:** Always comply with GDPR/CCPA - provide opt-out mechanisms
-5. **Test Thoroughly:** Use Firebase Test Lab for comprehensive testing
-6. **Monitor Budgets:** Analytics and Crashlytics have free tier limits
-
-## 🔧 Troubleshooting
-
-### iOS Issues
-
-**Compilation Error: ExperimentalForeignApi**
-```
-Error: This declaration needs opt-in. Its usage must be marked with '@OptIn(ExperimentalForeignApi::class)'
-```
-**Solution:** The iOS implementation requires `@OptIn(ExperimentalForeignApi::class)` annotation for Kotlin/Native cinterop. This is already included in the solution code (`AnalyticsService.ios.kt`).
-
-**CocoaPods Installation Fails**
-```
-Error: pod install failed
-```
-**Solutions:**
-1. Ensure CocoaPods is installed: `sudo gem install cocoapods`
-2. Run from project root: `./gradlew :shared:podInstall`
-3. If Podfile.lock conflicts exist, delete `shared/build/cocoapods/` and retry
-4. Verify Xcode command line tools: `xcode-select --install`
-
-**Framework Not Found in Xcode**
-- Ensure you opened the `.xcworkspace` file, not `.xcodeproj`
-- Run `./gradlew :shared:podInstall` again
-- Clean build folder in Xcode (Cmd+Shift+K)
-
-### Android Issues
-
-**AnalyticsProvider Not Initialized**
-```
-IllegalStateException: AnalyticsProvider not initialized. Call initialize(context) first.
-```
-**Solution:** Call `AnalyticsProvider.initialize(this)` in your Application class's `onCreate()` method before accessing analytics.
-
-**google-services.json Not Found**
-```
-Error: File google-services.json is missing
-```
-**Solution:**
-1. Download from Firebase Console → Project Settings → Your Apps → Download google-services.json
-2. Place in `composeApp/google-services.json` (not in project root)
-3. Verify package name in JSON matches `"com.recall.app"`
-4. Ensure file is not in `.gitignore` by mistake
-
-**Release Build Crashes with Firebase**
-
-If analytics work in debug but crash in release builds, add ProGuard rules to `composeApp/proguard-rules.pro`:
-
-```proguard
-# Firebase
--keep class com.google.firebase.** { *; }
--keep class com.google.android.gms.** { *; }
--dontwarn com.google.firebase.**
--dontwarn com.google.android.gms.**
-
-# Crashlytics
--keepattributes SourceFile,LineNumberTable
--keep public class * extends java.lang.Exception
-```
-
-### Common Issues
-
-**Events Not Appearing in Firebase Console**
-- Events can take 24-48 hours to appear in the Firebase dashboard
-- Use **DebugView** for real-time testing (enable debug mode in your app)
-- Verify configuration files have correct project IDs matching your Firebase project
-
-**iOS Simulator Warnings**
-Warnings like `Failed to send CA Event` or `nw_socket_set_connection_idle` are harmless iOS system warnings. They don't affect Firebase functionality and can be safely ignored.
-
-## 📚 Additional Resources
+# 📊 Exercise 13a: Firebase Analytics
+**Module:** Monitoring & Analytics
+**Estimated Time:** 30-40 minutes
+**Part:** 1 of 2 (Crashlytics & Remote Config in Exercise 13b)
+
+### **🎓 Objective**
+Learn to integrate **Firebase Analytics** in your KMP app to track user behavior across Android and iOS. You'll focus on the core challenge: implementing platform-specific type conversions while using the expect/actual pattern.
+
+### **⚠️ Important Notes**
+
+**What's Pre-configured:**
+The starter code includes complete build configuration:
+- Firebase Analytics dependencies in `libs.versions.toml`
+- CocoaPods setup with `version = "1.0"` in `shared/build.gradle.kts`
+- Google Services plugin in `composeApp/build.gradle.kts`
+- Example configuration files with correct JSON syntax
+- `@OptIn(ExperimentalForeignApi::class)` annotations for iOS (required for compilation)
+
+**Your Focus (30-40 minutes):**
+- Implement 7 TODOs focused on Firebase Analytics
+- Learn expect/actual pattern by comparing Android vs iOS implementations
+- Practice platform-specific type conversions (Map ↔ Bundle, Map ↔ NSDictionary)
+
+**What's NOT in This Exercise:**
+- Crashlytics (error tracking) - covered in Exercise 13b
+- Remote Config (dynamic configuration) - covered in Exercise 13b
+- You'll see stub methods for these with TODO comments pointing to 13b
+
+### **✅ Task 1: Firebase Console Setup**
+1. **Go to** [console.firebase.google.com](https://console.firebase.google.com)
+2. **Create Project:** Named "Recall" (or use existing project)
+3. **Enable Analytics:**
+   - Analytics is enabled by default for new projects
+   - Go to Build → Analytics to verify
+
+4. **Add Android:**
+   - Click "Add app" → Android
+   - Package name: `com.recall.app`
+   - Download `google-services.json`
+   - Place in `composeApp/google-services.json`
+   - **Or use the example:** `cp composeApp/google-services.json.example composeApp/google-services.json` and update with your credentials
+
+5. **Add iOS:**
+   - Click "Add app" → iOS
+   - Bundle ID: `com.recall.app`
+   - Download `GoogleService-Info.plist`
+   - Place in `iosApp/iosApp/GoogleService-Info.plist`
+   - **Or use the example:** `cp iosApp/iosApp/GoogleService-Info.plist.example iosApp/iosApp/GoogleService-Info.plist` and update with your credentials
+
+**Time: ~10 minutes**
+
+### **✅ Task 2: Implement Android Analytics**
+
+**Note:** Dependencies and plugins are already configured.
+
+1. **Open** `shared/src/androidMain/kotlin/com/recall/app/analytics/AnalyticsService.android.kt`
+
+2. **Implement 4 TODOs:**
+
+   **TODO 1: Initialize FirebaseAnalytics**
+   ```kotlin
+   private val analytics: FirebaseAnalytics = // Initialize here
+   ```
+   - Use `FirebaseAnalytics.getInstance(context)`
+
+   **TODO 2: Implement mapToBundle() helper**
+   ```kotlin
+   private fun mapToBundle(map: Map<String, Any>): Bundle {
+       // Convert Kotlin types to Bundle types
+       // Handle: String, Int, Long, Double, Float, Boolean
+   }
+   ```
+   - Create a Bundle
+   - Iterate through map with `.forEach { (key, value) ->`
+   - Use `when (value)` to check types
+   - Call appropriate `bundle.putXxx()` method
+
+   **TODO 3: Implement logEvent()**
+   ```kotlin
+   override fun logEvent(name: String, params: Map<String, Any>?) {
+       // Convert params using mapToBundle()
+       // Call analytics.logEvent()
+   }
+   ```
+
+   **TODO 4: Implement setUserProperty()**
+   ```kotlin
+   override fun setUserProperty(name: String, value: String) {
+       // One line: analytics.setUserProperty(name, value)
+   }
+   ```
+
+**Hints:**
+- Use `Bundle().apply { ... }` for cleaner code
+- For unknown types in mapToBundle, use `value.toString()`
+- Handle null params in logEvent
+
+**Time: ~10 minutes**
+
+### **✅ Task 3: Implement iOS Analytics**
+
+**Note:** CocoaPods is already configured. `@OptIn` annotation is already added.
+
+1. **Terminal:** Run CocoaPods install:
+   ```bash
+   ./gradlew :shared:podInstall
+   ```
+   This installs Firebase Analytics pod.
+
+2. **Open** `shared/src/iosMain/kotlin/com/recall/app/analytics/AnalyticsService.ios.kt`
+
+3. **Implement 3 TODOs:**
+
+   **TODO 5: Implement mapToNSDictionary() helper**
+   ```kotlin
+   private fun mapToNSDictionary(map: Map<String, Any>): Map<Any?, *> {
+       // Convert Kotlin types to iOS types
+       // Handle: String, Int, Long, Double, Float, Boolean
+   }
+   ```
+   - Use `map.mapValues { (_, value) ->`
+   - For numbers, wrap in `NSNumber`: `NSNumber(int = value)`, `NSNumber(double = value)`, etc.
+   - Strings can stay as-is
+
+   **TODO 6: Implement logEvent()**
+   ```kotlin
+   override fun logEvent(name: String, params: Map<String, Any>?) {
+       // Convert params using mapToNSDictionary()
+       // Call FIRAnalytics.logEventWithName(name, nsParams)
+   }
+   ```
+
+   **TODO 7: Implement setUserProperty()**
+   ```kotlin
+   override fun setUserProperty(name: String, value: String) {
+       // One line: FIRAnalytics.setUserPropertyString(value, name)
+       // Note: iOS has reversed parameter order!
+   }
+   ```
+
+**Hints:**
+- The `@OptIn(ExperimentalForeignApi::class)` annotation is required and already added
+- FIRAnalytics is accessed via cocoapods import
+- Use `params?.let { mapToNSDictionary(it) }` to handle null
+
+**Time: ~10 minutes**
+
+### **✅ Task 4: Test Analytics**
+1. **Open** `shared/src/commonMain/kotlin/com/recall/app/MainViewModel.kt`
+2. **Find** where study sessions complete (or any user action)
+3. **Add:**
+   ```kotlin
+   AnalyticsProvider.get().logEvent("session_complete", mapOf(
+       "deck_id" to deckId,
+       "card_count" to cardCount
+   ))
+   ```
+
+4. **Test in Firebase DebugView:**
+   - **Android:** `adb shell setprop debug.firebase.analytics.app com.recall.app`
+   - **iOS:** Edit scheme → Arguments → Add `-FIRDebugEnabled`
+   - Run the app and complete a study session
+   - Check Firebase Console → Analytics → DebugView
+   - You should see your `session_complete` event in real-time!
+
+**Time: ~10 minutes**
+
+### **🔧 Troubleshooting**
+
+**iOS: "@OptIn" annotation missing**
+- The annotation should already be in the starter code
+- If you see compilation errors, verify lines 20 and 107 have `@OptIn(ExperimentalForeignApi::class)`
+
+**iOS: CocoaPods installation fails**
+- Ensure CocoaPods is installed: `sudo gem install cocoapods`
+- The `version = "1.0"` field is already configured
+- Run from project root: `./gradlew :shared:podInstall`
+
+**Android: google-services.json not found**
+- Copy from `composeApp/google-services.json.example`
+- Replace placeholder values with your Firebase credentials
+- Place in `composeApp/` directory (not project root)
+
+**Events not appearing in Firebase Console**
+- Use DebugView for real-time testing (see Task 4)
+- Regular dashboard can take 24-48 hours
+- Verify configuration files have correct project IDs
+
+**Build: "Crashlytics" or "RemoteConfig" errors**
+- These are stubs in this exercise (implemented in 13b)
+- They should not cause build errors
+- If you see errors, check that stub methods return default values
+
+### **🚀 Definition of Done**
+* [ ] The app compiles on both Android and iOS
+* [ ] `./gradlew :shared:podInstall` completed successfully
+* [ ] Example configuration files copied and updated with real credentials
+* [ ] All 7 TODOs implemented (4 Android + 3 iOS)
+* [ ] Analytics event appears in Firebase DebugView when you complete an action
+* [ ] You understand the difference between Android Bundle and iOS NSDictionary type conversions
+* [ ] Ready to continue with Exercise 13b for Crashlytics and Remote Config
+
+### **💡 What You Learned**
+
+After completing this exercise, you understand:
+- ✅ How to use the **expect/actual pattern** for platform-specific implementations
+- ✅ How to convert between **Kotlin types and platform-specific types** (Bundle, NSDictionary)
+- ✅ How to integrate **Firebase Analytics** on both Android and iOS
+- ✅ How to use `@OptIn` annotations for Kotlin/Native experimental APIs
+- ✅ The basics of Firebase event tracking and DebugView testing
+
+### **➡️ Next Steps**
+
+**Continue to Exercise 13b** to add:
+- **Firebase Crashlytics** - Track and analyze app crashes
+- **Firebase Remote Config** - Update app behavior without releasing new versions
+- **Advanced patterns** - Suspend functions with platform-specific callbacks
+
+**Estimated time for 13b:** 30-40 minutes
+
+### **📚 Resources**
 
 - [Firebase Analytics Documentation](https://firebase.google.com/docs/analytics)
-- [Firebase Crashlytics Documentation](https://firebase.google.com/docs/crashlytics)
-- [Firebase Remote Config Documentation](https://firebase.google.com/docs/remote-config)
+- [Firebase DebugView Guide](https://firebase.google.com/docs/analytics/debugview)
 - [Kotlin Multiplatform expect/actual](https://kotlinlang.org/docs/multiplatform-expect-actual.html)
 - [CocoaPods Integration with KMP](https://kotlinlang.org/docs/native-cocoapods.html)
