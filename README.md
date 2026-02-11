@@ -1,4 +1,4 @@
-# 🔥 Exercise 13b: Crashlytics & Remote Config - Solution
+# 🔥 Solution 13b: Crashlytics & Remote Config
 **Module:** Monitoring & Analytics
 **Part:** 2 of 2 (Building on Exercise 13a)
 
