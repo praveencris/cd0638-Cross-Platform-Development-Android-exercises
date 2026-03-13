@@ -1,46 +1,77 @@
-# 🏁 Solution 7c: Wear OS Data Polish
-**Branch:** `sol-lesson-7c-wear-polish`
-**Prerequisite:** Completed Exercise 7b
+# ⌚ Exercise 7d: Wearable Data Layer API
+**Module:** Wearable Data Layer (Optional Deep Dive)
+**Prerequisite:** Completed Exercise 7c
+**Estimated Time:** 45 Minutes
 
-This branch replaces the hardcoded mock data in the Tile and Complication with real data fetched from `RecallApiService`. The Tile now displays the actual first deck name and total card count, and the Complication shows the real number of cards across all decks.
+### **🎓 Objective**
+In this exercise, you will implement inter-device communication between a Wear OS watch and a phone using the **Wearable Data Layer API**. You'll use three core APIs: CapabilityClient (device discovery), MessageClient (one-off commands), and DataClient (persistent data sync).
 
-## 🛠️ Implementation Summary
+### **📖 Background: When to Use the Data Layer API**
+The Wearable Data Layer API enables communication between a phone and watch over Bluetooth. It's essential when:
+- The watch app needs data from the phone app that isn't available via shared code
+- You need to trigger actions on one device from another
+- You want to sync state between paired devices
 
-### 1. Real Data in TileService
-We replaced the hardcoded `deckName = "Physics"` and `dueCount = 5` with a live fetch from `RecallApiService`.
-* **Pattern:** Access Koin from an Android Service using `KoinPlatform.getKoin().get<RecallApiService>()`
-* **Coroutine Strategy:** Use `runBlocking` — this is acceptable because TileService callbacks run on a background thread managed by the Tiles framework
-* **Error Handling:** If the API call fails, we fall back to `("Recall", 0)` so the Tile still renders
+In our Recall app, we already share code via KMP/Koin, so the Data Layer isn't strictly needed for data access. However, it's a critical API to understand for real-world Wear OS development where code sharing isn't always possible.
 
-### 2. Real Data in ComplicationService
-We replaced the hardcoded `dueCount = 12` with a live fetch using the same pattern.
-* **Pattern:** Same `KoinPlatform.getKoin()` + `runBlocking` approach
-* **Preview Data:** `getPreviewData()` intentionally still returns a static "12" — preview data is shown in the watch face editor before any real data is available
-* **Error Handling:** Falls back to `0` on API failure
+### **📖 Key Concepts**
+| API | Purpose | Persistence | Use Case |
+| :--- | :--- | :--- | :--- |
+| **CapabilityClient** | Find connected devices with specific features | N/A | "Is a phone with Recall installed connected?" |
+| **MessageClient** | Send one-off commands | Not persisted | "Hey phone, refresh your data" |
+| **DataClient** | Sync structured data | Persisted by Play Services | "Here's the current deck summary" |
 
-### Why KoinPlatform.getKoin() Instead of koinInject()?
-`TileService` and `ComplicationDataSourceService` are **Android Services**, not Compose components. They do not participate in Compose's composition lifecycle, so `koinInject()` (which is a `@Composable` function) cannot be used. Instead, we access Koin's global container directly via `KoinPlatform.getKoin().get<T>()`.
+### **✅ Task 1: Implement findPhoneNode() (TODO 1)**
+1. **Open** `wear/src/main/java/com/recall/wear/datalayer/WearDataLayerService.kt`
+2. **Implement** `findPhoneNode()` using CapabilityClient:
+   - Call `capabilityClient.getCapability("recall_phone_app", CapabilityClient.FILTER_REACHABLE)`
+   - Call `.await()` to convert the Task to a suspend result
+   - Return `capabilityInfo.nodes.firstOrNull()`
 
-### Why runBlocking is Acceptable Here
-Both `TileService.onTileRequest()` and `ComplicationDataSourceService.onComplicationRequest()` are called on **background threads** managed by the respective Wear OS frameworks. Using `runBlocking` on these threads does NOT block the main/UI thread. This is different from Activities or Compose, where `runBlocking` would cause ANRs.
+### **✅ Task 2: Implement sendRefreshRequest() (TODO 2)**
+1. **In the same file**, implement `sendRefreshRequest()` using MessageClient:
+   - Call `findPhoneNode()` — if null, return early
+   - Call `messageClient.sendMessage(node.id, "/recall/refresh", byteArrayOf())`
+   - Call `.await()`
 
-## 📂 Key Files
-| File Path | Description |
-| :--- | :--- |
-| `wear/.../tile/RecallTileService.kt` | Tile now fetches real deck data from API |
-| `wear/.../complication/RecallComplicationService.kt` | Complication now fetches real card count from API |
+### **✅ Task 3: Implement syncDeckSummary() (TODO 3)**
+1. **In the same file**, implement `syncDeckSummary()` using DataClient:
+   - Create: `PutDataMapRequest.create("/recall/deck_summary")`
+   - In `apply { }`: put "deck_name" (String), "card_count" (Int), "timestamp" (Long)
+   - Convert: `.asPutDataRequest().setUrgent()`
+   - Call: `dataClient.putDataItem(request).await()`
 
-## 🎓 Learning Objectives
-* Accessing dependency injection (Koin) from Android Services using `KoinPlatform.getKoin()`
-* Using coroutine patterns (`runBlocking`) in non-Compose contexts where background threads are guaranteed
-* Implementing graceful error handling with fallback values for glanceable surfaces
+### **✅ Task 4: Implement onDataChanged() (TODO 4)**
+1. **Open** `wear/src/main/java/com/recall/wear/datalayer/DataLayerListenerService.kt`
+2. **Implement** `onDataChanged()`:
+   - Iterate events, check `TYPE_CHANGED` and path "/recall/deck_summary"
+   - Extract DataMap using `DataMapItem.fromDataItem(event.dataItem).dataMap`
+   - Read "deck_name" and "card_count", log with `Log.d(TAG, ...)`
 
-## 🧪 Verification
-1. **Tile:** Install on a Wear OS emulator. Swipe to the tile carousel — the tile should show the actual first deck name (e.g., "Kotlin Basics") and total card count instead of "Physics: 5 Due"
-2. **Complication:** Add the Recall complication to a watch face slot — it should show the real total card count instead of always showing "12"
-3. **Error Case:** Disable network on the emulator — the tile should show "Recall: 0 Due" and the complication should show "0" (graceful fallback)
+### **✅ Task 5: Implement onMessageReceived() (TODO 5)**
+1. **In the same file**, implement `onMessageReceived()`:
+   - Log the message path: `Log.d(TAG, "Message received: ${event.path}")`
 
-## 🔧 Troubleshooting
-* **Koin not initialized:** If you see `KoinApplication has not been started`, ensure `WearApplication` is set as the application class in `AndroidManifest.xml` and that `initKoin` is called in `onCreate()`
-* **Tile not updating:** Tiles cache aggressively. Uninstall and reinstall the app, or use `adb shell am broadcast -a com.google.android.clockwork.home.action.REQUEST_TILE_UPDATE` to force a refresh
-* **Network timeout:** The GitHub Gist URL may be slow on first call. The `runBlocking` call will wait, which is fine on the background thread but may cause the tile to take a moment to appear
+### **✅ Task 6: Wire up the Sync Button (TODO 6)**
+1. **Open** `wear/src/main/java/com/recall/wear/presentation/WearAppContent.kt`
+2. **Find** the "Sync with Phone" Chip onClick handler
+3. **Implement** the sync logic inside `coroutineScope.launch { }`:
+   - Set `syncStatus = "Syncing..."`
+   - Try: call `sendRefreshRequest()`, then `syncDeckSummary()` with first deck data
+   - Catch: set `syncStatus = "No phone found"`
+   - On success: set `syncStatus = "Synced!"`
+
+### **🚀 Definition of Done**
+* [ ] **TODO 1:** `findPhoneNode()` returns a Node when a phone is paired (or null otherwise)
+* [ ] **TODO 2:** `sendRefreshRequest()` sends a message to the phone node
+* [ ] **TODO 3:** `syncDeckSummary()` writes a DataItem with deck name, card count, and timestamp
+* [ ] **TODO 4:** `onDataChanged()` logs received deck summary data from Logcat (filter: `DataLayerListener`)
+* [ ] **TODO 5:** `onMessageReceived()` logs received message path
+* [ ] **TODO 6:** Tapping "Sync with Phone" triggers the sync flow with status feedback
+
+### **💡 Hints**
+* All three client methods return `Task<T>` from Google Play Services. Use `kotlinx.coroutines.tasks.await()` to convert them to suspend functions
+* `PutDataMapRequest.create(path)` creates a builder. Use `.apply { dataMap.putXxx() }` to add data
+* Always include a timestamp in DataItems — without it, writing the same values won't trigger `onDataChanged()`
+* Test with two emulators (phone + Wear OS) paired via the Wear OS companion app
+* Filter Logcat by tag "DataLayerListener" to see received events
