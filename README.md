@@ -1,46 +1,68 @@
-# 🏁 Solution 7c: Wear OS Data Polish
-**Branch:** `sol-lesson-7c-wear-polish`
-**Prerequisite:** Completed Exercise 7b
+# 🏁 Solution 7d: Wearable Data Layer API
+**Branch:** `sol-lesson-7d-wear-data-layer`
+**Prerequisite:** Completed Exercise 7c
 
-This branch replaces the hardcoded mock data in the Tile and Complication with real data fetched from `RecallApiService`. The Tile now displays the actual first deck name and total card count, and the Complication shows the real number of cards across all decks.
+This branch demonstrates the **Wearable Data Layer API** for inter-device communication between a phone app and a Wear OS watch app over Bluetooth. It implements all three core APIs: DataClient, MessageClient, and CapabilityClient.
+
+> **Note:** This is a demonstration/sample branch. In the real Recall architecture, the watch app accesses shared KMP code directly via Koin, making the Data Layer unnecessary for data access. This branch exists purely to teach the Data Layer API pattern that is essential for apps where code sharing isn't possible.
 
 ## 🛠️ Implementation Summary
 
-### 1. Real Data in TileService
-We replaced the hardcoded `deckName = "Physics"` and `dueCount = 5` with a live fetch from `RecallApiService`.
-* **Pattern:** Access Koin from an Android Service using `KoinPlatform.getKoin().get<RecallApiService>()`
-* **Coroutine Strategy:** Use `runBlocking` — this is acceptable because TileService callbacks run on a background thread managed by the Tiles framework
-* **Error Handling:** If the API call fails, we fall back to `("Recall", 0)` so the Tile still renders
+### 1. WearDataLayerService — Core API Wrapper
+A helper class that initializes and wraps the three Data Layer clients:
+* **CapabilityClient** (`findPhoneNode()`): Discovers connected devices that advertise the "recall_phone_app" capability. Uses `FILTER_REACHABLE` to only find currently connected devices.
+* **MessageClient** (`sendRefreshRequest()`): Sends a one-off "/recall/refresh" message to the phone. Messages are fire-and-forget — delivered once, not persisted. Ideal for triggering actions.
+* **DataClient** (`syncDeckSummary()`): Writes a DataItem to path "/recall/deck_summary" containing deck name, card count, and timestamp. DataItems are automatically synced to all connected devices and persisted by Google Play Services.
 
-### 2. Real Data in ComplicationService
-We replaced the hardcoded `dueCount = 12` with a live fetch using the same pattern.
-* **Pattern:** Same `KoinPlatform.getKoin()` + `runBlocking` approach
-* **Preview Data:** `getPreviewData()` intentionally still returns a static "12" — preview data is shown in the watch face editor before any real data is available
-* **Error Handling:** Falls back to `0` on API failure
+### 2. DataLayerListenerService — Event Receiver
+A `WearableListenerService` that runs in the background:
+* **onDataChanged():** Receives DataItem updates at "/recall/deck_summary" and logs the deck name + card count
+* **onMessageReceived():** Receives messages and logs the path
+* Registered in AndroidManifest.xml with intent filters for DATA_CHANGED and MESSAGE_RECEIVED
 
-### Why KoinPlatform.getKoin() Instead of koinInject()?
-`TileService` and `ComplicationDataSourceService` are **Android Services**, not Compose components. They do not participate in Compose's composition lifecycle, so `koinInject()` (which is a `@Composable` function) cannot be used. Instead, we access Koin's global container directly via `KoinPlatform.getKoin().get<T>()`.
+### 3. UI Integration — Sync Chip
+A "Sync with Phone" Chip added to the main deck list:
+* Sends a refresh message via MessageClient
+* Syncs current deck summary via DataClient
+* Shows status feedback: "Syncing..." → "Synced!" or "No phone found"
 
-### Why runBlocking is Acceptable Here
-Both `TileService.onTileRequest()` and `ComplicationDataSourceService.onComplicationRequest()` are called on **background threads** managed by the respective Wear OS frameworks. Using `runBlocking` on these threads does NOT block the main/UI thread. This is different from Activities or Compose, where `runBlocking` would cause ANRs.
+### Architecture: Phone ↔ Watch Data Flow
+```
+┌──────────────┐     Bluetooth/Wi-Fi     ┌──────────────┐
+│  Phone App   │◄──────────────────────►│  Watch App   │
+│              │                         │              │
+│ Capability:  │   MessageClient:        │ Capability:  │
+│ recall_      │   /recall/refresh ────► │ recall_      │
+│ phone_app    │                         │ wear_app     │
+│              │   DataClient:           │              │
+│              │◄── /recall/deck_summary │              │
+└──────────────┘                         └──────────────┘
+```
 
 ## 📂 Key Files
 | File Path | Description |
 | :--- | :--- |
-| `wear/.../tile/RecallTileService.kt` | Tile now fetches real deck data from API |
-| `wear/.../complication/RecallComplicationService.kt` | Complication now fetches real card count from API |
+| `wear/.../datalayer/WearDataLayerService.kt` | **NEW** — Wraps DataClient, MessageClient, CapabilityClient |
+| `wear/.../datalayer/DataLayerListenerService.kt` | **NEW** — Receives data changes and messages |
+| `wear/src/main/res/values/wear_capabilities.xml` | **NEW** — Declares "recall_wear_app" capability |
+| `wear/src/main/AndroidManifest.xml` | **MODIFIED** — Registers DataLayerListenerService |
+| `wear/.../WearApplication.kt` | **MODIFIED** — Adds wearModule with WearDataLayerService to Koin |
+| `wear/.../presentation/WearAppContent.kt` | **MODIFIED** — Adds "Sync with Phone" Chip |
 
 ## 🎓 Learning Objectives
-* Accessing dependency injection (Koin) from Android Services using `KoinPlatform.getKoin()`
-* Using coroutine patterns (`runBlocking`) in non-Compose contexts where background threads are guaranteed
-* Implementing graceful error handling with fallback values for glanceable surfaces
+* Understanding the three Wearable Data Layer APIs: DataClient, MessageClient, CapabilityClient
+* Implementing a WearableListenerService for background event handling
+* Using `kotlinx.coroutines.tasks.await()` to convert Google Play Services Tasks to suspend functions
+* Registering services with proper intent filters in AndroidManifest.xml
+* Understanding when to use Data Layer API vs. shared code (KMP)
 
 ## 🧪 Verification
-1. **Tile:** Install on a Wear OS emulator. Swipe to the tile carousel — the tile should show the actual first deck name (e.g., "Kotlin Basics") and total card count instead of "Physics: 5 Due"
-2. **Complication:** Add the Recall complication to a watch face slot — it should show the real total card count instead of always showing "12"
-3. **Error Case:** Disable network on the emulator — the tile should show "Recall: 0 Due" and the complication should show "0" (graceful fallback)
+1. **Setup:** Create two emulators — one phone and one Wear OS watch. Pair them via the Wear OS companion app
+2. **Sync Button:** Run the watch app, scroll to the bottom, tap "Sync with Phone" — you should see "Syncing..." then either "Synced!" or "No phone found"
+3. **Logcat:** Filter by tag `DataLayerListener` — you should see "Received deck summary: [name], cards: [count]" when data is synced
+4. **Capability:** The capability "recall_wear_app" should be discoverable from the phone side
 
-## 🔧 Troubleshooting
-* **Koin not initialized:** If you see `KoinApplication has not been started`, ensure `WearApplication` is set as the application class in `AndroidManifest.xml` and that `initKoin` is called in `onCreate()`
-* **Tile not updating:** Tiles cache aggressively. Uninstall and reinstall the app, or use `adb shell am broadcast -a com.google.android.clockwork.home.action.REQUEST_TILE_UPDATE` to force a refresh
-* **Network timeout:** The GitHub Gist URL may be slow on first call. The `runBlocking` call will wait, which is fine on the background thread but may cause the tile to take a moment to appear
+## ⚠️ Limitations
+* This demo only implements the **watch side**. A full implementation would also have a phone-side listener service
+* Without a paired phone app advertising "recall_phone_app", `findPhoneNode()` will return null
+* The Data Layer requires Google Play Services — it won't work on devices without GMS

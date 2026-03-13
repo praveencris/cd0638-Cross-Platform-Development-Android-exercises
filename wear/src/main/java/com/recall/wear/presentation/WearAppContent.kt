@@ -1,22 +1,25 @@
 package com.recall.wear.presentation
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
-import androidx.wear.compose.foundation.lazy.ScalingLazyListState
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.*
 import com.recall.app.domain.models.Deck
+import com.recall.wear.datalayer.WearDataLayerService
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 /**
  * Main content composable for Wear OS app
  * Displays deck list with loading and error states
+ * Includes a "Sync with Phone" chip that demonstrates the Wearable Data Layer API
  */
 @Composable
 fun WearAppContent(
@@ -29,6 +32,9 @@ fun WearAppContent(
     modifier: Modifier = Modifier
 ) {
     val listState = rememberScalingLazyListState()
+    val dataLayerService: WearDataLayerService = koinInject()
+    val coroutineScope = rememberCoroutineScope()
+    var syncStatus by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         timeText = {
@@ -132,6 +138,48 @@ fun WearAppContent(
                             deck = deck,
                             onClick = { onDeckClick(deck) }
                         )
+                    }
+                }
+            }
+
+            // Sync with Phone chip — Data Layer API demonstration
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            item {
+                Chip(
+                    label = { Text(syncStatus ?: "Sync with Phone") },
+                    onClick = {
+                        coroutineScope.launch {
+                            syncStatus = "Syncing..."
+                            try {
+                                // Send a refresh message to the phone
+                                dataLayerService.sendRefreshRequest()
+                                // Also sync current deck summary if we have data
+                                if (decks.isNotEmpty()) {
+                                    val firstDeck = decks.first()
+                                    dataLayerService.syncDeckSummary(
+                                        deckName = firstDeck.title,
+                                        cardCount = decks.sumOf { it.cards.size }
+                                    )
+                                }
+                                syncStatus = "Synced!"
+                            } catch (e: Exception) {
+                                syncStatus = "No phone found"
+                            }
+                        }
+                    },
+                    colors = ChipDefaults.secondaryChipColors(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            // Show sync status briefly, then reset
+            if (syncStatus == "Synced!" || syncStatus == "No phone found") {
+                item {
+                    LaunchedEffect(syncStatus) {
+                        kotlinx.coroutines.delay(2000)
+                        syncStatus = null
                     }
                 }
             }
