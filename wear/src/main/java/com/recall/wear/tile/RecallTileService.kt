@@ -1,6 +1,5 @@
 package com.recall.wear.tile
 
-import android.content.Intent
 import androidx.wear.protolayout.ActionBuilders
 import androidx.wear.protolayout.ColorBuilders
 import androidx.wear.protolayout.DimensionBuilders
@@ -33,10 +32,34 @@ class RecallTileService : TileService() {
      * Returns a timeline with the tile content
      */
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
-        // In a real implementation, we would fetch the next due deck from the database
-        // For this demo, we'll use mock data
-        val deckName = "Physics"
-        val dueCount = 5
+        /**
+         * TODO 1: Replace mock data with real API data
+         *
+         * Current code uses hardcoded values:
+         *   val deckName = "Physics"
+         *   val dueCount = 5
+         *
+         * Your task:
+         * 1. Get RecallApiService from Koin using KoinPlatform.getKoin().get<RecallApiService>()
+         * 2. Call apiService.fetchAllDecks() inside runBlocking { }
+         *    (runBlocking is OK here — TileService runs on a background thread)
+         * 3. If decks are not empty, extract:
+         *    - deckName = first deck's title (decks.first().title)
+         *    - dueCount = total cards across ALL decks (decks.sumOf { it.cards.size })
+         *    If decks are empty, use ("No Decks", 0)
+         * 4. Wrap everything in a try/catch — on failure, use ("Recall", 0) as fallback
+         * 5. Assign results to deckName and dueCount variables
+         *
+         * Required imports (add at top of file):
+         *   import kotlinx.coroutines.runBlocking
+         *   import org.koin.mp.KoinPlatform
+         *   import com.recall.app.network.RecallApiService
+         *
+         * Hint: Use Kotlin's destructuring:
+         *   val (deckName, dueCount) = try { ... } catch (e: Exception) { Pair("Recall", 0) }
+         */
+        val deckName = "Physics"  // ← Replace with real data
+        val dueCount = 5          // ← Replace with real data
 
         // Create the tap action to launch MainActivity
         val clickable = ModifiersBuilders.Clickable.Builder()

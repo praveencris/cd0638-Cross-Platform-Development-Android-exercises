@@ -1,36 +1,52 @@
-# 🏁 Solution 7b: Advanced Wear OS
-**Branch:** `solution-module-7b`
+# ⌚ Exercise 7c: Wear OS Data Polish
+**Module:** Advanced Wear OS Integration (continued)
+**Prerequisite:** Completed Exercise 7b
+**Estimated Time:** 30 Minutes
 
-This branch extends the basic Wear OS app with deep system integrations, transforming it from a simple "List Viewer" into a native citizen of the watch ecosystem.
+### **🎓 Objective**
+In Exercise 7b, you implemented a Tile and Complication using hardcoded mock data (`"Physics"`, `5`, `12`). In this exercise, you will replace that mock data with **real data** fetched from `RecallApiService`.
 
-## 🛠️ Implementation Summary
+### **📖 Background: Accessing Koin from Android Services**
+`TileService` and `ComplicationDataSourceService` are **Android Services** — they are NOT Compose components. This means you **cannot** use `koinInject()` (which is a `@Composable` function).
 
-### 1. Health Services (Passive Data)
-We implemented `HealthServicesClient` to read the user's Heart Rate.
-* **Key Class:** `MeasureClient`
-* **Permission:** `android.permission.BODY_SENSORS`
-* **Implementation:** We use a `produceState` in Compose to subscribe to the `HEART_RATE_BPM` flow only when the UI is visible. This ensures we don't drain the battery when the user isn't looking at the screen.
+Instead, you access Koin's global container directly:
+```kotlin
+val apiService = KoinPlatform.getKoin().get<RecallApiService>()
+```
 
-### 2. Watch Face Complication
-We created a `SuspendingComplicationDataSourceService`.
-* **Type:** `ShortText` (Standard layout for small round slots).
-* **Update Cycle:** The OS polls this service. We return a `ShortTextComplicationData` built using the `ComplicationDataSourceService` API.
-* **Deep Link:** Tapping the complication fires a `PendingIntent` that launches `MainActivity`.
+Since both Services receive their callbacks on **background threads** (managed by the Tiles/Complications frameworks), you can safely use `runBlocking` to call suspend functions without blocking the UI thread.
 
-### 3. Tiles (ProtoLayout)
-We created a `SuspendingTileService`.
-* **Tech:** Tiles do **not** use Compose. They use **ProtoLayout**, a declarative schema that is serialized and sent to the OS to render.
-* **Layout:** We used `PrimaryLayout` from the `protolayout-material` library to easily create a standard "Title + Chip + Button" design without manual pixel math.
+### **✅ Task 1: Replace Mock Data in RecallTileService**
+1. **Open** `wear/src/main/java/com/recall/wear/tile/RecallTileService.kt`
+2. **Find** the TODO 1 comment block in `onTileRequest()`
+3. **Replace** the hardcoded `deckName` and `dueCount` with:
+   - Get `RecallApiService` from Koin
+   - Call `fetchAllDecks()` inside `runBlocking { }`
+   - Extract: first deck title + total card count across all decks
+   - Handle errors with fallback values `("Recall", 0)`
+4. **Add imports** at the top of the file:
+   - `import kotlinx.coroutines.runBlocking`
+   - `import org.koin.mp.KoinPlatform`
+   - `import com.recall.app.network.RecallApiService`
 
-## 📂 Key Files
-| File Path | Description |
-| :--- | :--- |
-| `wear/.../complication/RecallComplicationService.kt` | Logic for the "Due Count" widget. |
-| `wear/.../tile/RecallTileService.kt` | Logic for the "Quick Study" tile. |
-| `wear/.../presentation/WearApp.kt` | Updated with Heart Rate display. |
-| `wear/src/main/AndroidManifest.xml` | Added Services and Permissions. |
+### **✅ Task 2: Replace Mock Data in RecallComplicationService**
+1. **Open** `wear/src/main/java/com/recall/wear/complication/RecallComplicationService.kt`
+2. **Find** the TODO 2 comment block in `onComplicationRequest()`
+3. **Replace** the hardcoded `dueCount = 12` with:
+   - Same Koin + runBlocking pattern as Task 1
+   - Calculate: `decks.sumOf { it.cards.size }`
+   - Handle errors with fallback value `0`
+4. **Do NOT modify** `getPreviewData()` — preview data should remain static
 
-## 🧪 Verification
-1.  **Health:** Run the app on an Emulator. Open "Extended Controls" (3 dots) > "Wear OS" > "Health" and change the Heart Rate. The UI should update instantly.
-2.  **Complication:** Long-press the watch face > Edit > Tap a slot > Select "Recall". It should appear.
-3.  **Tile:** Swipe left/right on the watch face > "Add Tile" > Select "Recall". The UI should render.
+### **🚀 Definition of Done**
+* [ ] **Tile:** Shows actual deck name from API (e.g., "Kotlin Basics") instead of "Physics"
+* [ ] **Tile:** Shows real total card count instead of hardcoded "5"
+* [ ] **Complication:** Shows real total card count instead of hardcoded "12"
+* [ ] **Error Handling:** With network disabled, tile shows "Recall: 0 Due" and complication shows "0"
+* [ ] **Preview:** Complication preview in watch face editor still shows "12" (unchanged)
+
+### **💡 Hints**
+* `KoinPlatform` is in the `org.koin.mp` package
+* Kotlin destructuring: `val (name, count) = Pair("a", 1)` extracts both values
+* `decks.sumOf { it.cards.size }` gives you the total card count across all decks
+* `decks.first().title` gives you the name of the first deck

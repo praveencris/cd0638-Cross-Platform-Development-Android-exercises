@@ -3,7 +3,6 @@ package com.recall.wear.complication
 import android.app.PendingIntent
 import android.content.Intent
 import androidx.wear.watchface.complications.data.ComplicationData
-import androidx.wear.watchface.complications.data.ComplicationText
 import androidx.wear.watchface.complications.data.ComplicationType
 import androidx.wear.watchface.complications.data.PlainComplicationText
 import androidx.wear.watchface.complications.data.ShortTextComplicationData
@@ -22,7 +21,6 @@ class RecallComplicationService : ComplicationDataSourceService() {
 
     /**
      * Called when the watch face requests complication data
-     * Returns the number of due cards (mock data for now)
      */
     override fun onComplicationRequest(
         request: ComplicationRequest,
@@ -34,9 +32,24 @@ class RecallComplicationService : ComplicationDataSourceService() {
             return
         }
 
-        // In a real implementation, we would query the actual due count from the database
-        // For this demo, we'll show a mock value
-        val dueCount = 12
+        /**
+         * TODO 2: Replace mock due count with real API data
+         *
+         * Current code uses: val dueCount = 12
+         *
+         * Your task:
+         * 1. Get RecallApiService from Koin using KoinPlatform.getKoin().get<RecallApiService>()
+         * 2. Fetch all decks using runBlocking { apiService.fetchAllDecks() }
+         * 3. Calculate total cards: decks.sumOf { it.cards.size }
+         * 4. Wrap in try/catch — return 0 if the API call fails
+         * 5. Assign result to dueCount variable
+         *
+         * Required imports (add at top of file):
+         *   import kotlinx.coroutines.runBlocking
+         *   import org.koin.mp.KoinPlatform
+         *   import com.recall.app.network.RecallApiService
+         */
+        val dueCount = 12  // ← Replace with real data
 
         // Create a PendingIntent to launch MainActivity when the complication is tapped
         val intent = Intent(this, MainActivity::class.java)
