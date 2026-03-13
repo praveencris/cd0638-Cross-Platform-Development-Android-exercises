@@ -3,13 +3,15 @@ package com.recall.wear.complication
 import android.app.PendingIntent
 import android.content.Intent
 import androidx.wear.watchface.complications.data.ComplicationData
-import androidx.wear.watchface.complications.data.ComplicationText
 import androidx.wear.watchface.complications.data.ComplicationType
 import androidx.wear.watchface.complications.data.PlainComplicationText
 import androidx.wear.watchface.complications.data.ShortTextComplicationData
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceService
+import com.recall.app.network.RecallApiService
 import com.recall.wear.presentation.MainActivity
+import kotlinx.coroutines.runBlocking
+import org.koin.mp.KoinPlatform
 
 /**
  * Complication Service for Watch Face Integration
@@ -17,12 +19,17 @@ import com.recall.wear.presentation.MainActivity
  *
  * This allows users to see their due card count directly on their watch face
  * and tap to open the full app.
+ *
+ * This implementation fetches real data from RecallApiService via Koin.
+ * Since ComplicationDataSourceService callbacks run on a background thread,
+ * using runBlocking is acceptable here.
  */
 class RecallComplicationService : ComplicationDataSourceService() {
 
     /**
      * Called when the watch face requests complication data
-     * Returns the number of due cards (mock data for now)
+     * Fetches real card count from RecallApiService instead of using mock data.
+     * Uses KoinPlatform.getKoin() because Android Services cannot use koinInject().
      */
     override fun onComplicationRequest(
         request: ComplicationRequest,
@@ -34,9 +41,14 @@ class RecallComplicationService : ComplicationDataSourceService() {
             return
         }
 
-        // In a real implementation, we would query the actual due count from the database
-        // For this demo, we'll show a mock value
-        val dueCount = 12
+        // Fetch real due count from RecallApiService via Koin
+        val apiService = KoinPlatform.getKoin().get<RecallApiService>()
+        val dueCount = try {
+            val decks = runBlocking { apiService.fetchAllDecks() }
+            decks.sumOf { it.cards.size }
+        } catch (e: Exception) {
+            0
+        }
 
         // Create a PendingIntent to launch MainActivity when the complication is tapped
         val intent = Intent(this, MainActivity::class.java)
@@ -61,6 +73,7 @@ class RecallComplicationService : ComplicationDataSourceService() {
     /**
      * Preview data for the complication editor
      * Shown when users are customizing their watch face
+     * Uses static values since preview is shown before any data is loaded
      */
     override fun getPreviewData(type: ComplicationType): ComplicationData {
         return ShortTextComplicationData.Builder(

@@ -1,6 +1,5 @@
 package com.recall.wear.tile
 
-import android.content.Intent
 import androidx.wear.protolayout.ActionBuilders
 import androidx.wear.protolayout.ColorBuilders
 import androidx.wear.protolayout.DimensionBuilders
@@ -13,7 +12,10 @@ import androidx.wear.tiles.TileBuilders
 import androidx.wear.tiles.TileService
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import com.recall.app.network.RecallApiService
 import com.recall.wear.presentation.MainActivity
+import kotlinx.coroutines.runBlocking
+import org.koin.mp.KoinPlatform
 
 /**
  * Tile Service for Quick Access
@@ -21,6 +23,10 @@ import com.recall.wear.presentation.MainActivity
  *
  * Tiles appear in the Wear OS carousel and allow 5-second interactions
  * without opening the full app.
+ *
+ * This implementation fetches real data from RecallApiService via Koin.
+ * Since TileService callbacks run on a background thread managed by the
+ * Tiles framework, using runBlocking is acceptable here.
  */
 class RecallTileService : TileService() {
 
@@ -31,12 +37,25 @@ class RecallTileService : TileService() {
     /**
      * Called when the system requests the tile layout
      * Returns a timeline with the tile content
+     *
+     * Fetches real deck data from RecallApiService instead of using mock values.
+     * Uses KoinPlatform.getKoin() because Android Services cannot use koinInject().
      */
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
-        // In a real implementation, we would fetch the next due deck from the database
-        // For this demo, we'll use mock data
-        val deckName = "Physics"
-        val dueCount = 5
+        // Fetch real data from RecallApiService via Koin
+        val apiService = KoinPlatform.getKoin().get<RecallApiService>()
+        val (deckName, dueCount) = try {
+            val decks = runBlocking { apiService.fetchAllDecks() }
+            if (decks.isNotEmpty()) {
+                val name = decks.first().title
+                val count = decks.sumOf { it.cards.size }
+                Pair(name, count)
+            } else {
+                Pair("No Decks", 0)
+            }
+        } catch (e: Exception) {
+            Pair("Recall", 0)
+        }
 
         // Create the tap action to launch MainActivity
         val clickable = ModifiersBuilders.Clickable.Builder()

@@ -1,36 +1,46 @@
-# 🏁 Solution 7b: Advanced Wear OS
-**Branch:** `solution-module-7b`
+# 🏁 Solution 7c: Wear OS Data Polish
+**Branch:** `sol-lesson-7c-wear-polish`
+**Prerequisite:** Completed Exercise 7b
 
-This branch extends the basic Wear OS app with deep system integrations, transforming it from a simple "List Viewer" into a native citizen of the watch ecosystem.
+This branch replaces the hardcoded mock data in the Tile and Complication with real data fetched from `RecallApiService`. The Tile now displays the actual first deck name and total card count, and the Complication shows the real number of cards across all decks.
 
 ## 🛠️ Implementation Summary
 
-### 1. Health Services (Passive Data)
-We implemented `HealthServicesClient` to read the user's Heart Rate.
-* **Key Class:** `MeasureClient`
-* **Permission:** `android.permission.BODY_SENSORS`
-* **Implementation:** We use a `produceState` in Compose to subscribe to the `HEART_RATE_BPM` flow only when the UI is visible. This ensures we don't drain the battery when the user isn't looking at the screen.
+### 1. Real Data in TileService
+We replaced the hardcoded `deckName = "Physics"` and `dueCount = 5` with a live fetch from `RecallApiService`.
+* **Pattern:** Access Koin from an Android Service using `KoinPlatform.getKoin().get<RecallApiService>()`
+* **Coroutine Strategy:** Use `runBlocking` — this is acceptable because TileService callbacks run on a background thread managed by the Tiles framework
+* **Error Handling:** If the API call fails, we fall back to `("Recall", 0)` so the Tile still renders
 
-### 2. Watch Face Complication
-We created a `SuspendingComplicationDataSourceService`.
-* **Type:** `ShortText` (Standard layout for small round slots).
-* **Update Cycle:** The OS polls this service. We return a `ShortTextComplicationData` built using the `ComplicationDataSourceService` API.
-* **Deep Link:** Tapping the complication fires a `PendingIntent` that launches `MainActivity`.
+### 2. Real Data in ComplicationService
+We replaced the hardcoded `dueCount = 12` with a live fetch using the same pattern.
+* **Pattern:** Same `KoinPlatform.getKoin()` + `runBlocking` approach
+* **Preview Data:** `getPreviewData()` intentionally still returns a static "12" — preview data is shown in the watch face editor before any real data is available
+* **Error Handling:** Falls back to `0` on API failure
 
-### 3. Tiles (ProtoLayout)
-We created a `SuspendingTileService`.
-* **Tech:** Tiles do **not** use Compose. They use **ProtoLayout**, a declarative schema that is serialized and sent to the OS to render.
-* **Layout:** We used `PrimaryLayout` from the `protolayout-material` library to easily create a standard "Title + Chip + Button" design without manual pixel math.
+### Why KoinPlatform.getKoin() Instead of koinInject()?
+`TileService` and `ComplicationDataSourceService` are **Android Services**, not Compose components. They do not participate in Compose's composition lifecycle, so `koinInject()` (which is a `@Composable` function) cannot be used. Instead, we access Koin's global container directly via `KoinPlatform.getKoin().get<T>()`.
+
+### Why runBlocking is Acceptable Here
+Both `TileService.onTileRequest()` and `ComplicationDataSourceService.onComplicationRequest()` are called on **background threads** managed by the respective Wear OS frameworks. Using `runBlocking` on these threads does NOT block the main/UI thread. This is different from Activities or Compose, where `runBlocking` would cause ANRs.
 
 ## 📂 Key Files
 | File Path | Description |
 | :--- | :--- |
-| `wear/.../complication/RecallComplicationService.kt` | Logic for the "Due Count" widget. |
-| `wear/.../tile/RecallTileService.kt` | Logic for the "Quick Study" tile. |
-| `wear/.../presentation/WearApp.kt` | Updated with Heart Rate display. |
-| `wear/src/main/AndroidManifest.xml` | Added Services and Permissions. |
+| `wear/.../tile/RecallTileService.kt` | Tile now fetches real deck data from API |
+| `wear/.../complication/RecallComplicationService.kt` | Complication now fetches real card count from API |
+
+## 🎓 Learning Objectives
+* Accessing dependency injection (Koin) from Android Services using `KoinPlatform.getKoin()`
+* Using coroutine patterns (`runBlocking`) in non-Compose contexts where background threads are guaranteed
+* Implementing graceful error handling with fallback values for glanceable surfaces
 
 ## 🧪 Verification
-1.  **Health:** Run the app on an Emulator. Open "Extended Controls" (3 dots) > "Wear OS" > "Health" and change the Heart Rate. The UI should update instantly.
-2.  **Complication:** Long-press the watch face > Edit > Tap a slot > Select "Recall". It should appear.
-3.  **Tile:** Swipe left/right on the watch face > "Add Tile" > Select "Recall". The UI should render.
+1. **Tile:** Install on a Wear OS emulator. Swipe to the tile carousel — the tile should show the actual first deck name (e.g., "Kotlin Basics") and total card count instead of "Physics: 5 Due"
+2. **Complication:** Add the Recall complication to a watch face slot — it should show the real total card count instead of always showing "12"
+3. **Error Case:** Disable network on the emulator — the tile should show "Recall: 0 Due" and the complication should show "0" (graceful fallback)
+
+## 🔧 Troubleshooting
+* **Koin not initialized:** If you see `KoinApplication has not been started`, ensure `WearApplication` is set as the application class in `AndroidManifest.xml` and that `initKoin` is called in `onCreate()`
+* **Tile not updating:** Tiles cache aggressively. Uninstall and reinstall the app, or use `adb shell am broadcast -a com.google.android.clockwork.home.action.REQUEST_TILE_UPDATE` to force a refresh
+* **Network timeout:** The GitHub Gist URL may be slow on first call. The `runBlocking` call will wait, which is fine on the background thread but may cause the tile to take a moment to appear
