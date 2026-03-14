@@ -91,6 +91,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${libs.versions.kotlinx.coroutines.get()}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${libs.versions.kotlinx.coroutines.get()}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:${libs.versions.kotlinx.coroutines.get()}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${libs.versions.kotlinx.coroutines.get()}")
 
     // Unit Testing
     testImplementation(libs.junit)
