@@ -10,16 +10,16 @@ In this exercise, you will implement the "Zen Study" design aesthetic. You will 
 
 ### **🎨 Design Reference**
 
-* **Location:** `root/plan/design/main_list_zen_study_-_minimalist_variant/`
-* **Key Asset:** `screen.png` (Visual Reference) & `code.html` (Color/Tailwind Specs)
 * **Style:** Minimalist, Whitespace-heavy, Rounded Corners, Soft Gradients (Blue/Orange/Green).
+* **Color Palette:** Blue (`#3B82F6` → `#1E40AF`), Orange (`#F97316` → `#C2410C`), Emerald (`#10B981` → `#047857`). Use gradient pairs for card backgrounds.
+* Refer to the `DeckCard.kt` function signature and docstring for the expected component structure.
 
 ---
 
 ### **✅ Task 1: Build the Zen Card**
 
 1. **Open** `composeApp/src/commonMain/kotlin/com/recall/app/ui/components/DeckCard.kt`.
-2. **Action**: Implement the UI to match the design screenshot.
+2. **Action**: Implement the UI to match the Zen Study aesthetic described above.
 * **Container**: Rounded corners (`24.dp`), Gradient background.
 * **Content**: Title (Bold), Subtitle (Opacity 60%), "Due" Badge (Pill shape), Progress Bar.
 * **Colors**: Dynamically apply the hex color from the `Deck` model.
@@ -49,7 +49,7 @@ In this exercise, you will implement the "Zen Study" design aesthetic. You will 
 
 * **"Unresolved Reference: dp"**: Make sure you import `androidx.compose.ui.unit.dp`.
 * **Grid not showing?**: Ensure you are using `LazyVerticalGrid` with `GridCells.Fixed(2)`.
-* **Colors look wrong?**: Check `code.html` in the design folder for the exact Hex codes used in the mockups.
+* **Colors look wrong?**: Refer to the hex color codes listed in the Design Reference section above.
 
 ---
 
