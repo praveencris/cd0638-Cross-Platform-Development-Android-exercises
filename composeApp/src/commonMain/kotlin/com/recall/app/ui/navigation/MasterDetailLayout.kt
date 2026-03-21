@@ -59,6 +59,7 @@ fun MasterDetailLayout(
         )
     } else {
         CompactLayout(
+            windowSize = windowSize,
             selectedDeck = selectedDeck,
             decks = decks,
             onDeckSelected = onDeckSelected,
@@ -70,11 +71,14 @@ fun MasterDetailLayout(
 }
 
 /**
- * Compact layout for phones - shows either library or study screen
- * Close button in StudyScreen navigates back to library
+ * Single-pane layout for phones and tablets in portrait.
+ * Shows either library or study screen (stack navigation).
+ * Passes actual windowSize so LibraryScreen can adapt its grid columns
+ * (e.g., 1 column for Compact, 2 columns for Medium).
  */
 @Composable
 private fun CompactLayout(
+    windowSize: WindowSize,
     selectedDeck: Deck?,
     decks: List<Deck>,
     onDeckSelected: (Deck?) -> Unit,
@@ -94,9 +98,9 @@ private fun CompactLayout(
             )
         }
     } else {
-        // Show library screen
+        // Show library screen with actual window size for grid adaptation
         LibraryScreen(
-            windowSize = WindowSize.Compact,
+            windowSize = windowSize,
             decks = decks,
             onDeckClick = { deck -> onDeckSelected(deck) },
             modifier = modifier

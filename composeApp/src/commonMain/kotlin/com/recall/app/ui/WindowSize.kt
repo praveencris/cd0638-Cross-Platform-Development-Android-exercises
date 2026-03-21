@@ -53,6 +53,9 @@ fun AdaptiveLayout(content: @Composable (WindowSize) -> Unit) {
         val windowSize = when {
             maxWidth < 600.dp -> WindowSize.Compact
             maxWidth < 840.dp -> WindowSize.Medium
+            // Phones in landscape: wide enough for Expanded but height is too
+            // constrained for two-pane layouts (Google MD3 guideline)
+            maxHeight < 480.dp -> WindowSize.Medium
             else -> WindowSize.Expanded
         }
         content(windowSize)
