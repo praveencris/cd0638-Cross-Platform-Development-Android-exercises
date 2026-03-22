@@ -2,6 +2,7 @@ package com.recall.app.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -10,7 +11,8 @@ import androidx.room.PrimaryKey
         parentColumns = ["id"],
         childColumns = ["deckId"],
         onDelete = ForeignKey.CASCADE
-    )]
+    )],
+    indices = [Index("deckId")]
 )
 data class CardEntity(
     @PrimaryKey val id: String,
