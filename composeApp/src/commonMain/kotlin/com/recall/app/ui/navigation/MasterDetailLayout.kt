@@ -1,11 +1,16 @@
 package com.recall.app.ui.navigation
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.recall.app.domain.models.Deck
 import com.recall.app.ui.LibraryScreen
 import com.recall.app.ui.StudyScreen
@@ -151,8 +156,32 @@ private fun SplitLayout(
                     )
                 }
             } else {
-                // Empty state - could show a "Select a deck" message
-                Box(modifier = Modifier.fillMaxSize())
+                // Empty state - prompt user to select a deck
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "\uD83D\uDCDA",
+                            fontSize = 64.sp
+                        )
+                        Text(
+                            text = "Select a deck",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Choose a deck from the library to start studying",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
         }
     }
