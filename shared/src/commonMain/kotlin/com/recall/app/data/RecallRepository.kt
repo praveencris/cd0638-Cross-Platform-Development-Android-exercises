@@ -3,6 +3,7 @@ package com.recall.app.data
 import com.recall.app.data.local.dao.RecallDao
 import com.recall.app.data.local.toDomain
 import com.recall.app.data.local.toEntity
+import com.recall.app.domain.Result
 import com.recall.app.domain.models.Deck
 import com.recall.app.network.RecallApiService
 import kotlinx.coroutines.flow.Flow
@@ -94,8 +95,10 @@ class RecallRepositoryImpl(
 
         // TEMPORARY: Direct API call (remove this after implementing TODO 5)
         return kotlinx.coroutines.flow.flow {
-            val decksFromApi = api.fetchAllDecks()
-            emit(decksFromApi)
+            when (val result = api.fetchAllDecks()) {
+                is Result.Success -> emit(result.data)
+                is Result.Error -> emit(emptyList())
+            }
         }
     }
 
@@ -105,7 +108,11 @@ class RecallRepositoryImpl(
         // Goal: Fetch from API, then save to database
         //
         // Steps:
-        // 1. Fetch decks from API: val decksFromApi = api.fetchAllDecks()
+        // 1. Fetch decks from API using Result pattern:
+        //    when (val result = api.fetchAllDecks()) {
+        //        is Result.Success -> { /* use result.data */ }
+        //        is Result.Error -> throw result.exception
+        //    }
         // 2. For each deck:
         //    a. Convert to DeckEntity using deck.toEntity()
         //    b. Save deck using dao.insertDeck(deckEntity)
@@ -123,8 +130,10 @@ class RecallRepositoryImpl(
         // - Data persists across app restarts
 
         // TEMPORARY: Just fetch without saving (remove this after implementing TODO 6)
-        val decksFromApi = api.fetchAllDecks()
-        // Not saving to database yet - students will implement this
+        when (val result = api.fetchAllDecks()) {
+            is Result.Success -> { /* Not saving to database yet - students will implement this */ }
+            is Result.Error -> throw result.exception
+        }
     }
 
     override suspend fun updateDeckProgress(deckId: String, cardIndex: Int) {
