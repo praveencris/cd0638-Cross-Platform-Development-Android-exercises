@@ -2,7 +2,6 @@ package com.recall.app.network
 
 import com.recall.app.domain.Result
 import com.recall.app.domain.models.Deck
-import com.recall.app.domain.Result
 import com.recall.app.domain.models.DecksResponse
 import io.ktor.client.*
 import io.ktor.client.call.*
