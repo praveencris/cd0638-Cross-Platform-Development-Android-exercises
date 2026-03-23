@@ -3,6 +3,7 @@ package com.recall.app.data
 import com.recall.app.data.local.dao.RecallDao
 import com.recall.app.data.local.toDomain
 import com.recall.app.data.local.toEntity
+import com.recall.app.domain.Result
 import com.recall.app.domain.models.Deck
 import com.recall.app.network.RecallApiService
 import kotlinx.coroutines.flow.Flow
@@ -83,7 +84,10 @@ class RecallRepositoryImpl(
 
     override suspend fun refreshDecks() {
         // 1. Fetch from network
-        val decksFromApi = api.fetchAllDecks()
+        val decksFromApi = when (val result = api.fetchAllDecks()) {
+            is Result.Success -> result.data
+            is Result.Error -> throw result.exception
+        }
 
         // 2. Get existing decks to preserve progress
         val existingDecks = dao.getDecks().map { deckEntities ->
