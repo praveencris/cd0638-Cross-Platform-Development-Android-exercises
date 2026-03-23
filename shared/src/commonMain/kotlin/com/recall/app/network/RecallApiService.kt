@@ -1,6 +1,8 @@
 package com.recall.app.network
 
+import com.recall.app.domain.Result
 import com.recall.app.domain.models.Deck
+import com.recall.app.domain.Result
 import com.recall.app.domain.models.DecksResponse
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -21,11 +23,14 @@ open class RecallApiService(private val client: HttpClient) {
     /**
      * Fetches all available decks from the remote API
      *
-     * @return List of Deck objects with their cards
-     * @throws Exception if the network request fails or JSON parsing fails
+     * @return Result.Success with the list of decks, or Result.Error on failure
      */
-    open suspend fun fetchAllDecks(): List<Deck> {
-        val response: DecksResponse = client.get(baseUrl).body()
-        return response.decks
+    open suspend fun fetchAllDecks(): Result<List<Deck>> {
+        return try {
+            val response: DecksResponse = client.get(baseUrl).body()
+            Result.Success(response.decks)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
     }
 }
