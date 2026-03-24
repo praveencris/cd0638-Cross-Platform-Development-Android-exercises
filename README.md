@@ -87,4 +87,4 @@ Verify: `./build/Recall.xcarchive/` directory exists. Check archive in Xcode Org
 - **iOS Production Pipeline:** Learn the full App Store submission workflow from archive to distribution
 
 ## 📄 Additional Documentation
-See `ios-release-build.md` for detailed step-by-step instructions, troubleshooting (KLIB duplicates, signing issues), and the cross-platform version sync workflow diagram.
+See `ios-release-build.md` for detailed step-by-step instructions with both **terminal commands** and **IDE (Xcode / Android Studio) alternatives** for each step, troubleshooting (KLIB duplicates, signing issues), and the cross-platform version sync workflow diagram.
