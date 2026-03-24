@@ -1,5 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
+import java.io.FileInputStream
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -71,28 +73,27 @@ android {
     }
 
     // Signing configuration for release builds
-    // Credentials are injected via environment variables to keep them out of version control
+    // Credentials loaded from keystore.properties (Google's recommended approach)
+    // Falls back to environment variables for CI/CD pipelines
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    val keystoreProperties = Properties()
+    if (keystorePropertiesFile.exists()) {
+        keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+    }
+
     signingConfigs {
         create("release") {
-            // Keystore file path from environment or local.properties
-            val keystorePath = System.getenv("KEYSTORE_PATH")
-                ?: project.findProperty("keystorePath") as String?
+            val ksPath = keystoreProperties["storeFile"] as String?
+                ?: System.getenv("KEYSTORE_PATH")
 
-            // Only configure signing if keystore path is provided
-            if (keystorePath != null) {
-                storeFile = file(keystorePath)
-
-                // Keystore password
-                storePassword = System.getenv("KEYSTORE_PASSWORD")
-                    ?: project.findProperty("keystorePassword") as String?
-
-                // Key alias
-                keyAlias = System.getenv("KEY_ALIAS")
-                    ?: project.findProperty("keyAlias") as String?
-
-                // Key password
-                keyPassword = System.getenv("KEY_PASSWORD")
-                    ?: project.findProperty("keyPassword") as String?
+            if (ksPath != null) {
+                storeFile = file(ksPath)
+                storePassword = keystoreProperties["storePassword"] as String?
+                    ?: System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = keystoreProperties["keyAlias"] as String?
+                    ?: System.getenv("KEY_ALIAS")
+                keyPassword = keystoreProperties["keyPassword"] as String?
+                    ?: System.getenv("KEY_PASSWORD")
             }
         }
     }
@@ -112,9 +113,9 @@ android {
             )
 
             // Link signing configuration only if keystore is available
-            val keystorePath = System.getenv("KEYSTORE_PATH")
-                ?: project.findProperty("keystorePath") as String?
-            if (keystorePath != null) {
+            val ksPath = keystoreProperties["storeFile"] as String?
+                ?: System.getenv("KEYSTORE_PATH")
+            if (ksPath != null) {
                 signingConfig = signingConfigs.getByName("release")
             }
         }
