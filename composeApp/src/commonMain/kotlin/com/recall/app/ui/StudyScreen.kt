@@ -30,6 +30,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.*
 import com.recall.app.domain.models.Card
 import com.recall.app.domain.models.Deck
+import com.recall.app.accessibility.announceForAccessibility
 import org.jetbrains.compose.resources.stringResource
 import recall.composeapp.generated.resources.Res
 import recall.composeapp.generated.resources.showing_answer
@@ -142,6 +143,12 @@ fun StudyScreen(
                 progress = (currentCardIndex + 1).toFloat() / deck.cards.size.toFloat(),
                 onClose = onClose
             )
+
+            // Announce progress changes to iOS VoiceOver
+            // Android uses liveRegion in TopBar; iOS needs explicit notification
+            LaunchedEffect(currentCardIndex) {
+                announceForAccessibility("${currentCardIndex + 1} / ${deck.cards.size}")
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
