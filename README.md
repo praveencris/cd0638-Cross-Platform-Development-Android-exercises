@@ -10,23 +10,38 @@ We implemented a sync step using `PlistBuddy`.
 * **Why?** Mismatched versions between Android and iOS cause headaches in crash reporting (e.g., Crashlytics).
 * **Technique:** We treat the Android `composeApp/build.gradle.kts` versionCode/versionName as the "Single Source of Truth" and project those values into the iOS `Info.plist`.
 * **Script:** Run `./iosApp/sync_version.sh` to synchronize versions from Android to iOS.
+* **Note on `CFBundleVersion`:** This is the build number and must increment with every App Store submission, even if the user-facing version stays the same. Keep `CFBundleShortVersionString` synced with Android, but `CFBundleVersion` is iOS-specific and always goes up.
 
 ### 2. Release Mode Optimization
 We configured the Xcode Archive scheme to use **Release**.
-* **Impact:** This triggers the **Kotlin/Native** compiler to run LLVM optimizations (dead code elimination, link-time optimization).
-* **Result:** The app launches ~40% faster and the binary size is significantly reduced compared to the Debug build.
+* **Impact:** This triggers the **Kotlin/Native** compiler to run LLVM optimizations (dead code elimination, function inlining, constant folding).
+* **Result:** Debug app (63 MB) → Release app (39 MB) — a **38% size reduction**. Release also removes the separate debug dylib and Xcode Preview support library.
 
 ### 3. Archive & Signing
-We successfully generated an `.xcarchive`.
-* **Verification:** The archive contains the compiled Swift UI and the optimized "Fat Framework" (arm64) from the shared module.
-* **Command:** `xcodebuild -workspace iosApp/iosApp.xcworkspace -scheme iosApp -configuration Release -archivePath ./build/Recall.xcarchive archive`
+To generate an `.xcarchive` for App Store / TestFlight distribution:
+* **Requirement:** An Apple Developer Team must be configured in Xcode's Signing & Capabilities tab.
+* **Command:**
+  ```bash
+  xcodebuild -project iosApp/iosApp.xcodeproj \
+    -scheme iosApp \
+    -configuration Release \
+    -archivePath ./build/Recall.xcarchive \
+    archive
+  ```
+
+## 📊 Build Size Comparison
+
+| Build Type | App Size | Notes |
+| :--- | :--- | :--- |
+| **Debug** | 63 MB | Includes debug dylib (62 MB) + preview support |
+| **Release** | 39 MB | Single optimized binary, no debug symbols |
 
 ## 📂 Key Files
 | File Path | Description |
 | :--- | :--- |
 | `iosApp/sync_version.sh` | Shell script that syncs Android versionCode/versionName to iOS Info.plist using PlistBuddy. |
-| `iosApp/iosApp/Info.plist` | Contains the synced `CFBundleVersion` and `CFBundleShortVersionString`. |
-| `shared/build/` | Contains the release-optimized framework artifacts after running `./gradlew :shared:assembleRelease`. |
+| `iosApp/iosApp/Info.plist` | Contains the synced `CFBundleVersion` (1) and `CFBundleShortVersionString` (1.0). |
+| `ios-release-build.md` | Detailed step-by-step release build documentation with troubleshooting. |
 
 ## 🚀 Build & Verification Steps
 
@@ -34,25 +49,39 @@ We successfully generated an `.xcarchive`.
 ```bash
 ./iosApp/sync_version.sh
 ```
-
-### 2. Build Release Framework
+Verify:
 ```bash
-./gradlew :shared:assembleRelease
+/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" iosApp/iosApp/Info.plist        # → 1
+/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" iosApp/iosApp/Info.plist  # → 1.0
 ```
-Verify: Check `shared/build/fat-framework/release/` for optimized framework
 
-### 3. Create iOS Archive
+### 2. Build Release App
 ```bash
-xcodebuild -workspace iosApp/iosApp.xcworkspace \
+xcodebuild -project iosApp/iosApp.xcodeproj \
+  -scheme iosApp \
+  -configuration Release \
+  -sdk iphonesimulator \
+  -derivedDataPath ./build/ios-release \
+  -destination 'generic/platform=iOS Simulator' \
+  build
+```
+Verify: `build/ios-release/Build/Products/Release-iphonesimulator/Recall.app` exists
+
+### 3. Create iOS Archive (requires Apple Developer Team)
+```bash
+xcodebuild -project iosApp/iosApp.xcodeproj \
   -scheme iosApp \
   -configuration Release \
   -archivePath ./build/Recall.xcarchive \
   archive
 ```
-Verify: Check `./build/Recall.xcarchive/` directory exists
+Verify: `./build/Recall.xcarchive/` directory exists. Check archive in Xcode Organizer (Window > Organizer).
 
 ## 🎯 Learning Objectives
 
 - **Single Source of Truth:** Understand why version synchronization prevents production bugs in multi-platform apps
-- **Kotlin/Native Optimization:** See the performance impact of Release vs Debug builds
+- **Kotlin/Native Optimization:** See the performance impact of Release vs Debug builds (63 MB → 39 MB)
 - **iOS Production Pipeline:** Learn the full App Store submission workflow from archive to distribution
+
+## 📄 Additional Documentation
+See `ios-release-build.md` for detailed step-by-step instructions, troubleshooting (KLIB duplicates, signing issues), and the cross-platform version sync workflow diagram.
