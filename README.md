@@ -19,7 +19,8 @@ We configured the Xcode Archive scheme to use **Release**.
 
 ### 3. Archive & Signing
 To generate an `.xcarchive` for App Store / TestFlight distribution:
-* **Requirement:** An Apple Developer Team must be configured in Xcode's Signing & Capabilities tab.
+* **Requirement:** A paid Apple Developer Program membership ($99/year) and a configured Team in Xcode's Signing & Capabilities tab.
+* **Without a Developer account:** Debug and Release simulator builds still work and demonstrate the LLVM optimization impact. Only the archive/signing step requires the paid account.
 * **Command:**
   ```bash
   xcodebuild -project iosApp/iosApp.xcodeproj \
