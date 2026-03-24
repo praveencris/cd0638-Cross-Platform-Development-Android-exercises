@@ -29,12 +29,14 @@ To generate an `.xcarchive` for App Store / TestFlight distribution:
     archive
   ```
 
-## 📊 Build Size Comparison
+## 📊 Build Size Comparison (Simulator Builds)
 
-| Build Type | App Size | Notes |
+| Build Type | App Size (Simulator) | Notes |
 | :--- | :--- | :--- |
 | **Debug** | 63 MB | Includes debug dylib (62 MB) + preview support |
 | **Release** | 39 MB | Single optimized binary, no debug symbols |
+
+> Sizes are from simulator builds. Actual App Store sizes will be smaller due to App Thinning.
 
 ## 📂 Key Files
 | File Path | Description |

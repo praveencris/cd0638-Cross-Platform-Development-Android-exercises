@@ -91,14 +91,16 @@ xcodebuild -project iosApp/iosApp.xcodeproj \
 
 ---
 
-## Build Size Comparison
+## Build Size Comparison (Simulator Builds)
 
-| Build Type | App Size | Binary Size |
-|-----------|----------|-------------|
+| Build Type | App Size (Simulator) | Binary Size |
+|-----------|----------------------|-------------|
 | **Debug** | 63 MB | 62 MB (Recall.debug.dylib) |
 | **Release** | 39 MB | 39 MB (Recall binary) |
 
-### Size Reduction: ~38% (Debug vs Release)
+### Size Reduction: ~38% (Debug vs Release, Simulator)
+
+> **Note:** These sizes are from simulator builds (x86_64/arm64 simulator architecture). Actual App Store sizes will differ — typically smaller due to App Thinning, which delivers only the device-specific architecture slice. The percentage reduction between Debug and Release remains comparable.
 
 ---
 
@@ -150,8 +152,8 @@ This is a known behavior — the Xcode build phase for Kotlin compilation doesn'
 | Version sync script | `iosApp/sync_version.sh` | Syncs Android versions to iOS Info.plist |
 | Info.plist | `iosApp/iosApp/Info.plist` | Contains CFBundleVersion and CFBundleShortVersionString |
 | Xcode project | `iosApp/iosApp.xcodeproj` | iOS app project |
-| Debug app | `build/ios-debug/.../Recall.app` | Debug simulator build (63 MB) |
-| Release app | `build/ios-release/.../Recall.app` | Release simulator build (39 MB) |
+| Debug app (simulator) | `build/ios-debug/.../Recall.app` | Debug simulator build (63 MB) |
+| Release app (simulator) | `build/ios-release/.../Recall.app` | Release simulator build (39 MB) |
 | Archive | `build/Recall.xcarchive/` | Production archive for App Store |
 
 ---
