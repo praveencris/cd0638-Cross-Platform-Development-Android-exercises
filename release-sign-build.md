@@ -1,11 +1,13 @@
 # Release Signing Build Documentation
 
 ## Overview
-This document covers the steps to generate a signed release build for the Recall app, including keystore generation, build configuration, and the resulting size optimizations from R8 code shrinking and resource stripping.
+This document covers the steps to generate a signed release build for the Recall app, including keystore generation, build configuration, and the resulting size optimizations from R8 code shrinking and resource stripping. Each step includes both **terminal** and **Android Studio IDE** instructions.
 
 ---
 
 ## Step 1: Generate a Keystore
+
+### Option A: Terminal (keytool)
 
 ```bash
 keytool -genkey -v \
@@ -20,6 +22,20 @@ keytool -genkey -v \
 ```
 
 **Output:** `recall-release.jks` in the project root.
+
+### Option B: Android Studio IDE
+
+1. In Android Studio, go to **Build > Generate Signed Bundle / APK...**
+2. Select **Android App Bundle** or **APK**, click **Next**
+3. Under Key store path, click **Create new...**
+4. Fill in the dialog:
+   - **Key store path:** Choose a location (e.g., project root or `~/keystores/recall-release.jks`)
+   - **Password:** Enter a strong password
+   - **Key alias:** `recall`
+   - **Key password:** Enter a password (can match keystore password)
+   - **Certificate:** Fill in organization details (CN, OU, O, L, ST, C)
+5. Click **OK** — the keystore is created and automatically selected
+6. Click **Cancel** (we'll configure Gradle signing separately rather than using the wizard)
 
 **Important:** Never commit the keystore or passwords to version control. Both `*.jks` and `keystore.properties` are in `.gitignore`.
 
@@ -39,6 +55,13 @@ keyPassword=your_key_password
 keyAlias=recall
 storeFile=/absolute/path/to/recall-release.jks
 ```
+
+**Using Android Studio to create the file:**
+1. In the Project view, right-click the **project root** (top-level `Recall` folder)
+2. Select **New > File**
+3. Name it `keystore.properties`
+4. Enter the four key-value pairs above
+5. Save the file
 
 This file is loaded by `build.gradle.kts` using:
 ```kotlin
@@ -72,19 +95,53 @@ Environment variables are used as a fallback when `keystore.properties` is not p
 
 ## Step 3: Build the Release
 
-### Signed APK (for direct install/testing)
+### Debug Build (for size comparison)
 
+**Terminal:**
+```bash
+./gradlew :composeApp:assembleDebug
+```
+
+**Android Studio IDE:**
+1. In the toolbar, ensure the **build variant** is set to **debug** (Build > Select Build Variant, or use the Build Variants panel on the left sidebar)
+2. Click the **Run** button (green play icon) or press `Shift+F10`
+3. The debug APK is generated at `composeApp/build/outputs/apk/debug/composeApp-debug.apk`
+
+### Signed Release APK (for direct install/testing)
+
+**Terminal:**
 ```bash
 ./gradlew :composeApp:assembleRelease
 ```
+
+**Android Studio IDE:**
+1. Go to **Build > Generate Signed Bundle / APK...**
+2. Select **APK**, click **Next**
+3. Select your keystore (or it auto-populates if you created one earlier):
+   - **Key store path:** Browse to your `.jks` file
+   - **Key store password:** Enter password
+   - **Key alias:** `recall`
+   - **Key password:** Enter password
+4. Click **Next**
+5. Select **release** build variant
+6. Check **V1 (Jar Signature)** and **V2 (Full APK Signature)**
+7. Click **Create**
+8. Android Studio builds and signs the APK — a notification appears when done with a link to the output
 
 **Output path:** `composeApp/build/outputs/apk/release/composeApp-release.apk`
 
 ### Signed App Bundle (for Google Play Store)
 
+**Terminal:**
 ```bash
 ./gradlew :composeApp:bundleRelease
 ```
+
+**Android Studio IDE:**
+1. Go to **Build > Generate Signed Bundle / APK...**
+2. Select **Android App Bundle**, click **Next**
+3. Enter keystore credentials (same as APK above)
+4. Click **Next**, select **release**, click **Create**
 
 **Output path:** `composeApp/build/outputs/bundle/release/composeApp-release.aab`
 
@@ -92,6 +149,7 @@ Environment variables are used as a fallback when `keystore.properties` is not p
 
 ## Step 4: Verify the Signature
 
+### Terminal
 ```bash
 # Using Android's apksigner (recommended)
 $ANDROID_HOME/build-tools/35.0.0/apksigner verify --print-certs \
@@ -106,9 +164,41 @@ Signer #1 certificate SHA-256 digest: <hash>
 
 Note: Use `apksigner` instead of `jarsigner`. Android uses v2/v3 APK signing scheme which `jarsigner` does not recognize.
 
+### Android Studio IDE (Analyze APK)
+
+1. Go to **Build > Analyze APK...**
+2. Browse to `composeApp/build/outputs/apk/release/composeApp-release.apk`
+3. Android Studio opens the APK Analyzer showing:
+   - **File size** and **download size** (estimated Play Store download)
+   - **classes.dex** — R8-optimized bytecode (you'll see obfuscated class names)
+   - **res/** — remaining resources after shrinking
+   - **META-INF/** — contains the signature files (confirms signing)
+4. To compare debug vs release: click **Compare with previous APK...** button and select the debug APK
+
 ---
 
-## Build Size Comparison
+## Step 5: Size Comparison
+
+### Terminal
+Compare file sizes directly:
+```bash
+ls -lh composeApp/build/outputs/apk/debug/composeApp-debug.apk
+ls -lh composeApp/build/outputs/apk/release/composeApp-release.apk
+ls -lh composeApp/build/outputs/bundle/release/composeApp-release.aab
+```
+
+### Android Studio IDE (Analyze APK — Side-by-Side)
+
+1. Go to **Build > Analyze APK...**
+2. Open the **release** APK first
+3. Click **Compare with previous APK...** (top-right button)
+4. Select the **debug** APK
+5. Android Studio shows a side-by-side breakdown:
+   - Total size difference
+   - Per-file size changes (which classes, resources, and libraries shrank the most)
+   - dex file comparison (see how many classes R8 removed)
+
+### Results
 
 | Build Type | Size | Path |
 |-----------|------|------|
@@ -150,6 +240,9 @@ Rules are configured to preserve:
 - **Coroutines:** Main dispatcher factory and exception handlers
 - **SLF4J:** Suppresses warnings about missing logging implementations
 
+**Viewing R8 output in Android Studio:**
+After a release build, check `composeApp/build/outputs/mapping/release/mapping.txt` for the R8 obfuscation map. This file maps obfuscated names back to original names — essential for reading crash reports from production.
+
 ---
 
 ## File Locations Summary
@@ -160,6 +253,7 @@ Rules are configured to preserve:
 | Signing credentials | `keystore.properties` (project root) | No (`keystore.properties` in .gitignore) |
 | Build config | `composeApp/build.gradle.kts` | Yes |
 | ProGuard rules | `composeApp/proguard-rules.pro` | Yes |
+| R8 mapping | `composeApp/build/outputs/mapping/release/mapping.txt` | No (build output) |
 | Debug APK | `composeApp/build/outputs/apk/debug/` | No (build output) |
 | Release APK | `composeApp/build/outputs/apk/release/` | No (build output) |
 | Release AAB | `composeApp/build/outputs/bundle/release/` | No (build output) |
@@ -181,3 +275,4 @@ Rules are configured to preserve:
 - Check `proguard-rules.pro` for missing keep rules
 - Common symptom: crash on database access (Room) or DI resolution (Koin)
 - Add `-keep` rules for any classes accessed via reflection
+- **In Android Studio:** Use **Build > Analyze APK** on the release APK to check if expected classes are present in the dex files

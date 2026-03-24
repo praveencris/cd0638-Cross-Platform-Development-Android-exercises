@@ -36,4 +36,4 @@ We added specific rules to `proguard-rules.pro` to support our KMP stack:
 4. **Size Comparison:** Debug APK (22 MB) vs Release APK (9.6 MB) vs Release AAB (8.0 MB).
 
 ## 📄 Additional Documentation
-See `release-sign-build.md` for detailed step-by-step instructions on generating the keystore, configuring credentials, building, and verifying.
+See `release-sign-build.md` for detailed step-by-step instructions with both **terminal commands** and **Android Studio IDE alternatives** for each step — keystore generation, signing, building, APK analysis, and size comparison.
