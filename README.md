@@ -3,6 +3,8 @@
 
 This solution prepares the iOS target for the App Store by aligning it with the Android production build.
 
+> **Prerequisite:** Archiving and code signing require a paid Apple Developer Program membership ($99/year). Without one, version sync and Debug/Release simulator builds still work — only the final archive step requires the account. All steps are documented below for the complete learning experience.
+
 ## 🛠️ Implementation Summary
 
 ### 1. Automated Versioning
@@ -18,9 +20,7 @@ We configured the Xcode Archive scheme to use **Release**.
 * **Result:** Debug app (63 MB) → Release app (39 MB) — a **38% size reduction**. Release also removes the separate debug dylib and Xcode Preview support library.
 
 ### 3. Archive & Signing
-To generate an `.xcarchive` for App Store / TestFlight distribution:
-* **Requirement:** A paid Apple Developer Program membership ($99/year) and a configured Team in Xcode's Signing & Capabilities tab.
-* **Without a Developer account:** Debug and Release simulator builds still work and demonstrate the LLVM optimization impact. Only the archive/signing step requires the paid account.
+To generate an `.xcarchive` for App Store / TestFlight distribution (requires Apple Developer account — see prerequisite above):
 * **Command:**
   ```bash
   xcodebuild -project iosApp/iosApp.xcodeproj \

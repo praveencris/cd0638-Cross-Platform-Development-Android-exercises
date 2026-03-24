@@ -3,6 +3,10 @@
 ## Overview
 This document covers the steps to prepare the iOS Recall app for App Store submission, including version synchronization, Release mode optimization, and archiving.
 
+## Prerequisites & Limitations
+
+> **Apple Developer Account ($99/year):** Archiving and code signing require a paid Apple Developer Program membership. Without one, the **archive step will fail** with "Signing requires a development team." However, all other steps — version sync, Debug and Release simulator builds, and size comparison — work without a Developer account. We document the full archive process below so you understand the complete pipeline, even if you cannot execute the final signing step.
+
 ---
 
 ## Step 1: Sync Versions from Android
@@ -87,13 +91,7 @@ xcodebuild -project iosApp/iosApp.xcodeproj \
 
 **Output:** `build/Recall.xcarchive/`
 
-**Important — Apple Developer Account Required:**
-Archiving and code signing require an Apple Developer account ($99/year). Without one:
-- Debug and Release **simulator builds work fine** — no signing needed
-- **Archiving will fail** with: `Signing for "iosApp" requires a development team`
-- You **cannot** submit to the App Store or distribute via TestFlight
-
-If you don't have a Developer account, you can still demonstrate the Debug vs Release optimization by comparing the simulator builds (Step 3 above). The size reduction and LLVM optimization impact are identical — only the final archive/signing step requires the paid account.
+**Note:** This step requires an Apple Developer account (see Prerequisites above). The steps below document the full process for reference.
 
 ---
 
@@ -141,18 +139,7 @@ export KONAN_DATA_DIR=/Users/you/.konan
 ```
 
 ### Archive Fails with "Signing requires a development team"
-This means no Apple Developer account is configured. Unlike Android (where you can self-sign with a local keystore for free), iOS archiving requires a paid Apple Developer Program membership ($99/year).
-
-**If you have an Apple Developer account:**
-1. Open the project in Xcode
-2. Go to **Signing & Capabilities** tab
-3. Select your **Team** under Signing
-4. Retry the archive
-
-**If you don't have an Apple Developer account:**
-- Debug and Release simulator builds still work — use those to demonstrate the optimization
-- You can compare simulator `.app` sizes to show the Debug vs Release difference
-- The archive/signing step is the only part that requires the paid account
+See Prerequisites at the top. To fix, open the project in Xcode, go to **Signing & Capabilities**, and select your **Team**. This requires an Apple Developer account.
 
 ### "Compile Kotlin Framework" runs every build
 This is a known behavior — the Xcode build phase for Kotlin compilation doesn't use dependency analysis. The warning is informational and doesn't affect the build.
