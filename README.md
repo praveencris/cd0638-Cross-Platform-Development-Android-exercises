@@ -13,8 +13,10 @@ Android apps must be signed with a digital certificate.
 
 ### **✅ Task 2: Configure Signing in Gradle**
 1. **Open** `composeApp/build.gradle.kts`.
-2. **Action**: Implement the `signingConfigs` block. Reference your new keystore file and the passwords you created.
-3. **Action**: Ensure the `release` build type uses this signing configuration.
+2. **Action**: Create a `keystore.properties` file in the project root to store your credentials (path, passwords, alias). This is Google's recommended approach — never use `local.properties` for custom values, and never hardcode passwords in the build script.
+3. **Action**: In the build script, load `keystore.properties` using `java.util.Properties` and implement the `signingConfigs` block. Use environment variables as a fallback for CI/CD.
+4. **Action**: Ensure the `release` build type uses this signing configuration.
+5. **Action**: Add `keystore.properties`, `*.jks`, and `*.keystore` to `.gitignore`.
 
 ### **✅ Task 3: Optimization (R8)**
 A debug APK is large and contains "leaking" info. We need to shrink it.
