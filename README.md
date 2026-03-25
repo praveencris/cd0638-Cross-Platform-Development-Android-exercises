@@ -5,6 +5,15 @@ This branch contains the final production-ready configuration for the Recall app
 
 ## 🛠️ Implementation Summary
 
+### 0. Centralized Versioning
+Version is defined in `gradle.properties` as the **single source of truth** for both Android and iOS:
+```properties
+APP_VERSION_MAJOR=1
+APP_VERSION_MINOR=0
+APP_VERSION_PATCH=0
+```
+`build.gradle.kts` reads from these properties to compute `versionCode` (1000000) and `versionName` ("1.0.0"). iOS syncs `MARKETING_VERSION` in `Config.xcconfig` from the same source. Build numbers (`versionCode` / `CURRENT_PROJECT_VERSION`) are independent per store.
+
 ### 1. Secure Signing
 We implemented `signingConfigs` using a detached keystore.
 * **Security:** Following Google's recommended approach, we load credentials from a separate `keystore.properties` file using `java.util.Properties`, with environment variables as a CI/CD fallback. This keeps sensitive data out of version control.
