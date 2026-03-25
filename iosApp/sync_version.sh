@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # sync_version.sh - OPTIONAL STRETCH GOAL
-# Synchronizes Android version (single source of truth) to iOS Info.plist
-# This prevents version drift between platforms during production releases
+# Synchronizes marketing version from gradle.properties (single source of truth)
+# to iOS Config.xcconfig. Build numbers are independent per store.
 #
 # NOTE: The primary exercise focuses on manual Xcode configuration.
 # This script provides an optional automation approach for advanced students.
@@ -15,88 +15,67 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo "${YELLOW}🔄 Syncing Android version to iOS...${NC}"
+echo "${YELLOW}🔄 Syncing marketing version from gradle.properties to iOS...${NC}"
 
 # TODO 1: Define paths to the files you need
 # Hint: Use $(cd "$(dirname "$0")/.." && pwd) to get the project root
 # You need:
 # - PROJECT_ROOT: The root directory of the project
-# - BUILD_GRADLE: Path to composeApp/build.gradle.kts
-# - INFO_PLIST: Path to iosApp/iosApp/Info.plist
+# - GRADLE_PROPS: Path to gradle.properties (single source of truth)
+# - XCCONFIG: Path to iosApp/Configuration/Config.xcconfig
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BUILD_GRADLE="$PROJECT_ROOT/composeApp/build.gradle.kts"
-INFO_PLIST="$PROJECT_ROOT/iosApp/iosApp/Info.plist"
+GRADLE_PROPS="$PROJECT_ROOT/gradle.properties"
+XCCONFIG="$PROJECT_ROOT/iosApp/Configuration/Config.xcconfig"
 
-# TODO 2: Verify PlistBuddy is available (macOS only tool)
-# Hint: Use 'command -v /usr/libexec/PlistBuddy' to check
-# Exit with error message if not found
-
-if ! command -v /usr/libexec/PlistBuddy &> /dev/null; then
-    echo "${RED}❌ Error: PlistBuddy not found. This script requires macOS.${NC}"
-    exit 1
-fi
-
-# TODO 3: Verify required files exist
-# Check if BUILD_GRADLE and INFO_PLIST files exist
+# TODO 2: Verify required files exist
+# Check if GRADLE_PROPS and XCCONFIG files exist
 # Exit with error message if either is missing
 
-if [ ! -f "$BUILD_GRADLE" ]; then
-    echo "${RED}❌ Error: composeApp/build.gradle.kts not found${NC}"
+if [ ! -f "$GRADLE_PROPS" ]; then
+    echo "${RED}❌ Error: gradle.properties not found${NC}"
     exit 1
 fi
 
-if [ ! -f "$INFO_PLIST" ]; then
-    echo "${RED}❌ Error: iosApp/iosApp/Info.plist not found${NC}"
+if [ ! -f "$XCCONFIG" ]; then
+    echo "${RED}❌ Error: iosApp/Configuration/Config.xcconfig not found${NC}"
     exit 1
 fi
 
-# TODO 4: Extract versionCode from build.gradle.kts
-# Hint: Use grep to find the line with 'versionCode ='
-# Then use awk or sed to extract just the number
-# Example: grep -E 'versionCode\s*=\s*[0-9]+' "$BUILD_GRADLE" | awk ...
+# TODO 3: Extract version components from gradle.properties
+# Hint: Use grep to find lines like APP_VERSION_MAJOR=1
+# Then use awk to extract the value after '='
+# Example: grep -E '^APP_VERSION_MAJOR=' "$GRADLE_PROPS" | awk -F'=' '{print $2}'
+#
+# You need three variables: MAJOR, MINOR, PATCH
 
-VERSION_CODE=""  # Replace with your extraction logic
+MAJOR=""  # Replace with your extraction logic
+MINOR=""  # Replace with your extraction logic
+PATCH=""  # Replace with your extraction logic
 # Your code here
 
-if [ -z "$VERSION_CODE" ]; then
-    echo "${RED}❌ Error: Could not extract versionCode from build.gradle.kts${NC}"
+if [ -z "$MAJOR" ] || [ -z "$MINOR" ] || [ -z "$PATCH" ]; then
+    echo "${RED}❌ Error: Could not extract APP_VERSION_MAJOR/MINOR/PATCH from gradle.properties${NC}"
     exit 1
 fi
 
-# TODO 5: Extract versionName from build.gradle.kts
-# Hint: Similar to above but look for 'versionName ='
-# The value is in quotes, so you'll need to extract the string between quotes
-# Example: grep -E 'versionName\s*=\s*"' "$BUILD_GRADLE" | awk -F'"' ...
+MARKETING_VERSION="$MAJOR.$MINOR.$PATCH"
+echo "  📦 gradle.properties version: $MARKETING_VERSION"
 
-VERSION_NAME=""  # Replace with your extraction logic
+# Read current build number (independent, not synced)
+CURRENT_BUILD=$(grep -E '^CURRENT_PROJECT_VERSION=' "$XCCONFIG" | awk -F'=' '{print $2}' | tr -d ' ')
+echo "  🔢 Current iOS build number: $CURRENT_BUILD (independent, not synced)"
+
+# TODO 4: Update MARKETING_VERSION in Config.xcconfig
+# Hint: Use sed to replace the MARKETING_VERSION line
+# Example: sed -i '' "s/^MARKETING_VERSION=.*/MARKETING_VERSION=$MARKETING_VERSION/" "$XCCONFIG"
+#
+# IMPORTANT: Only update MARKETING_VERSION, NOT CURRENT_PROJECT_VERSION
+# Build numbers are independent per store — iOS increments its own build number
+# with each App Store submission
+
 # Your code here
 
-if [ -z "$VERSION_NAME" ]; then
-    echo "${RED}❌ Error: Could not extract versionName from build.gradle.kts${NC}"
-    exit 1
-fi
-
-echo "  📱 Android versionCode: $VERSION_CODE"
-echo "  📱 Android versionName: $VERSION_NAME"
-
-# TODO 6: Update Info.plist using PlistBuddy
-# You need to set two keys:
-# - CFBundleVersion = versionCode (build number)
-# - CFBundleShortVersionString = versionName (user-facing version)
-#
-# PlistBuddy syntax:
-#   /usr/libexec/PlistBuddy -c "Set :KeyName value" "$INFO_PLIST"
-#   If the key doesn't exist, use "Add :KeyName string value" instead
-#
-# Hint: Use || to try Set first, and if it fails, use Add:
-#   /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION_CODE" "$INFO_PLIST" 2>/dev/null || \
-#   /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $VERSION_CODE" "$INFO_PLIST"
-
-# Your code here to update CFBundleVersion
-
-# Your code here to update CFBundleShortVersionString
-
-echo "${GREEN}✅ iOS Info.plist updated successfully${NC}"
-echo "  🍎 CFBundleVersion: $VERSION_CODE"
-echo "  🍎 CFBundleShortVersionString: $VERSION_NAME"
+echo "${GREEN}✅ Config.xcconfig updated successfully${NC}"
+echo "  🍎 MARKETING_VERSION: $MARKETING_VERSION (synced from gradle.properties)"
+echo "  🔢 CURRENT_PROJECT_VERSION: $CURRENT_BUILD (unchanged — increment manually per App Store submission)"

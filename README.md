@@ -7,35 +7,31 @@
 The Android app is signed and optimized. Now, you must bring the iOS app up to the same standard. In this exercise, you will sync the version numbers and configure the Shared Framework for a "Release" build to ensure maximum performance.
 
 ## ✅ Task 1: Version Synchronization
-Apple requires the Build Number (`CFBundleVersion`) to match your release history. In KMP, we want this to match our Android `versionCode` for consistency.
+The app version is defined in `gradle.properties` as the **single source of truth**. The marketing version (what users see) must match across Android and iOS. Build numbers are independent per store.
 
-1. **Check:** Open `iosApp/iosApp/Info.plist` and notice the dummy versions ("0.0.1" and "0").
-2. **Action:** Extract the `versionCode` and `versionName` from `composeApp/build.gradle.kts` and update the `Info.plist`.
-   - **Current Android values:**
-     - `versionCode = 1` → Should map to `CFBundleVersion`
-     - `versionName = "1.0"` → Should map to `CFBundleShortVersionString`
+1. **Check:** Open `gradle.properties` and find `APP_VERSION_MAJOR=1`, `APP_VERSION_MINOR=0`, `APP_VERSION_PATCH=0`. The marketing version is `1.0.0`.
+2. **Action:** Sync the marketing version to iOS by updating `MARKETING_VERSION` in `iosApp/Configuration/Config.xcconfig` to match.
+   - **Important:** Only sync `MARKETING_VERSION`. Leave `CURRENT_PROJECT_VERSION` (build number) independent — it increments per App Store submission.
 
-**How to update Info.plist:**
+**How to update Config.xcconfig:**
 
 ### Option A: Manual Update (Recommended for Exercise)
-1. Open `composeApp/build.gradle.kts` and find the version values (lines 62-63)
-2. Open `iosApp/iosApp/Info.plist` in Xcode or text editor
-3. Update the XML values:
-   ```xml
-   <key>CFBundleVersion</key>
-   <string>1</string>
-   <key>CFBundleShortVersionString</key>
-   <string>1.0</string>
+1. Open `gradle.properties` and note the version: `1.0.0`
+2. Open `iosApp/Configuration/Config.xcconfig`
+3. Update `MARKETING_VERSION`:
    ```
+   MARKETING_VERSION=1.0.0
+   ```
+4. Leave `CURRENT_PROJECT_VERSION=1` unchanged
 
-### Option B: Using PlistBuddy (macOS Command Line)
-```bash
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion 1" iosApp/iosApp/Info.plist
-/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.0" iosApp/iosApp/Info.plist
-```
+### Option B: Using Xcode UI
+1. Open `iosApp/iosApp.xcodeproj` in Xcode
+2. Select **iosApp** target > **General** tab
+3. Update **Version** to `1.0.0` (matches gradle.properties)
+4. Leave **Build** unchanged (independent per store)
 
 ### Option C: Automated Script (Stretch Goal)
-Complete the TODOs in `iosApp/sync_version.sh` to create an automated version sync script.
+Complete the TODOs in `iosApp/sync_version.sh` to create an automated version sync script that reads from `gradle.properties` and writes `MARKETING_VERSION` to `Config.xcconfig`.
 
 ## ✅ Task 2: Enable Release Optimizations
 By default, the Shared Module compiles in "Debug" mode, which is slow and large. Let's configure it for production.
