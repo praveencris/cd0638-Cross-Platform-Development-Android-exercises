@@ -8,7 +8,7 @@ platform :android do
   lane :package_release do
     # Step 1: Clean previous build artifacts
     # This ensures a fresh build without cached artifacts
-    gradle(task: "clean")
+    gradle(task: "clean", project_dir: "../")
 
     # Step 2: Build release bundle (optimized with R8 & resource shrinking)
     # The bundleRelease task:
@@ -17,7 +17,7 @@ platform :android do
     # - Applies ProGuard rules for Koin, Room, and Serialization
     # - Strips unused resources
     # - Produces an optimized .aab file for Play Store
-    gradle(task: "bundleRelease")
+    gradle(task: "bundleRelease", project_dir: "../")
 
     # Step 3: Upload to Play Store (COMMENTED OUT)
     # Uncomment when you have a Google Play Developer Account and API credentials
