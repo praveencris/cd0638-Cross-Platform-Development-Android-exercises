@@ -9,9 +9,9 @@ This document covers the steps to prepare the iOS Recall app for App Store submi
 
 ---
 
-## Step 1: Sync Versions from Android
+## Step 1: Sync Marketing Version from gradle.properties
 
-Android `build.gradle.kts` is the single source of truth for versioning.
+`gradle.properties` is the **single source of truth** for the app version. The sync script reads the marketing version from there and writes it to iOS's `Config.xcconfig`. Build numbers are **independent per store** — the script does not touch them.
 
 ### Option A: Using the Sync Script (Terminal)
 
@@ -19,47 +19,46 @@ Android `build.gradle.kts` is the single source of truth for versioning.
 ./iosApp/sync_version.sh
 ```
 
-This extracts `versionCode` and `versionName` from `composeApp/build.gradle.kts` and writes them to `iosApp/iosApp/Info.plist`:
-- `versionCode` (1) → `CFBundleVersion` (build number)
-- `versionName` ("1.0") → `CFBundleShortVersionString` (user-facing version)
+This reads `APP_VERSION_MAJOR`, `APP_VERSION_MINOR`, and `APP_VERSION_PATCH` from `gradle.properties` and writes `MARKETING_VERSION` to `iosApp/Configuration/Config.xcconfig`. It does **not** change `CURRENT_PROJECT_VERSION` (the iOS build number) — that increments independently per App Store submission.
 
 ### Option B: Using Android Studio + Xcode (IDE)
 
-**Read versions from Android Studio:**
+**Read version from Android Studio:**
 1. Open the project in **Android Studio**
-2. Navigate to `composeApp/build.gradle.kts`
-3. Find `versionCode` and `versionName` in the `defaultConfig` block (around lines 62-63):
+2. Open `gradle.properties` (project root)
+3. Find the version properties:
    ```
-   versionCode = 1
-   versionName = "1.0"
+   APP_VERSION_MAJOR=1
+   APP_VERSION_MINOR=0
+   APP_VERSION_PATCH=0
    ```
-4. Note these values — you'll enter them in Xcode next
+4. The marketing version is `1.0.0`
 
-**Write versions in Xcode:**
+**Write marketing version in Xcode:**
+1. Open `iosApp/Configuration/Config.xcconfig` in a text editor or Xcode
+2. Update `MARKETING_VERSION` to match:
+   ```
+   MARKETING_VERSION=1.0.0
+   ```
+3. Leave `CURRENT_PROJECT_VERSION` as-is (independent build number)
+
+Alternatively, in Xcode UI:
 1. Open `iosApp/iosApp.xcodeproj` in **Xcode**
-2. In the Project Navigator (left sidebar), click on `iosApp` project (blue icon at the top)
-3. Select the **iosApp** target
-4. Go to the **General** tab
-5. Under **Identity**, update:
-   - **Version** → `1.0` (matches Android `versionName`)
-   - **Build** → `1` (matches Android `versionCode`)
-
-Alternatively, edit `Info.plist` directly:
-1. In Xcode, open `iosApp/iosApp/Info.plist`
-2. Find `CFBundleShortVersionString` → set to `1.0`
-3. Find `CFBundleVersion` → set to `1`
+2. Select the **iosApp** target > **General** tab
+3. Under **Identity**, update **Version** to `1.0.0`
+4. Leave **Build** unchanged (independent per store)
 
 ### Verify
 ```bash
-/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" iosApp/iosApp/Info.plist
-/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" iosApp/iosApp/Info.plist
+grep "MARKETING_VERSION" iosApp/Configuration/Config.xcconfig
 ```
-Expected: `1` and `1.0`
+Expected: `MARKETING_VERSION=1.0.0`
 
-### Important Note on iOS Version Numbers
-- `CFBundleVersion` (build number) must increment with every App Store submission, even if the version stays the same
-- `CFBundleShortVersionString` (user-facing version) should stay synced with Android
-- Example: version 1.2 with build numbers 5, 6, 7 across multiple submissions
+### Important: Marketing Version vs Build Number
+- **Marketing version** (`MARKETING_VERSION` / `CFBundleShortVersionString`): User-facing, **must match across platforms**
+- **Build number** (`CURRENT_PROJECT_VERSION` / `CFBundleVersion`): Internal, **independent per store**, must increment with every App Store submission
+- Example: Marketing version 1.2.0 with iOS build numbers 5, 6, 7 across multiple submissions
+- **Android-only hotfix?** Bump marketing version in gradle.properties for both, but only submit Android to Play Store. iOS build number stays put.
 
 ---
 
@@ -224,8 +223,9 @@ Ensure `KONAN_DATA_DIR` is set correctly. Xcode uses the logged-in user's enviro
 
 | File | Path | Description |
 |------|------|-------------|
-| Version sync script | `iosApp/sync_version.sh` | Syncs Android versions to iOS Info.plist |
-| Info.plist | `iosApp/iosApp/Info.plist` | Contains CFBundleVersion and CFBundleShortVersionString |
+| Version source | `gradle.properties` | Single source of truth (APP_VERSION_MAJOR/MINOR/PATCH) |
+| Version sync script | `iosApp/sync_version.sh` | Syncs MARKETING_VERSION from gradle.properties to Config.xcconfig |
+| Config.xcconfig | `iosApp/Configuration/Config.xcconfig` | MARKETING_VERSION (synced) + CURRENT_PROJECT_VERSION (independent) |
 | Xcode project | `iosApp/iosApp.xcodeproj` | iOS app project |
 | Debug app (simulator) | `build/ios-debug/.../Recall.app` | Debug simulator build (63 MB) |
 | Release app (simulator) | `build/ios-release/.../Recall.app` | Release simulator build (39 MB) |
@@ -236,20 +236,25 @@ Ensure `KONAN_DATA_DIR` is set correctly. Xcode uses the logged-in user's enviro
 ## Cross-Platform Version Sync Workflow
 
 ```
-Android build.gradle.kts (Single Source of Truth)
+gradle.properties (Single Source of Truth)
     │
-    │  versionCode = 1
-    │  versionName = "1.0"
+    │  APP_VERSION_MAJOR=1
+    │  APP_VERSION_MINOR=0
+    │  APP_VERSION_PATCH=0
     │
-    ├──→ Android APK/AAB (uses these directly)
+    ├──→ Android build.gradle.kts
+    │    versionName = "1.0.0" (computed from gradle.properties)
+    │    versionCode = 1000000 (computed: MAJOR*1M + MINOR*1K + PATCH)
+    │    │
+    │    └──→ Android APK/AAB → Play Store
     │
-    └──→ ./iosApp/sync_version.sh (or manual copy via Android Studio → Xcode)
+    └──→ ./iosApp/sync_version.sh
          │
-         └──→ iosApp/Info.plist
-              CFBundleVersion = "1"
-              CFBundleShortVersionString = "1.0"
+         └──→ iosApp/Configuration/Config.xcconfig
+              MARKETING_VERSION = 1.0.0 (synced from gradle.properties)
+              CURRENT_PROJECT_VERSION = 1 (independent — increments per App Store submission)
               │
-              └──→ iOS Archive / App Store
+              └──→ iOS Archive → App Store
 ```
 
-Always sync versions **before** archiving. The pattern: sync first, archive second.
+Always sync marketing version **before** archiving. Build numbers increment independently per store.

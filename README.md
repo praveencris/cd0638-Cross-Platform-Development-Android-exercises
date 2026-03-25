@@ -7,12 +7,17 @@ This solution prepares the iOS target for the App Store by aligning it with the 
 
 ## 🛠️ Implementation Summary
 
-### 1. Automated Versioning
-We implemented a sync step using `PlistBuddy`.
-* **Why?** Mismatched versions between Android and iOS cause headaches in crash reporting (e.g., Crashlytics).
-* **Technique:** We treat the Android `composeApp/build.gradle.kts` versionCode/versionName as the "Single Source of Truth" and project those values into the iOS `Info.plist`.
-* **Script:** Run `./iosApp/sync_version.sh` to synchronize versions from Android to iOS.
-* **Note on `CFBundleVersion`:** This is the build number and must increment with every App Store submission, even if the user-facing version stays the same. Keep `CFBundleShortVersionString` synced with Android, but `CFBundleVersion` is iOS-specific and always goes up.
+### 1. Centralized Versioning (Strategy B)
+Version is defined in `gradle.properties` as the **single source of truth**:
+```properties
+APP_VERSION_MAJOR=1
+APP_VERSION_MINOR=0
+APP_VERSION_PATCH=0
+```
+* **Marketing version** (`MARKETING_VERSION` in Config.xcconfig) is synced from `gradle.properties` — must match across Android and iOS.
+* **Build numbers** (`CURRENT_PROJECT_VERSION` in Config.xcconfig / `versionCode` in build.gradle.kts) are **independent per store** — iOS increments per App Store submission, Android increments per Play Store submission.
+* **Script:** Run `./iosApp/sync_version.sh` to sync marketing version from `gradle.properties` to `Config.xcconfig`.
+* **Why not sync build numbers?** If you only fix an Android bug, bump the shared marketing version but only submit Android. iOS's build number stays put until iOS actually ships.
 
 ### 2. Release Mode Optimization
 We configured the Xcode Archive scheme to use **Release**.
@@ -42,8 +47,9 @@ To generate an `.xcarchive` for App Store / TestFlight distribution (requires Ap
 ## 📂 Key Files
 | File Path | Description |
 | :--- | :--- |
-| `iosApp/sync_version.sh` | Shell script that syncs Android versionCode/versionName to iOS Info.plist using PlistBuddy. |
-| `iosApp/iosApp/Info.plist` | Contains the synced `CFBundleVersion` (1) and `CFBundleShortVersionString` (1.0). |
+| `gradle.properties` | Single source of truth for APP_VERSION_MAJOR/MINOR/PATCH. |
+| `iosApp/sync_version.sh` | Syncs MARKETING_VERSION from gradle.properties to Config.xcconfig. |
+| `iosApp/Configuration/Config.xcconfig` | Contains MARKETING_VERSION (synced) and CURRENT_PROJECT_VERSION (independent). |
 | `ios-release-build.md` | Detailed step-by-step release build documentation with troubleshooting. |
 
 ## 🚀 Build & Verification Steps
@@ -54,8 +60,7 @@ To generate an `.xcarchive` for App Store / TestFlight distribution (requires Ap
 ```
 Verify:
 ```bash
-/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" iosApp/iosApp/Info.plist        # → 1
-/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" iosApp/iosApp/Info.plist  # → 1.0
+grep "MARKETING_VERSION" iosApp/Configuration/Config.xcconfig  # → MARKETING_VERSION=1.0.0
 ```
 
 ### 2. Build Release App

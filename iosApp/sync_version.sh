@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # sync_version.sh
-# Synchronizes Android version (single source of truth) to iOS Info.plist
-# This prevents version drift between platforms during production releases
+# Synchronizes marketing version from gradle.properties (single source of truth)
+# to iOS Config.xcconfig. Build numbers are independent per store.
 
 set -e  # Exit on error
 
@@ -12,58 +12,45 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo "${YELLOW}🔄 Syncing Android version to iOS...${NC}"
+echo "${YELLOW}🔄 Syncing marketing version from gradle.properties to iOS...${NC}"
 
 # Paths
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BUILD_GRADLE="$PROJECT_ROOT/composeApp/build.gradle.kts"
-INFO_PLIST="$PROJECT_ROOT/iosApp/iosApp/Info.plist"
+GRADLE_PROPS="$PROJECT_ROOT/gradle.properties"
+XCCONFIG="$PROJECT_ROOT/iosApp/Configuration/Config.xcconfig"
 
-# Check if PlistBuddy is available (macOS only)
-if ! command -v /usr/libexec/PlistBuddy &> /dev/null; then
-    echo "${RED}❌ Error: PlistBuddy not found. This script requires macOS.${NC}"
+# Check if gradle.properties exists
+if [ ! -f "$GRADLE_PROPS" ]; then
+    echo "${RED}❌ Error: gradle.properties not found${NC}"
     exit 1
 fi
 
-# Check if build.gradle.kts exists
-if [ ! -f "$BUILD_GRADLE" ]; then
-    echo "${RED}❌ Error: composeApp/build.gradle.kts not found${NC}"
+# Check if Config.xcconfig exists
+if [ ! -f "$XCCONFIG" ]; then
+    echo "${RED}❌ Error: iosApp/Configuration/Config.xcconfig not found${NC}"
     exit 1
 fi
 
-# Check if Info.plist exists
-if [ ! -f "$INFO_PLIST" ]; then
-    echo "${RED}❌ Error: iosApp/iosApp/Info.plist not found${NC}"
+# Extract version components from gradle.properties
+MAJOR=$(grep -E '^APP_VERSION_MAJOR=' "$GRADLE_PROPS" | awk -F'=' '{print $2}' | tr -d ' ')
+MINOR=$(grep -E '^APP_VERSION_MINOR=' "$GRADLE_PROPS" | awk -F'=' '{print $2}' | tr -d ' ')
+PATCH=$(grep -E '^APP_VERSION_PATCH=' "$GRADLE_PROPS" | awk -F'=' '{print $2}' | tr -d ' ')
+
+if [ -z "$MAJOR" ] || [ -z "$MINOR" ] || [ -z "$PATCH" ]; then
+    echo "${RED}❌ Error: Could not extract APP_VERSION_MAJOR/MINOR/PATCH from gradle.properties${NC}"
     exit 1
 fi
 
-# Extract versionCode from build.gradle.kts
-VERSION_CODE=$(grep -E 'versionCode\s*=\s*[0-9]+' "$BUILD_GRADLE" | awk -F'=' '{print $2}' | tr -d ' ')
-if [ -z "$VERSION_CODE" ]; then
-    echo "${RED}❌ Error: Could not extract versionCode from build.gradle.kts${NC}"
-    exit 1
-fi
+MARKETING_VERSION="$MAJOR.$MINOR.$PATCH"
+echo "  📦 gradle.properties version: $MARKETING_VERSION"
 
-# Extract versionName from build.gradle.kts
-VERSION_NAME=$(grep -E 'versionName\s*=\s*"' "$BUILD_GRADLE" | awk -F'"' '{print $2}')
-if [ -z "$VERSION_NAME" ]; then
-    echo "${RED}❌ Error: Could not extract versionName from build.gradle.kts${NC}"
-    exit 1
-fi
+# Read current CURRENT_PROJECT_VERSION (build number — independent, not synced)
+CURRENT_BUILD=$(grep -E '^CURRENT_PROJECT_VERSION=' "$XCCONFIG" | awk -F'=' '{print $2}' | tr -d ' ')
+echo "  🔢 Current iOS build number: $CURRENT_BUILD (independent, not synced)"
 
-echo "  📱 Android versionCode: $VERSION_CODE"
-echo "  📱 Android versionName: $VERSION_NAME"
+# Update MARKETING_VERSION in Config.xcconfig
+sed -i '' "s/^MARKETING_VERSION=.*/MARKETING_VERSION=$MARKETING_VERSION/" "$XCCONFIG"
 
-# Update Info.plist using PlistBuddy
-# CFBundleVersion = versionCode (build number)
-# CFBundleShortVersionString = versionName (user-facing version)
-
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION_CODE" "$INFO_PLIST" 2>/dev/null || \
-/usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $VERSION_CODE" "$INFO_PLIST"
-
-/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION_NAME" "$INFO_PLIST" 2>/dev/null || \
-/usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $VERSION_NAME" "$INFO_PLIST"
-
-echo "${GREEN}✅ iOS Info.plist updated successfully${NC}"
-echo "  🍎 CFBundleVersion: $VERSION_CODE"
-echo "  🍎 CFBundleShortVersionString: $VERSION_NAME"
+echo "${GREEN}✅ Config.xcconfig updated successfully${NC}"
+echo "  🍎 MARKETING_VERSION: $MARKETING_VERSION (synced from gradle.properties)"
+echo "  🔢 CURRENT_PROJECT_VERSION: $CURRENT_BUILD (unchanged — increment manually per App Store submission)"
