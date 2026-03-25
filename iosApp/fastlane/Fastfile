@@ -6,7 +6,7 @@ platform :ios do
   lane :package_beta do
     # Step 1: Increment build number automatically
     # This prevents "Duplicate Build Number" errors in App Store Connect
-    # The build number is stored in CURRENT_PROJECT_VERSION in Info.plist
+    # The build number is stored in CURRENT_PROJECT_VERSION in Config.xcconfig
     # Each run will bump it: 1 -> 2 -> 3 -> etc.
     increment_build_number(
       xcodeproj: "iosApp/iosApp.xcodeproj"
