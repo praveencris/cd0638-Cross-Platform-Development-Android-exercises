@@ -9,7 +9,7 @@ platform :ios do
     # The build number is stored in CURRENT_PROJECT_VERSION in Config.xcconfig
     # Each run will bump it: 1 -> 2 -> 3 -> etc.
     increment_build_number(
-      xcodeproj: "iosApp/iosApp.xcodeproj"
+      xcodeproj: "iosApp.xcodeproj"
     )
 
     # Step 2: Build the app archive (.xcarchive) and export as .ipa
