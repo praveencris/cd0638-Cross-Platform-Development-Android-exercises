@@ -63,8 +63,12 @@ android {
         applicationId = "com.recall.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        // Version from gradle.properties (Single Source of Truth)
+        val major = (project.findProperty("APP_VERSION_MAJOR") as String).toInt()
+        val minor = (project.findProperty("APP_VERSION_MINOR") as String).toInt()
+        val patch = (project.findProperty("APP_VERSION_PATCH") as String).toInt()
+        versionCode = major * 1_000_000 + minor * 1_000 + patch
+        versionName = "\$major.\$minor.\$patch"
     }
     packaging {
         resources {
