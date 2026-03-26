@@ -46,6 +46,12 @@ kotlin {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        force("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
+    }
+}
+
 android {
     namespace = "com.recall.app"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
