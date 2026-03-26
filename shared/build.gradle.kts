@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.targets.native.tasks.PodBuildTask
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -17,7 +18,6 @@ kotlin {
         }
     }
 
-    iosX64()
     iosArm64()
     iosSimulatorArm64()
 
@@ -106,7 +106,11 @@ android {
 dependencies {
     add("kspCommonMainMetadata", libs.androidx.room.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
-    add("kspIosX64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+}
+
+tasks.withType<PodBuildTask>().configureEach {
+    xcodeBuildSettings.put("EXCLUDED_ARCHS", "x86_64")
+    xcodeBuildSettings.put("ENABLE_DEBUG_DYLIB", "NO")
 }
