@@ -1,6 +1,7 @@
 package com.recall.app.analytics
 
 import cocoapods.FirebaseAnalytics.FIRAnalytics
+import cocoapods.FirebaseCore.FIRApp
 import platform.Foundation.NSNumber
 import kotlinx.cinterop.ExperimentalForeignApi
 
@@ -60,14 +61,20 @@ class IOSAnalyticsService : AnalyticsService {
 /**
  * iOS actual implementation of AnalyticsProvider.
  *
- * Firebase is initialized in the iOS app's AppDelegate (iosApp/iosApp/iOSApp.swift)
- * by calling FirebaseApp.configure(), so we can create the service instance directly.
+ * Firebase is initialized here via FIRApp.configure() before creating the service.
+ * Unlike Android (where the google-services Gradle plugin auto-initializes Firebase),
+ * iOS requires an explicit configure() call before any Firebase API usage.
  *
  * Note: @OptIn(ExperimentalForeignApi::class) is required for Kotlin/Native cinterop.
  */
 @OptIn(ExperimentalForeignApi::class)
 actual object AnalyticsProvider {
     private val instance: AnalyticsService by lazy {
+        // Initialize Firebase before first use
+        if (FIRApp.defaultApp() == null) {
+            FIRApp.configure()
+            println("Firebase initialized on iOS")
+        }
         IOSAnalyticsService()
     }
 

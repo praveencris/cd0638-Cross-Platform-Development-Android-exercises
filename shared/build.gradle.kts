@@ -29,6 +29,10 @@ kotlin {
         ios.deploymentTarget = "15.0"
 
         // Firebase pods for iOS
+        pod("FirebaseCore") {
+            version = "~> 11.8.0"
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
         pod("FirebaseAnalytics") {
             version = "~> 11.8.0"
             extraOpts += listOf("-compiler-option", "-fmodules")
