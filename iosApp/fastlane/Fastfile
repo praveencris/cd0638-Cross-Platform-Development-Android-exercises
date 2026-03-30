@@ -24,6 +24,7 @@ platform :ios do
     # - iosApp.ipa (distributable binary)
     # - iosApp.app.dSYM.zip (debug symbols for crash reporting)
     build_app(
+      workspace: "iosApp.xcworkspace",
       scheme: "iosApp",
       export_method: "app-store"
     )
