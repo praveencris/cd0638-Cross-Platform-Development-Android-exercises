@@ -123,17 +123,54 @@ class IOSAnalyticsService : AnalyticsService {
 
 This annotation is required for Kotlin/Native cinterop to access iOS Firebase APIs.
 
+**Firebase Initialization in Swift:**
+
+Unlike Android (where the google-services Gradle plugin auto-initializes Firebase), iOS requires explicit initialization in `iOSApp.swift`:
+
+```swift
+import FirebaseCore
+
+@main
+struct iOSApp: App {
+    init() {
+        FirebaseApp.configure()
+    }
+    // ...
+}
+```
+
+This is possible because `iosApp/Podfile` declares Firebase pods directly, giving Swift access to `FirebaseCore`.
+
 **CocoaPods Integration:**
-The `shared/build.gradle.kts` includes:
+
+The `shared/build.gradle.kts` includes a static framework configuration and Firebase pods:
 ```kotlin
 cocoapods {
-    version = "1.0"  // Required for podspec generation
+    version = "1.0"
+    framework {
+        baseName = "shared"
+        isStatic = true  // Required for Firebase static xcframeworks
+    }
     pod("FirebaseAnalytics") {
         version = "~> 11.8.0"
         extraOpts += listOf("-compiler-option", "-fmodules")
     }
 }
 ```
+
+The `iosApp/Podfile` declares Firebase pods separately for Swift access:
+```ruby
+platform :ios, '15.0'
+target 'iosApp' do
+  use_frameworks! :linkage => :static
+  pod 'FirebaseCore', '~> 11.8.0'
+  pod 'FirebaseAnalytics', '~> 11.8.0'
+  pod 'FirebaseCrashlytics', '~> 11.8.0'
+  pod 'FirebaseRemoteConfig', '~> 11.8.0'
+end
+```
+
+> **Important:** The Podfile does NOT reference `pod 'shared'` because `ComposeApp.framework` already includes the shared module's Kotlin code via Gradle. Including both would cause a "runtime injected twice" crash.
 
 ## Testing the Solution
 
@@ -151,13 +188,20 @@ cocoapods {
 
 ### iOS
 
-1. **Enable DebugView:**
+1. **Setup CocoaPods** (first time only):
+   ```bash
+   ./gradlew :shared:generateDummyFramework
+   cd iosApp && pod install
+   ```
+
+2. **Enable DebugView:**
    - Edit scheme → Arguments → Add `-FIRDebugEnabled`
 
-2. **Run the app** and complete a study session
+3. **Build and run** from Xcode using `iosApp.xcworkspace` (not `.xcodeproj`), or from Android Studio
 
-3. **Check Firebase Console** → Analytics → DebugView
-   - You should see events in real-time
+4. **Check Firebase Console** → Analytics → DebugView
+   - You should see `"Firebase initialized on iOS"` in console
+   - Events appear in real-time in DebugView
 
 ## Build Configuration
 
@@ -172,8 +216,12 @@ All Firebase dependencies and plugins are pre-configured:
 - Firebase Crashlytics plugin applied (for Exercise 13b)
 
 **iOS** (`shared/build.gradle.kts`):
-- CocoaPods configuration with Firebase Analytics pod
+- CocoaPods configuration with static framework and Firebase pods
 - `@OptIn` compiler flags configured
+
+**iOS App** (`iosApp/Podfile`):
+- Firebase pods for Swift-side initialization
+- Static linkage to match Firebase xcframeworks
 
 ## Troubleshooting
 
@@ -189,8 +237,16 @@ All Firebase dependencies and plugins are pre-configured:
 - Regular dashboard can take 24-48 hours
 
 **iOS: CocoaPods errors**
-- Run: `./gradlew :shared:podInstall`
+- Run: `./gradlew :shared:generateDummyFramework` then `cd iosApp && pod install`
 - The `version = "1.0"` field is required and included
+- Build from `iosApp.xcworkspace` (not `.xcodeproj`)
+
+**iOS: Bundle ID mismatch warning**
+- Ensure `iosApp/Configuration/Config.xcconfig` has `PRODUCT_BUNDLE_IDENTIFIER=com.recall.app`
+- This must match the bundle ID in `GoogleService-Info.plist`
+
+**iOS: "runtime injected twice" crash**
+- Do NOT add `pod 'shared'` to `iosApp/Podfile` — the shared module is already included via `ComposeApp.framework`
 
 ## Next Steps
 
