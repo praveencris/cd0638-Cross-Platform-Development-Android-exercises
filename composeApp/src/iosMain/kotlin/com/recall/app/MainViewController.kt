@@ -1,7 +1,6 @@
 package com.recall.app
 
 import androidx.compose.ui.window.ComposeUIViewController
-import com.recall.app.analytics.AnalyticsProvider
 import com.recall.app.di.appModule
 import com.recall.app.di.initKoin
 import com.recall.app.di.iosModule
@@ -10,12 +9,9 @@ import org.koin.mp.KoinPlatform.getKoin
 
 /**
  * iOS entry point for the Recall app
- * Initializes Firebase, Koin, then renders the shared Compose UI
+ * Initializes Koin before rendering the shared Compose UI
  */
 fun MainViewController() = ComposeUIViewController {
-    // Initialize Firebase (triggers FIRApp.configure() via AnalyticsProvider)
-    AnalyticsProvider.get()
-
     // Initialize Koin if not already started
     // This is safe for hot reload scenarios
     try {
