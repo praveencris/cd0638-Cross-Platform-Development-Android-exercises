@@ -1,0 +1,13 @@
+platform :ios, '15.0'
+
+target 'iosApp' do
+  use_frameworks! :linkage => :static
+
+  # Firebase pods declared directly (not via shared podspec) to avoid
+  # loading shared.framework twice — ComposeApp.framework already
+  # includes the shared module's Kotlin code via Gradle dependency
+  pod 'FirebaseCore', '~> 11.8.0'
+  pod 'FirebaseAnalytics', '~> 11.8.0'
+  pod 'FirebaseCrashlytics', '~> 11.8.0'
+  pod 'FirebaseRemoteConfig', '~> 11.8.0'
+end

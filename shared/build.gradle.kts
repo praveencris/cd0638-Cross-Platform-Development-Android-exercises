@@ -28,6 +28,13 @@ kotlin {
         version = "1.0"
         ios.deploymentTarget = "15.0"
 
+        // Static framework ensures Firebase static xcframeworks are linked
+        // directly into shared.framework — no dynamic loading at runtime
+        framework {
+            baseName = "shared"
+            isStatic = true
+        }
+
         // Firebase pods for iOS
         pod("FirebaseAnalytics") {
             version = "~> 11.8.0"
