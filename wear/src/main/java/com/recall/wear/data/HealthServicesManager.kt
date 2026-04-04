@@ -12,7 +12,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.guava.await
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 
 /**
  * Manager for Health Services integration
@@ -51,8 +51,9 @@ class HealthServicesManager(context: Context) {
         measureClient.registerMeasureCallback(DataType.HEART_RATE_BPM, callback)
 
         // Unregister when Flow is cancelled (e.g., when composable leaves composition)
+        // Non-blocking cleanup to avoid potential deadlock on single-threaded dispatchers
         awaitClose {
-            runBlocking {
+            kotlinx.coroutines.GlobalScope.launch {
                 measureClient.unregisterMeasureCallbackAsync(DataType.HEART_RATE_BPM, callback)
             }
         }
