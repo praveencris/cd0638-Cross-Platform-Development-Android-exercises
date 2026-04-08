@@ -2,6 +2,18 @@
 **Module:** Monitoring & Analytics
 **Part:** 1 of 2 (Crashlytics & Remote Config in Exercise 13b)
 
+## iOS CocoaPods Setup (Required)
+
+This branch uses CocoaPods for Firebase iOS dependencies. After checking out this branch, run:
+
+```bash
+cd /path/to/Recall
+./gradlew :shared:generateDummyFramework
+cd iosApp && pod install
+```
+
+This generates the `Pods/` directory needed by the Xcode workspace. You only need to do this once per branch checkout. If Android Studio shows an error about `Pods/Pods.xcodeproj` not found, run the commands above.
+
 ## Solution Overview
 
 This branch contains the complete solution for Exercise 13a, demonstrating how to integrate Firebase Analytics in a Kotlin Multiplatform app with proper type conversions for both Android and iOS platforms.
