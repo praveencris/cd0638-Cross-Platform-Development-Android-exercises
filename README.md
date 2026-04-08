@@ -6,6 +6,18 @@
 ### **🎓 Objective**
 Learn to integrate **Firebase Analytics** in your KMP app to track user behavior across Android and iOS. You'll focus on the core challenge: implementing platform-specific type conversions while using the expect/actual pattern.
 
+### **⚠️ iOS CocoaPods Setup (Required)**
+
+This branch uses CocoaPods for Firebase iOS dependencies. After checking out this branch, run:
+
+```bash
+cd /path/to/Recall
+./gradlew :shared:generateDummyFramework
+cd iosApp && pod install
+```
+
+This generates the `Pods/` directory needed by the Xcode workspace. You only need to do this once per branch checkout. If Android Studio shows an error about `Pods/Pods.xcodeproj` not found, run the commands above.
+
 ### **⚠️ Important Notes**
 
 **What's Pre-configured:**
