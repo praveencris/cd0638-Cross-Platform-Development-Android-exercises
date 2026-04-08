@@ -6,6 +6,18 @@
 ### **🎓 Objective**
 Build on your working Firebase Analytics from Exercise 13a to add **Crashlytics** (crash reporting) and **Remote Config** (dynamic app configuration). You'll learn advanced KMP patterns for error handling and async operations.
 
+### **⚠️ iOS CocoaPods Setup (Required)**
+
+This branch uses CocoaPods for Firebase iOS dependencies. After checking out this branch, run:
+
+```bash
+cd /path/to/Recall
+./gradlew :shared:generateDummyFramework
+cd iosApp && pod install
+```
+
+This generates the `Pods/` directory needed by the Xcode workspace. You only need to do this once per branch checkout. If Android Studio shows an error about `Pods/Pods.xcodeproj` not found, run the commands above.
+
 ### **⚠️ Important Notes**
 
 **Prerequisites:**
