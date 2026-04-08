@@ -9,6 +9,18 @@ This solution implements the complete Firebase integration for Recall, including
 
 This provides a unified observability stack with cross-platform analytics, crash reporting, and remote configuration capabilities.
 
+## ⚠️ iOS CocoaPods Setup (Required)
+
+This branch uses CocoaPods for Firebase iOS dependencies. After checking out this branch, run:
+
+```bash
+cd /path/to/Recall
+./gradlew :shared:generateDummyFramework
+cd iosApp && pod install
+```
+
+This generates the `Pods/` directory needed by the Xcode workspace. You only need to do this once per branch checkout. If Android Studio shows an error about `Pods/Pods.xcodeproj` not found, run the commands above.
+
 ## 🛠️ Implementation Summary
 
 ### 1. The `expect/actual` Bridge
