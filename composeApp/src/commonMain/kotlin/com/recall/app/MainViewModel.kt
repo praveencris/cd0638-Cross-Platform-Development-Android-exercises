@@ -28,6 +28,8 @@ class MainViewModel(
             try {
                 val decks = apiService.fetchAllDecks()
                 _uiState.value = UiState.Success(decks.size)
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
