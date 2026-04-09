@@ -11,12 +11,12 @@ import com.recall.app.data.local.entity.DeckEntity
 // TODO 4: Annotate this class with @Database
 //  - Set entities parameter to array of: DeckEntity::class, CardEntity::class
 //  - Set version to 1 (this is the first version of the schema)
-//  - Set exportSchema to true (helps with migrations later)
+//  - Set exportSchema to false (avoids schema export warnings in KMP)
 //  Hint: Use the following syntax:
 //    @Database(
 //        entities = [DeckEntity::class, CardEntity::class],
 //        version = 1,
-//        exportSchema = true
+//        exportSchema = false
 //    )
 abstract class RecallDatabase : RoomDatabase() {
 
