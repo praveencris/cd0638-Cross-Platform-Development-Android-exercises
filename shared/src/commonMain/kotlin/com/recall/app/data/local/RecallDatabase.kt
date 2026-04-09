@@ -68,4 +68,6 @@ abstract class RecallDatabase : RoomDatabase() {
  * This expect class is implemented by Room's code generation
  */
 @Suppress("NO_ACTUAL_FOR_EXPECT")
-expect object RecallDatabaseConstructor : RoomDatabaseConstructor<RecallDatabase>
+expect object RecallDatabaseConstructor : RoomDatabaseConstructor<RecallDatabase> {
+    override fun initialize(): RecallDatabase
+}
