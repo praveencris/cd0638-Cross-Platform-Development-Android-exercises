@@ -77,6 +77,8 @@ class MainViewModel(
                 repository.refreshDecks()
                 // Mark initial load complete even if network fetch returns empty
                 _isInitialLoad.value = false
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _error.value = e.message ?: "Unknown error occurred"
                 // Still mark initial load complete on error
