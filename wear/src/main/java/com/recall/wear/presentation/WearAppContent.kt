@@ -164,7 +164,9 @@ fun WearAppContent(
                                     )
                                 }
                                 syncStatus = "Synced!"
-                            } catch (e: Exception) {
+                            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
+            } catch (e: Exception) {
                                 syncStatus = "No phone found"
                             }
                         }
