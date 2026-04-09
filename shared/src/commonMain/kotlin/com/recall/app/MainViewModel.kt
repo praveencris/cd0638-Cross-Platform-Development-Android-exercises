@@ -68,6 +68,8 @@ class MainViewModel(
                 // Fetch from network and update database
                 // The Flow collection in init will automatically update _decks
                 repository.refreshDecks()
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _error.value = e.message ?: "Unknown error occurred"
             } finally {

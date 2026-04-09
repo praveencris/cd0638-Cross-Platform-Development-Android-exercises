@@ -5,6 +5,7 @@ import io.ktor.client.engine.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.client.plugins.*
 import kotlinx.serialization.json.Json
 
 /**
@@ -43,6 +44,12 @@ object NetworkClient {
                     prettyPrint = true
                 }, contentType = ContentType.Text.Plain)
             }
+// Prevent indefinite hangs on slow or unreachable networks
+        install(HttpTimeout) {
+            requestTimeoutMillis = 15_000
+            connectTimeoutMillis = 10_000
+            socketTimeoutMillis = 10_000
+        }
         }
     }
 }
