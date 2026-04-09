@@ -44,6 +44,8 @@ class MainViewModel(
             try {
                 val fetchedDecks = apiService.fetchAllDecks()
                 _decks.value = fetchedDecks
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _error.value = e.message ?: "Unknown error occurred"
             } finally {
