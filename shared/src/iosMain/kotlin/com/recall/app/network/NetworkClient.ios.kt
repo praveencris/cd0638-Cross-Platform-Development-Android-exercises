@@ -1,10 +1,8 @@
 package com.recall.app.network
 
-import io.ktor.client.engine.*
-import io.ktor.client.engine.darwin.*
+// TODO: Uncomment after adding Ktor Darwin engine dependency
+// import io.ktor.client.engine.*
+// import io.ktor.client.engine.darwin.*
 
-/**
- * iOS implementation of HTTP client engine
- * Uses Darwin engine for iOS platform
- */
-actual fun createHttpEngine(): HttpClientEngine = Darwin.create()
+// TODO: Uncomment after adding Ktor dependencies
+// actual fun createHttpEngine(): HttpClientEngine = Darwin.create()

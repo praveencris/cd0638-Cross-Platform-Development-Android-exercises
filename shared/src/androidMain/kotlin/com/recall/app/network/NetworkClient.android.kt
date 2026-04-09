@@ -1,10 +1,8 @@
 package com.recall.app.network
 
-import io.ktor.client.engine.*
-import io.ktor.client.engine.okhttp.*
+// TODO: Uncomment after adding Ktor OkHttp engine dependency
+// import io.ktor.client.engine.*
+// import io.ktor.client.engine.okhttp.*
 
-/**
- * Android implementation of HTTP client engine
- * Uses OkHttp engine for Android platform
- */
-actual fun createHttpEngine(): HttpClientEngine = OkHttp.create()
+// TODO: Uncomment after adding Ktor dependencies
+// actual fun createHttpEngine(): HttpClientEngine = OkHttp.create()
