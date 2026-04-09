@@ -2,6 +2,7 @@ package com.recall.app.network
 
 import io.ktor.client.*
 import io.ktor.client.engine.*
+import io.ktor.client.plugins.*
 
 /**
  * Platform-specific HTTP client engine
@@ -22,5 +23,11 @@ object NetworkClient {
      */
     val httpClient = HttpClient(createHttpEngine()) {
         // TODO: Install ContentNegotiation and configure JSON
+// Prevent indefinite hangs on slow or unreachable networks
+        install(HttpTimeout) {
+            requestTimeoutMillis = 15_000
+            connectTimeoutMillis = 10_000
+            socketTimeoutMillis = 10_000
+        }
     }
 }
