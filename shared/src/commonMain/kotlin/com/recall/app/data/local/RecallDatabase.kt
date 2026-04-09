@@ -19,4 +19,6 @@ abstract class RecallDatabase : RoomDatabase() {
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
-expect object RecallDatabaseConstructor : RoomDatabaseConstructor<RecallDatabase>
+expect object RecallDatabaseConstructor : RoomDatabaseConstructor<RecallDatabase> {
+    override fun initialize(): RecallDatabase
+}
