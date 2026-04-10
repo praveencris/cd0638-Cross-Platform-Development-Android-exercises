@@ -59,6 +59,14 @@ fun StudyScreen(
         null
     }
 
+    // Advance to next card and report progress
+    fun advanceCard() {
+        val nextIndex = (currentCardIndex + 1) % deck.cards.size
+        currentCardIndex = nextIndex
+        isFlipped = false
+        onCardReviewed(nextIndex)
+    }
+
     // Focus management for keyboard support
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
@@ -80,36 +88,8 @@ fun StudyScreen(
                     // Number keys 1-4 trigger rating buttons (only when flipped)
                     isFlipped && event.type == KeyEventType.KeyUp -> {
                         when (event.key) {
-                            Key.One -> {
-                                // Trigger Again button logic
-                                val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                                currentCardIndex = nextIndex
-                                isFlipped = false
-                                onCardReviewed(nextIndex)
-                                true
-                            }
-                            Key.Two -> {
-                                // Trigger Hard button logic
-                                val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                                currentCardIndex = nextIndex
-                                isFlipped = false
-                                onCardReviewed(nextIndex)
-                                true
-                            }
-                            Key.Three -> {
-                                // Trigger Good button logic
-                                val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                                currentCardIndex = nextIndex
-                                isFlipped = false
-                                onCardReviewed(nextIndex)
-                                true
-                            }
-                            Key.Four -> {
-                                // Trigger Easy button logic
-                                val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                                currentCardIndex = nextIndex
-                                isFlipped = false
-                                onCardReviewed(nextIndex)
+                            Key.One, Key.Two, Key.Three, Key.Four -> {
+                                advanceCard()
                                 true
                             }
                             else -> false
@@ -154,31 +134,10 @@ fun StudyScreen(
                 // Spaced repetition buttons
                 if (isFlipped) {
                     SpacedRepetitionButtons(
-                        onAgain = {
-                            // Move to next card and report progress
-                            val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                            currentCardIndex = nextIndex
-                            isFlipped = false
-                            onCardReviewed(nextIndex)
-                        },
-                        onHard = {
-                            val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                            currentCardIndex = nextIndex
-                            isFlipped = false
-                            onCardReviewed(nextIndex)
-                        },
-                        onGood = {
-                            val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                            currentCardIndex = nextIndex
-                            isFlipped = false
-                            onCardReviewed(nextIndex)
-                        },
-                        onEasy = {
-                            val nextIndex = (currentCardIndex + 1) % deck.cards.size
-                            currentCardIndex = nextIndex
-                            isFlipped = false
-                            onCardReviewed(nextIndex)
-                        },
+                        onAgain = { advanceCard() },
+                        onHard = { advanceCard() },
+                        onGood = { advanceCard() },
+                        onEasy = { advanceCard() },
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
                     )
                 } else {
