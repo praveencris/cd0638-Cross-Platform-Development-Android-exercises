@@ -23,6 +23,7 @@ fun WearAppContent(
     decks: List<Deck>,
     isLoading: Boolean,
     error: String?,
+    heartRate: Int? = null,
     onRetry: () -> Unit,
     onDeckClick: (Deck) -> Unit,
     modifier: Modifier = Modifier
