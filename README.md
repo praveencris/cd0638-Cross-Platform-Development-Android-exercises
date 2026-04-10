@@ -9,7 +9,7 @@ In this exercise, you will build the "Shared Domain" of the Recall app. This lay
 
 By the end of this lab, you will have:
 
-1. Created **Serializable Data Models** that match our Gist API.
+1. Reviewed the **Data Models** that match our Gist API.
 2. Implemented **Expect/Actual** declarations for platform-specific UUID generation.
 3. Built the **SM-2 Spaced Repetition Algorithm**.
 4. Verified the logic using **Unit Tests**.
@@ -27,11 +27,11 @@ By the end of this lab, you will have:
 
 Our app needs to handle Decks and Cards. These models must align with the JSON structure provided by our Gist API while including the fields needed for the study algorithm.
 
-1. **Create** the package: `com.recall.app.domain.models`.
-2. **Implement** the `Card` and `Deck` data classes.
-* **Hint:** Use `@SerialName("image_base64")` to map the Gist's snake_case field to your Kotlin camelCase property.
+1. **Review** the existing models in `com.recall.app.domain.models`.
+2. **Understand** the `Card` and `Deck` data classes and how they map to the JSON structure from the Gist API.
 * **Fields for Card:** `id`, `front`, `back`, `imageBase64`, `interval` (Int), and `ease` (Float).
 * **Fields for Deck:** `id`, `title`, `colorHex`, and `cards` (List of Cards).
+* **Note:** Serialization annotations (`@Serializable`, `@SerialName`) will be added in Lesson 3 when we introduce Ktor networking.
 
 
 
@@ -93,7 +93,7 @@ The domain logic is the "Single Source of Truth." Before we ever build a UI, we 
 
 ### **🆘 Troubleshooting**
 
-* **"Unresolved reference: @Serializable"**: Ensure you have the `kotlinx-serialization` plugin in your `build.gradle.kts` and the library in your `libs.versions.toml`.
+* **"Unresolved reference: @Serializable"**: Serialization annotations are not needed for this lesson — they will be introduced in Lesson 3.
 * **"Actual declaration missing"**: Double-check that your package names and function signatures match exactly between the `commonMain`, `androidMain`, and `iosMain` files.
 * **Math precision**: When calculating the new ease, remember to convert your result to a `Float` and use `.coerceAtLeast(1.3f)`.
 
@@ -101,6 +101,6 @@ The domain logic is the "Single Source of Truth." Before we ever build a UI, we 
 
 ### **🚀 Definition of Done**
 
-* Data models are serializable and match the Gist JSON structure.
+* Data models match the Gist JSON structure.
 * UUID generation works on both Android and iOS targets.
 * Unit tests pass with 100% success for the SM-2 logic.
