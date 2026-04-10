@@ -212,8 +212,8 @@ private fun calculateDueCount(deck: Deck): Int {
 /**
  * Calculates review progress as a percentage
  *
- * For now, uses a simple heuristic based on card count
- * In production, would use actual review history
+ * Placeholder: uses a simple heuristic based on card count.
+ * Replace with actual spaced repetition progress tracking once the review system is implemented.
  */
 private fun calculateProgress(deck: Deck): Float {
     if (deck.cards.isEmpty()) return 0f
