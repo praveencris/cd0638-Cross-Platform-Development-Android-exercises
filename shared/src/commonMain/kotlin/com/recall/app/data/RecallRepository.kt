@@ -72,10 +72,12 @@ class RecallRepositoryImpl(
     private val dao: RecallDao
 ) : RecallRepository {
     override fun getDecks(): Flow<List<Deck>> {
-        // N+1 Query Pattern (inefficient - will be fixed in exercise)
+        // TODO: Replace this N+1 query pattern with getDecksWithCards() from RecallDao
+        // Currently this triggers a separate query for EACH deck (1 + N queries total)
+        // After implementing DeckWithCards, use dao.getDecksWithCards() for a single JOIN query
         return dao.getDecks().map { deckEntities ->
             deckEntities.map { deckEntity ->
-                // This triggers a separate query for EACH deck
+                // This triggers a separate query for EACH deck (N+1 problem)
                 val cards = dao.getCardsForDeck(deckEntity.id).map { it.toDomain() }
                 deckEntity.toDomain(cards = cards)
             }

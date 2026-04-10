@@ -13,6 +13,11 @@ interface RecallDao {
     @Query("SELECT * FROM DeckEntity")
     fun getDecks(): Flow<List<DeckEntity>>
 
+    // TODO: Add a @Transaction query that returns Flow<List<DeckWithCards>>
+    // This replaces the N+1 pattern where getDecks() + getCardsForDeck() runs per deck
+    // Hint: Use @Transaction + @Query("SELECT * FROM DeckEntity") with DeckWithCards return type
+    // Remember to import: androidx.room.Transaction and DeckWithCards
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDeck(deck: DeckEntity)
 

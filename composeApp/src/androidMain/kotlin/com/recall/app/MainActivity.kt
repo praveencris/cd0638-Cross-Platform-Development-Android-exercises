@@ -11,7 +11,7 @@ import androidx.activity.enableEdgeToEdge
  * Simply delegates to the shared Compose UI
  */
 class MainActivity : ComponentActivity() {
-    // Memory Leak Bug: Static reference prevents garbage collection
+    // BUG: Can you spot the memory leak in this class? (Hint: static + Context)
     companion object {
         var leak: Context? = null
     }
