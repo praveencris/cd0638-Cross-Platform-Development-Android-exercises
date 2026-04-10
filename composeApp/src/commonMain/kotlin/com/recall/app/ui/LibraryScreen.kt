@@ -53,7 +53,6 @@ fun LibraryScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             // Header
