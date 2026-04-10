@@ -42,12 +42,12 @@ To verify that the networking layer is functioning correctly, the following unit
 ```kotlin
 @Test
 fun testFetchAllDecks() = runTest {
-    val service = RecallApiService(NetworkClient.client)
+    val service = RecallApiService(NetworkClient.httpClient)
     val decks = service.fetchAllDecks()
 
     assertTrue(decks.isNotEmpty(), "Decks should not be empty")
     assertEquals(10, decks.size, "Should fetch exactly 10 decks")
-    assertEquals("Geography Basics", decks.first().title)
+    assertEquals("NASA Space Gallery", decks.first().title)
 }
 
 ```
