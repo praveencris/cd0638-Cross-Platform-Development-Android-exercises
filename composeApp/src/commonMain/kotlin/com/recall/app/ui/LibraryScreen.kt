@@ -36,6 +36,10 @@ fun LibraryScreen(
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
-        // TODO: Implement Adaptive Layout (List for Phone, Grid for Tablet)
+        // TODO: Implement adaptive layout based on windowSize
+        //   - Compact: Use LazyColumn for single-column vertical list
+        //   - Medium: Use LazyVerticalGrid with GridCells.Fixed(2)
+        //   - Expanded: Use LazyVerticalGrid with GridCells.Fixed(3)
+        //   Hint: Use when(windowSize) { ... } and render DeckCard for each deck
     }
 }
