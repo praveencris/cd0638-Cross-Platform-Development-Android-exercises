@@ -75,18 +75,18 @@ Now that we have the tools, let's write the code. We want a function that return
 
 1. **Open** the file: `shared/src/commonMain/kotlin/com/recall/app/Platform.kt`.
 2. **Locate** the `greet()` function.
-3. **Action:** Replace the `TODO` with code that uses `Clock.System.now()` to get the current date.
+3. **Action:** Replace the `TODO` with code that uses `kotlinx.datetime` to get the current date.
 ```kotlin
 // Goal: Return a string like "Hello, Android! Today is 2026-01-26"
 fun greet(): String {
-    val date = Clock.System.now().toString().substringBefore('T') // Simple date formatting
-    return "Hello, ${getPlatform().name}! Today is $date"
+    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    return "Hello, ${getPlatform().name}! Today is $today"
 }
 
 ```
 
 
-*(Note: You will need to import `kotlinx.datetime.Clock`)*
+*(Note: You will need to import `kotlinx.datetime.Clock`, `kotlinx.datetime.TimeZone`, and `kotlinx.datetime.toLocalDateTime`)*
 
 ---
 
