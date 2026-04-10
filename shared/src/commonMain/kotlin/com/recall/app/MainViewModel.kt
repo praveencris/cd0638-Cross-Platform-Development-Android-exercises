@@ -1,6 +1,5 @@
 package com.recall.app
 
-import com.recall.app.domain.Result
 import com.recall.app.domain.models.Deck
 import com.recall.app.network.RecallApiService
 import kotlinx.coroutines.CoroutineScope
@@ -42,11 +41,16 @@ class MainViewModel(
         scope.launch {
             _isLoading.value = true
             _error.value = null
-            when (val result = apiService.fetchAllDecks()) {
-                is Result.Success -> _decks.value = result.data
-                is Result.Error -> _error.value = result.message
+            try {
+                val fetchedDecks = apiService.fetchAllDecks()
+                _decks.value = fetchedDecks
+            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Unknown error occurred"
+            } finally {
+                _isLoading.value = false
             }
-            _isLoading.value = false
         }
     }
 
