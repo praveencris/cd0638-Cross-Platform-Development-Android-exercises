@@ -61,6 +61,9 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        // TODO (Bonus): Centralize version management using gradle.properties
+        // Define APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_PATCH in gradle.properties
+        // Then read them here: val major = project.property("APP_VERSION_MAJOR").toString().toInt()
     }
     packaging {
         resources {
