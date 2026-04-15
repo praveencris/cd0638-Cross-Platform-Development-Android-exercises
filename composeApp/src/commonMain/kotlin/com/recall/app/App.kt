@@ -9,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.koin.compose.KoinContext
-import org.koin.compose.koinInject
+import org.koin.mp.KoinPlatform
 
 /**
  * Shared Compose UI for both Android and iOS
@@ -26,7 +26,12 @@ fun App() {
 
 @Composable
 fun MainScreen() {
-    val viewModel: MainViewModel = koinInject()
+    val viewModel = remember { KoinPlatform.getKoin().get<MainViewModel>() }
+    DisposableEffect(viewModel) {
+        onDispose {
+            viewModel.onCleared()
+        }
+    }
     val decks by viewModel.decks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()

@@ -1,9 +1,13 @@
 package com.recall.app
 
+import com.recall.app.domain.Result
 import com.recall.app.domain.models.Deck
 import com.recall.app.network.RecallApiService
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +20,7 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     private val apiService: RecallApiService
 ) {
-    private val scope = CoroutineScope(Dispatchers.Main)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val _decks = MutableStateFlow<List<Deck>>(emptyList())
     val decks: StateFlow<List<Deck>> = _decks.asStateFlow()
@@ -35,13 +39,17 @@ class MainViewModel(
         scope.launch {
             _isLoading.value = true
             _error.value = null
-            try {
-                val fetchedDecks = apiService.fetchAllDecks()
-                _decks.value = fetchedDecks
-            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                _error.value = e.message ?: "Unknown error occurred"
+            when (val result = apiService.fetchAllDecks()) {
+                is Result.Success -> {
+                    _decks.value = result.data
+                }
+                is Result.Error -> {
+                    val exception = result.exception
+                    if (exception is CancellationException) {
+                        throw exception
+                    }
+                    _error.value = result.message
+                }
             } finally {
                 _isLoading.value = false
             }
@@ -50,5 +58,12 @@ class MainViewModel(
 
     fun retry() {
         fetchDecks()
+    }
+
+    /**
+     * Cancel work tied to this screen instance when the composable leaves composition.
+     */
+    fun onCleared() {
+        scope.cancel()
     }
 }
