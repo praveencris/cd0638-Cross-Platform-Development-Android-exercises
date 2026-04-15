@@ -2,6 +2,7 @@ package com.recall.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.recall.app.domain.Result
 import com.recall.app.network.RecallApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,13 +26,13 @@ class MainViewModel(
     fun fetchDecks() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            try {
-                val decks = apiService.fetchAllDecks()
-                _uiState.value = UiState.Success(decks.size)
-            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                _uiState.value = UiState.Error(e.message ?: "Unknown error")
+            when (val result = apiService.fetchAllDecks()) {
+                is Result.Success -> {
+                    _uiState.value = UiState.Success(result.data.size)
+                }
+                is Result.Error -> {
+                    _uiState.value = UiState.Error(result.message)
+                }
             }
         }
     }
