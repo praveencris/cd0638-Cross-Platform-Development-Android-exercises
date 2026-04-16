@@ -40,8 +40,14 @@ fun StudyScreen(
 ) {
     var currentCardIndex by remember { mutableStateOf(0) }
     var isFlipped by remember { mutableStateOf(false) }
+    val totalCards = deck.cards.size
+    val progress = if (totalCards > 0) {
+        (currentCardIndex + 1).toFloat() / totalCards.toFloat()
+    } else {
+        0f
+    }
 
-    val currentCard = if (deck.cards.isNotEmpty() && currentCardIndex < deck.cards.size) {
+    val currentCard = if (totalCards > 0 && currentCardIndex < totalCards) {
         deck.cards[currentCardIndex]
     } else {
         null
@@ -61,8 +67,8 @@ fun StudyScreen(
             TopBar(
                 deckTitle = deck.title,
                 currentIndex = currentCardIndex + 1,
-                totalCards = deck.cards.size,
-                progress = (currentCardIndex + 1).toFloat() / deck.cards.size.toFloat(),
+                totalCards = totalCards,
+                progress = progress,
                 onClose = onClose
             )
 
@@ -88,19 +94,19 @@ fun StudyScreen(
                     SpacedRepetitionButtons(
                         onAgain = {
                             // Move to next card
-                            currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                            currentCardIndex = (currentCardIndex + 1) % totalCards
                             isFlipped = false
                         },
                         onHard = {
-                            currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                            currentCardIndex = (currentCardIndex + 1) % totalCards
                             isFlipped = false
                         },
                         onGood = {
-                            currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                            currentCardIndex = (currentCardIndex + 1) % totalCards
                             isFlipped = false
                         },
                         onEasy = {
-                            currentCardIndex = (currentCardIndex + 1) % deck.cards.size
+                            currentCardIndex = (currentCardIndex + 1) % totalCards
                             isFlipped = false
                         },
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
