@@ -27,34 +27,31 @@ import com.recall.app.domain.models.Deck
  * - Progress tracking (current card / total cards)
  * - Spaced repetition buttons (Again, Hard, Good, Easy)
  * - Adaptive background gradient based on deck category
- * - Resume functionality to continue where you left off
  *
  * @param deck The deck being studied
- * @param startIndex The card index to start at (for resume functionality)
- * @param onCardReviewed Callback when a card is reviewed, receives the new card index
  * @param onClose Callback when user closes the study session
  * @param modifier Optional modifier for the screen
  */
 @Composable
 fun StudyScreen(
     deck: Deck,
-    startIndex: Int = 0,
-    onCardReviewed: (Int) -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var currentCardIndex by remember { mutableStateOf(startIndex) }
+    var currentCardIndex by remember { mutableStateOf(0) }
     var isFlipped by remember { mutableStateOf(false) }
+    val totalCards = deck.cards.size
+    val progress = if (totalCards > 0) {
+        (currentCardIndex + 1).toFloat() / totalCards.toFloat()
+    } else {
+        0f
+    }
 
-    val currentCard = if (deck.cards.isNotEmpty() && currentCardIndex < deck.cards.size) {
+    val currentCard = if (totalCards > 0 && currentCardIndex < totalCards) {
         deck.cards[currentCardIndex]
     } else {
         null
     }
-
-    // TODO: Add keyboard support - FocusRequester, LaunchedEffect, onKeyEvent
-    // - Spacebar should flip the card
-    // - Keys 1-4 should trigger rating buttons
 
     Box(
         modifier = modifier
@@ -70,8 +67,8 @@ fun StudyScreen(
             TopBar(
                 deckTitle = deck.title,
                 currentIndex = currentCardIndex + 1,
-                totalCards = deck.cards.size,
-                progress = (currentCardIndex + 1).toFloat() / deck.cards.size.toFloat(),
+                totalCards = totalCards,
+                progress = progress,
                 onClose = onClose
             )
 
@@ -96,20 +93,21 @@ fun StudyScreen(
                 if (isFlipped) {
                     SpacedRepetitionButtons(
                         onAgain = {
-                            // TODO: Calculate nextIndex, update currentCardIndex, reset isFlipped
-                            // TODO: Call onCardReviewed(nextIndex) to update ViewModel
+                            // Move to next card
+                            currentCardIndex = (currentCardIndex + 1) % totalCards
+                            isFlipped = false
                         },
                         onHard = {
-                            // TODO: Calculate nextIndex, update currentCardIndex, reset isFlipped
-                            // TODO: Call onCardReviewed(nextIndex) to update ViewModel
+                            currentCardIndex = (currentCardIndex + 1) % totalCards
+                            isFlipped = false
                         },
                         onGood = {
-                            // TODO: Calculate nextIndex, update currentCardIndex, reset isFlipped
-                            // TODO: Call onCardReviewed(nextIndex) to update ViewModel
+                            currentCardIndex = (currentCardIndex + 1) % totalCards
+                            isFlipped = false
                         },
                         onEasy = {
-                            // TODO: Calculate nextIndex, update currentCardIndex, reset isFlipped
-                            // TODO: Call onCardReviewed(nextIndex) to update ViewModel
+                            currentCardIndex = (currentCardIndex + 1) % totalCards
+                            isFlipped = false
                         },
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
                     )
@@ -207,12 +205,6 @@ private fun FlashCard(
     onCardTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // TODO: Implement 3D Flip Animation
-    // 1. Use animateFloatAsState to animate rotation from 0f to 180f
-    // 2. Apply graphicsLayer modifier with rotationY and cameraDistance
-    // 3. Switch content at 90 degrees (front vs back)
-    // 4. Apply counter-rotation to back side so text is readable
-
     Card(
         modifier = modifier
             .clickable(onClick = onCardTap),
@@ -220,41 +212,97 @@ private fun FlashCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxSize()
         ) {
-            // Placeholder card UI - students will implement the full design
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFFF5F5F5))
-                    .padding(32.dp)
+                modifier = Modifier.fillMaxSize()
             ) {
-                Text(
-                    text = if (isFlipped) "ANSWER" else "QUESTION",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (isFlipped) Color(0xFF10B981) else Color(0xFF2B8CEE),
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
+                // Top gradient section (teal background)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.4f)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF14B8A6),
+                                    Color(0xFF0D9488)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    // Category badge
+                    Surface(
+                        modifier = Modifier.padding(16.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color.White.copy(alpha = 0.3f)
+                    ) {
+                        Text(
+                            text = deck.category.name.replace("_", " "),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                }
 
-                Text(
-                    text = if (isFlipped) card.back else card.front,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F2937),
-                    textAlign = TextAlign.Center
-                )
+                // Bottom white section (question/answer)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.6f)
+                        .background(Color.White),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(32.dp)
+                    ) {
+                        // Label
+                        Text(
+                            text = if (isFlipped) "ANSWER" else "QUESTION",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (isFlipped) Color(0xFF10B981) else Color(0xFF2B8CEE),
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.2.sp,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
 
-                if (!isFlipped) {
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = "↻ Tap to flip",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color(0xFF9CA3AF)
-                    )
+                        // Question/Answer text
+                        Text(
+                            text = if (isFlipped) card.back else card.front,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1F2937),
+                            textAlign = TextAlign.Center,
+                            lineHeight = MaterialTheme.typography.headlineMedium.lineHeight
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Tap to flip hint (only show when not flipped)
+                        if (!isFlipped) {
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(top = 16.dp)
+                            ) {
+                                Text(
+                                    text = "↻",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = Color(0xFF9CA3AF)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Tap to flip",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Color(0xFF9CA3AF)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
