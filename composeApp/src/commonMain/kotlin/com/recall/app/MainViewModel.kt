@@ -4,6 +4,8 @@ import com.recall.app.domain.models.Deck
 import com.recall.app.network.RecallApiService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +18,7 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     private val apiService: RecallApiService
 ) {
-    private val scope = CoroutineScope(Dispatchers.Main)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val _decks = MutableStateFlow<List<Deck>>(emptyList())
     val decks: StateFlow<List<Deck>> = _decks.asStateFlow()
@@ -56,5 +58,12 @@ class MainViewModel(
 
     fun selectDeck(deck: Deck?) {
         // TODO: Implement deck selection logic
+    }
+
+    /**
+     * Cancel in-flight work when this screen-scoped instance is discarded.
+     */
+    fun onCleared() {
+        scope.cancel()
     }
 }
