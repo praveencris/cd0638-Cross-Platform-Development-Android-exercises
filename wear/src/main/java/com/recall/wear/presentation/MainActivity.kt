@@ -4,11 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import com.recall.app.MainViewModel
-import org.koin.compose.koinInject
+import org.koin.mp.KoinPlatform
 
 /**
  * Main activity for Wear OS application
@@ -25,7 +27,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun WearApp(viewModel: MainViewModel = koinInject()) {
+fun WearApp() {
+    val viewModel = remember { KoinPlatform.getKoin().get<MainViewModel>() }
+    DisposableEffect(viewModel) {
+        onDispose {
+            viewModel.onCleared()
+        }
+    }
+
     val decks by viewModel.decks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
