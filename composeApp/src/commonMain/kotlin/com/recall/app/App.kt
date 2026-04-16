@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import com.recall.app.ui.AdaptiveLayout
 import com.recall.app.ui.navigation.MasterDetailLayout
 import org.koin.compose.KoinContext
-import org.koin.compose.koinInject
+import org.koin.mp.KoinPlatform
 
 /**
  * Shared Compose UI for both Android and iOS
@@ -20,12 +20,16 @@ fun App() {
     KoinContext {
         MaterialTheme {
             AdaptiveLayout { windowSize ->
-                val viewModel: MainViewModel = koinInject()
+                val viewModel = remember { KoinPlatform.getKoin().get<MainViewModel>() }
+                DisposableEffect(viewModel) {
+                    onDispose {
+                        viewModel.onCleared()
+                    }
+                }
                 val decks by viewModel.decks.collectAsState()
                 val isLoading by viewModel.isLoading.collectAsState()
                 val error by viewModel.error.collectAsState()
                 val selectedDeck by viewModel.selectedDeck.collectAsState()
-                val isInitialLoad by viewModel.isInitialLoad.collectAsState()
                 val snackbarHostState = remember { SnackbarHostState() }
 
                 // Show error as snackbar (non-blocking)
@@ -58,8 +62,8 @@ fun App() {
                             .padding(paddingValues),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        if (decks.isEmpty() && !isInitialLoad) {
-                            // Empty state - only shown when truly no data AFTER initial load
+                        if (decks.isEmpty()) {
+                            // Empty state - only shown when truly no data
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
@@ -88,8 +92,7 @@ fun App() {
                                 onRefresh = viewModel::fetchDecks,
                                 onDeckSelected = viewModel::selectDeck,
                                 getStartIndex = viewModel::getStartIndex,
-                                onCardReviewed = viewModel::onCardReviewed,
-                                isInitialLoad = isInitialLoad
+                                onCardReviewed = viewModel::onCardReviewed
                             )
                         }
                     }
