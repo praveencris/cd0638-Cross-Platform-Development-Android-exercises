@@ -1,7 +1,5 @@
 package com.recall.app.ui
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,15 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.focusable
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.*
 import com.recall.app.domain.models.Card
 import com.recall.app.domain.models.Deck
 
@@ -34,71 +27,36 @@ import com.recall.app.domain.models.Deck
  * - Progress tracking (current card / total cards)
  * - Spaced repetition buttons (Again, Hard, Good, Easy)
  * - Adaptive background gradient based on deck category
- * - Resume functionality to continue where you left off
  *
  * @param deck The deck being studied
- * @param startIndex The card index to start at (for resume functionality)
- * @param onCardReviewed Callback when a card is reviewed, receives the new card index
  * @param onClose Callback when user closes the study session
  * @param modifier Optional modifier for the screen
  */
 @Composable
 fun StudyScreen(
     deck: Deck,
-    startIndex: Int = 0,
-    onCardReviewed: (Int) -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var currentCardIndex by remember { mutableStateOf(startIndex) }
+    var currentCardIndex by remember { mutableStateOf(0) }
     var isFlipped by remember { mutableStateOf(false) }
+    val totalCards = deck.cards.size
+    val progress = if (totalCards > 0) {
+        (currentCardIndex + 1).toFloat() / totalCards.toFloat()
+    } else {
+        0f
+    }
 
-    val currentCard = if (deck.cards.isNotEmpty() && currentCardIndex < deck.cards.size) {
+    val currentCard = if (totalCards > 0 && currentCardIndex < totalCards) {
         deck.cards[currentCardIndex]
     } else {
         null
-    }
-
-    // Advance to next card and report progress
-    fun advanceCard() {
-        val nextIndex = (currentCardIndex + 1) % deck.cards.size
-        currentCardIndex = nextIndex
-        isFlipped = false
-        onCardReviewed(nextIndex)
-    }
-
-    // Focus management for keyboard support
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
     }
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color(0xFFE6F0FA))
-            .focusRequester(focusRequester)
-            .onKeyEvent { event ->
-                when {
-                    // Spacebar flips the card
-                    event.key == Key.Spacebar && event.type == KeyEventType.KeyUp -> {
-                        isFlipped = !isFlipped
-                        true
-                    }
-                    // Number keys 1-4 trigger rating buttons (only when flipped)
-                    isFlipped && event.type == KeyEventType.KeyUp -> {
-                        when (event.key) {
-                            Key.One, Key.Two, Key.Three, Key.Four -> {
-                                advanceCard()
-                                true
-                            }
-                            else -> false
-                        }
-                    }
-                    else -> false
-                }
-            }
-            .focusable()
     ) {
         Column(
             modifier = Modifier
@@ -109,8 +67,8 @@ fun StudyScreen(
             TopBar(
                 deckTitle = deck.title,
                 currentIndex = currentCardIndex + 1,
-                totalCards = deck.cards.size,
-                progress = (currentCardIndex + 1).toFloat() / deck.cards.size.toFloat(),
+                totalCards = totalCards,
+                progress = progress,
                 onClose = onClose
             )
 
@@ -134,10 +92,23 @@ fun StudyScreen(
                 // Spaced repetition buttons
                 if (isFlipped) {
                     SpacedRepetitionButtons(
-                        onAgain = { advanceCard() },
-                        onHard = { advanceCard() },
-                        onGood = { advanceCard() },
-                        onEasy = { advanceCard() },
+                        onAgain = {
+                            // Move to next card
+                            currentCardIndex = (currentCardIndex + 1) % totalCards
+                            isFlipped = false
+                        },
+                        onHard = {
+                            currentCardIndex = (currentCardIndex + 1) % totalCards
+                            isFlipped = false
+                        },
+                        onGood = {
+                            currentCardIndex = (currentCardIndex + 1) % totalCards
+                            isFlipped = false
+                        },
+                        onEasy = {
+                            currentCardIndex = (currentCardIndex + 1) % totalCards
+                            isFlipped = false
+                        },
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
                     )
                 } else {
@@ -234,96 +205,85 @@ private fun FlashCard(
     onCardTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val rotation by animateFloatAsState(
-        targetValue = if (isFlipped) 180f else 0f,
-        animationSpec = tween(durationMillis = 400),
-        label = "cardFlip"
-    )
-
     Card(
         modifier = modifier
-            .clickable(onClick = onCardTap)
-            .graphicsLayer {
-                rotationY = rotation
-                cameraDistance = 12f * density
-            },
+            .clickable(onClick = onCardTap),
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Show front side when rotation <= 90 degrees
-            if (rotation <= 90f) {
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    // Top gradient section (teal background)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(0.4f)
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color(0xFF14B8A6),
-                                        Color(0xFF0D9488)
-                                    )
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Top gradient section (teal background)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.4f)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF14B8A6),
+                                    Color(0xFF0D9488)
                                 )
-                            ),
-                        contentAlignment = Alignment.TopEnd
-                    ) {
-                        // Category badge
-                        Surface(
-                            modifier = Modifier.padding(16.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color.White.copy(alpha = 0.3f)
-                        ) {
-                            Text(
-                                text = deck.category.name.replace("_", " "),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.White,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                             )
-                        }
+                        ),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    // Category badge
+                    Surface(
+                        modifier = Modifier.padding(16.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color.White.copy(alpha = 0.3f)
+                    ) {
+                        Text(
+                            text = deck.category.name.replace("_", " "),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
                     }
+                }
 
-                    // Bottom white section (question)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(0.6f)
-                            .background(Color.White),
-                        contentAlignment = Alignment.Center
+                // Bottom white section (question/answer)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.6f)
+                        .background(Color.White),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(32.dp)
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(32.dp)
-                        ) {
-                            // Label
-                            Text(
-                                text = "QUESTION",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = Color(0xFF2B8CEE),
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.2.sp,
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
+                        // Label
+                        Text(
+                            text = if (isFlipped) "ANSWER" else "QUESTION",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (isFlipped) Color(0xFF10B981) else Color(0xFF2B8CEE),
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.2.sp,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
 
-                            // Question text
-                            Text(
-                                text = card.front,
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1F2937),
-                                textAlign = TextAlign.Center,
-                                lineHeight = MaterialTheme.typography.headlineMedium.lineHeight
-                            )
+                        // Question/Answer text
+                        Text(
+                            text = if (isFlipped) card.back else card.front,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1F2937),
+                            textAlign = TextAlign.Center,
+                            lineHeight = MaterialTheme.typography.headlineMedium.lineHeight
+                        )
 
-                            Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
 
-                            // Tap to flip hint
+                        // Tap to flip hint (only show when not flipped)
+                        if (!isFlipped) {
                             Row(
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically,
@@ -339,85 +299,6 @@ private fun FlashCard(
                                     text = "Tap to flip",
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = Color(0xFF9CA3AF)
-                                )
-                            }
-                        }
-                    }
-                }
-            } else {
-                // Show back side when rotation > 90 degrees
-                // Apply counter-rotation so text is readable
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            rotationY = 180f
-                        }
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        // Top gradient section (teal background)
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.4f)
-                                .background(
-                                    brush = Brush.verticalGradient(
-                                        colors = listOf(
-                                            Color(0xFF14B8A6),
-                                            Color(0xFF0D9488)
-                                        )
-                                    )
-                                ),
-                            contentAlignment = Alignment.TopEnd
-                        ) {
-                            // Category badge
-                            Surface(
-                                modifier = Modifier.padding(16.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color.White.copy(alpha = 0.3f)
-                            ) {
-                                Text(
-                                    text = deck.category.name.replace("_", " "),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Medium,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                                )
-                            }
-                        }
-
-                        // Bottom white section (answer)
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.6f)
-                                .background(Color.White),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.padding(32.dp)
-                            ) {
-                                // Label
-                                Text(
-                                    text = "ANSWER",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = Color(0xFF10B981),
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.2.sp,
-                                    modifier = Modifier.padding(bottom = 16.dp)
-                                )
-
-                                // Answer text
-                                Text(
-                                    text = card.back,
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF1F2937),
-                                    textAlign = TextAlign.Center,
-                                    lineHeight = MaterialTheme.typography.headlineMedium.lineHeight
                                 )
                             }
                         }
