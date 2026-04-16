@@ -80,20 +80,26 @@ class AndroidAnalyticsService(context: Context) : AnalyticsService {
  * 3. Inject it wherever analytics are needed
  */
 actual object AnalyticsProvider {
-    private lateinit var instance: AnalyticsService
+    
+    private var instance: AnalyticsService? = null
 
     /**
      * Initialize the analytics service with Android Context.
      * Call this once in your Application.onCreate()
      */
     fun initialize(context: Context) {
-        instance = AndroidAnalyticsService(context.applicationContext)
+        if (instance != null) return
+
+        synchronized(this) {
+            if (instance == null) {
+                instance = AndroidAnalyticsService(context.applicationContext)
+            }
+        }
     }
 
     actual fun get(): AnalyticsService {
-        check(::instance.isInitialized) {
+        return checkNotNull(instance) {
             "AnalyticsProvider not initialized. Call AnalyticsProvider.initialize(context) in Application.onCreate()"
         }
-        return instance
     }
 }
