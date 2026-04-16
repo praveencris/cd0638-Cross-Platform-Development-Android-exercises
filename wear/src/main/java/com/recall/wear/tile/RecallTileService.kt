@@ -1,6 +1,5 @@
 package com.recall.wear.tile
 
-import android.content.Intent
 import androidx.wear.protolayout.ActionBuilders
 import androidx.wear.protolayout.ColorBuilders
 import androidx.wear.protolayout.DimensionBuilders
@@ -13,7 +12,9 @@ import androidx.wear.tiles.TileBuilders
 import androidx.wear.tiles.TileService
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import com.recall.wear.data.DeckSnapshotStore
 import com.recall.wear.presentation.MainActivity
+import org.koin.mp.KoinPlatform
 
 /**
  * Tile Service for Quick Access
@@ -21,6 +22,9 @@ import com.recall.wear.presentation.MainActivity
  *
  * Tiles appear in the Wear OS carousel and allow 5-second interactions
  * without opening the full app.
+ *
+ * This implementation reads the last local deck snapshot so tile callbacks
+ * stay responsive without blocking on network work.
  */
 class RecallTileService : TileService() {
 
@@ -31,12 +35,14 @@ class RecallTileService : TileService() {
     /**
      * Called when the system requests the tile layout
      * Returns a timeline with the tile content
+     *
+     * Reads the last deck snapshot from local storage.
      */
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
-        // In a real implementation, we would fetch the next due deck from the database
-        // For this demo, we'll use mock data
-        val deckName = "Physics"
-        val dueCount = 5
+        val snapshotStore = KoinPlatform.getKoin().get<DeckSnapshotStore>()
+        val snapshot = snapshotStore.readSnapshot()
+        val deckName = snapshot.featuredDeckName
+        val dueCount = snapshot.dueCount
 
         // Create the tap action to launch MainActivity
         val clickable = ModifiersBuilders.Clickable.Builder()

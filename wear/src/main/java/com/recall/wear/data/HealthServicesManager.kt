@@ -9,6 +9,7 @@ import androidx.health.services.client.data.DataType
 import androidx.health.services.client.data.DataTypeAvailability
 import androidx.health.services.client.data.DeltaDataType
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.guava.await
@@ -51,10 +52,9 @@ class HealthServicesManager(context: Context) {
         measureClient.registerMeasureCallback(DataType.HEART_RATE_BPM, callback)
 
         // Unregister when Flow is cancelled (e.g., when composable leaves composition)
-        // Non-blocking cleanup to avoid potential deadlock on single-threaded dispatchers
         awaitClose {
-            kotlinx.coroutines.GlobalScope.launch {
-                measureClient.unregisterMeasureCallbackAsync(DataType.HEART_RATE_BPM, callback)
+            launch(NonCancellable) {
+                measureClient.unregisterMeasureCallbackAsync(DataType.HEART_RATE_BPM, callback).await()
             }
         }
     }

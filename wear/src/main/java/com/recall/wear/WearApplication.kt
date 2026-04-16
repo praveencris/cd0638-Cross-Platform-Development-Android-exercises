@@ -2,6 +2,7 @@ package com.recall.wear
 
 import android.app.Application
 import com.recall.app.di.initKoin
+import com.recall.wear.di.wearModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.logger.Level
@@ -18,6 +19,7 @@ class WearApplication : Application() {
         initKoin {
             androidLogger(Level.DEBUG)
             androidContext(this@WearApplication)
+            modules(wearModule)
         }
     }
 }

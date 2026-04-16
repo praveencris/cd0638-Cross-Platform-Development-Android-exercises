@@ -5,6 +5,7 @@ import com.recall.app.data.RecallRepository
 import com.recall.app.data.RecallRepositoryImpl
 import com.recall.app.data.local.DatabaseFactory
 import com.recall.app.data.local.RecallDatabase
+import io.ktor.client.HttpClient
 import com.recall.app.network.NetworkClient
 import com.recall.app.network.RecallApiService
 import org.koin.core.context.startKoin
@@ -39,7 +40,10 @@ val sharedModule = module {
 
     // ==================== Network Layer ====================
     // RecallApiService - HTTP client for remote API
-    single { RecallApiService(NetworkClient.httpClient) }
+    single<HttpClient> { NetworkClient.createHttpClient() } onClose { client ->
+        client?.close()
+    }
+    single { RecallApiService(get()) }
 
     // ==================== Repository Layer ====================
     // RecallRepository - Mediates between network and database (Single Source of Truth)
