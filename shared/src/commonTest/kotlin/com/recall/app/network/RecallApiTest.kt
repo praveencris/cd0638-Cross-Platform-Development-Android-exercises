@@ -1,5 +1,6 @@
 package com.recall.app.network
 
+import com.recall.app.domain.Result
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,17 +18,21 @@ class RecallApiTest {
      */
     @Test
     fun test_fetchAllDecks_returns_decks() = runTest {
-        // Arrange: Create the API service with the configured client
-        val apiService = RecallApiService(NetworkClient.httpClient)
+        val client = NetworkClient.createHttpClient()
+        val apiService = RecallApiService(client)
 
-        // Act: Fetch all decks from the API
-        val decks = apiService.fetchAllDecks()
+        try {
+            val result = apiService.fetchAllDecks()
+            val decks = (result as? Result.Success)?.data
 
-        // Assert: Verify we got decks back
-        assertTrue(
-            actual = decks.isNotEmpty(),
-            message = "Should fetch at least one deck"
-        )
+            assertNotNull(decks, "Expected a successful network response")
+            assertTrue(
+                actual = decks.isNotEmpty(),
+                message = "Should fetch at least one deck"
+            )
+        } finally {
+            client.close()
+        }
     }
 
     /**
@@ -35,20 +40,24 @@ class RecallApiTest {
      */
     @Test
     fun test_first_deck_title_is_nasa_space_gallery() = runTest {
-        // Arrange
-        val apiService = RecallApiService(NetworkClient.httpClient)
+        val client = NetworkClient.createHttpClient()
+        val apiService = RecallApiService(client)
 
-        // Act
-        val decks = apiService.fetchAllDecks()
+        try {
+            val result = apiService.fetchAllDecks()
+            val decks = (result as? Result.Success)?.data
+            assertNotNull(decks, "Expected a successful network response")
 
-        // Assert: Verify the first deck's title
-        val firstDeck = decks.firstOrNull()
-        assertNotNull(firstDeck, "First deck should not be null")
-        assertEquals(
-            expected = "NASA Space Gallery",
-            actual = firstDeck.title,
-            message = "First deck title should be 'NASA Space Gallery'"
-        )
+            val firstDeck = decks.firstOrNull()
+            assertNotNull(firstDeck, "First deck should not be null")
+            assertEquals(
+                expected = "NASA Space Gallery",
+                actual = firstDeck.title,
+                message = "First deck title should be 'NASA Space Gallery'"
+            )
+        } finally {
+            client.close()
+        }
     }
 
     /**
@@ -56,24 +65,27 @@ class RecallApiTest {
      */
     @Test
     fun test_decks_contain_cards_with_data() = runTest {
-        // Arrange
-        val apiService = RecallApiService(NetworkClient.httpClient)
+        val client = NetworkClient.createHttpClient()
+        val apiService = RecallApiService(client)
 
-        // Act
-        val decks = apiService.fetchAllDecks()
+        try {
+            val result = apiService.fetchAllDecks()
+            val decks = (result as? Result.Success)?.data
+            assertNotNull(decks, "Expected a successful network response")
 
-        // Assert: Verify first deck has cards
-        val firstDeck = decks.first()
-        assertTrue(
-            actual = firstDeck.cards.isNotEmpty(),
-            message = "First deck should contain cards"
-        )
+            val firstDeck = decks.first()
+            assertTrue(
+                actual = firstDeck.cards.isNotEmpty(),
+                message = "First deck should contain cards"
+            )
 
-        // Verify card structure
-        val firstCard = firstDeck.cards.first()
-        assertNotNull(firstCard.id, "Card should have an ID")
-        assertNotNull(firstCard.front, "Card should have front text")
-        assertNotNull(firstCard.back, "Card should have back text")
+            val firstCard = firstDeck.cards.first()
+            assertNotNull(firstCard.id, "Card should have an ID")
+            assertNotNull(firstCard.front, "Card should have front text")
+            assertNotNull(firstCard.back, "Card should have back text")
+        } finally {
+            client.close()
+        }
     }
 
     /**
@@ -81,17 +93,21 @@ class RecallApiTest {
      */
     @Test
     fun test_deck_color_is_mapped_correctly() = runTest {
-        // Arrange
-        val apiService = RecallApiService(NetworkClient.httpClient)
+        val client = NetworkClient.createHttpClient()
+        val apiService = RecallApiService(client)
 
-        // Act
-        val decks = apiService.fetchAllDecks()
+        try {
+            val result = apiService.fetchAllDecks()
+            val decks = (result as? Result.Success)?.data
+            assertNotNull(decks, "Expected a successful network response")
 
-        // Assert: Verify color field is mapped
-        val firstDeck = decks.first()
-        assertTrue(
-            actual = firstDeck.colorHex.startsWith("#"),
-            message = "Deck color should be a hex color code starting with #"
-        )
+            val firstDeck = decks.first()
+            assertTrue(
+                actual = firstDeck.colorHex.startsWith("#"),
+                message = "Deck color should be a hex color code starting with #"
+            )
+        } finally {
+            client.close()
+        }
     }
 }

@@ -8,9 +8,8 @@ import androidx.wear.watchface.complications.data.PlainComplicationText
 import androidx.wear.watchface.complications.data.ShortTextComplicationData
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceService
-import com.recall.app.network.RecallApiService
+import com.recall.wear.data.DeckSnapshotStore
 import com.recall.wear.presentation.MainActivity
-import kotlinx.coroutines.runBlocking
 import org.koin.mp.KoinPlatform
 
 /**
@@ -20,16 +19,14 @@ import org.koin.mp.KoinPlatform
  * This allows users to see their due card count directly on their watch face
  * and tap to open the full app.
  *
- * This implementation fetches real data from RecallApiService via Koin.
- * Since ComplicationDataSourceService callbacks run on a background thread,
- * using runBlocking is acceptable here.
+ * This implementation reads the last on-device deck snapshot so complication
+ * callbacks do not block on network work.
  */
 class RecallComplicationService : ComplicationDataSourceService() {
 
     /**
      * Called when the watch face requests complication data
-     * Fetches real card count from RecallApiService instead of using mock data.
-     * Uses KoinPlatform.getKoin() because Android Services cannot use koinInject().
+     * Reads the last saved deck snapshot from local storage.
      */
     override fun onComplicationRequest(
         request: ComplicationRequest,
@@ -41,14 +38,8 @@ class RecallComplicationService : ComplicationDataSourceService() {
             return
         }
 
-        // Fetch real due count from RecallApiService via Koin
-        val apiService = KoinPlatform.getKoin().get<RecallApiService>()
-        val dueCount = try {
-            val decks = runBlocking { apiService.fetchAllDecks() }
-            decks.sumOf { it.cards.size }
-        } catch (e: Exception) {
-            0
-        }
+        val snapshotStore = KoinPlatform.getKoin().get<DeckSnapshotStore>()
+        val dueCount = snapshotStore.readSnapshot().dueCount
 
         // Create a PendingIntent to launch MainActivity when the complication is tapped
         val intent = Intent(this, MainActivity::class.java)
