@@ -4,14 +4,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.produceState
-import androidx.compose.ui.platform.LocalContext
 import com.recall.app.MainViewModel
+import com.recall.wear.data.DeckSnapshotStore
 import com.recall.wear.data.HealthServicesManager
-import org.koin.compose.koinInject
+import org.koin.mp.KoinPlatform
 
 /**
  * Main activity for Wear OS application
@@ -28,7 +30,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun WearApp(viewModel: MainViewModel = koinInject()) {
+fun WearApp() {
+    val viewModel = remember { KoinPlatform.getKoin().get<MainViewModel>() }
+    DisposableEffect(viewModel) {
+        onDispose {
+            viewModel.onCleared()
+        }
+    }
+
     // Wrap content with permission handler for heart rate access
     HeartRatePermissionHandler {
         WearAppWithPermission(viewModel)
@@ -40,15 +49,19 @@ private fun WearAppWithPermission(viewModel: MainViewModel) {
     val decks by viewModel.decks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+    val healthServicesManager = remember { KoinPlatform.getKoin().get<HealthServicesManager>() }
+    val snapshotStore = remember { KoinPlatform.getKoin().get<DeckSnapshotStore>() }
 
     // Observe heart rate from Health Services
     // Only called after permission is granted by HeartRatePermissionHandler
-    val context = LocalContext.current
     val heartRate by produceState<Int?>(initialValue = null) {
-        val healthServicesManager = HealthServicesManager(context)
         healthServicesManager.heartRateFlow().collect { bpm ->
             value = bpm
         }
+    }
+
+    LaunchedEffect(decks) {
+        snapshotStore.saveSnapshot(decks)
     }
 
     // Trigger data loading when the composable enters composition
