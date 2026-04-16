@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.recall.app.ui.AdaptiveLayout
 import com.recall.app.ui.WindowSize
 import org.koin.compose.KoinContext
-import org.koin.compose.koinInject
+import org.koin.mp.KoinPlatform
 
 /**
  * Shared Compose UI for both Android and iOS
@@ -37,7 +37,12 @@ fun App() {
 
 @Composable
 fun MainScreen(windowSize: WindowSize) {
-    val viewModel: MainViewModel = koinInject()
+    val viewModel = remember { KoinPlatform.getKoin().get<MainViewModel>() }
+    DisposableEffect(viewModel) {
+        onDispose {
+            viewModel.onCleared()
+        }
+    }
     val decks by viewModel.decks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
