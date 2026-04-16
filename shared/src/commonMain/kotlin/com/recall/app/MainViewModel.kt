@@ -2,8 +2,11 @@ package com.recall.app
 
 import com.recall.app.data.RecallRepository
 import com.recall.app.domain.models.Deck
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,16 +25,13 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     private val repository: RecallRepository
 ) {
-    private val scope = CoroutineScope(Dispatchers.Main)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val _decks = MutableStateFlow<List<Deck>>(emptyList())
     val decks: StateFlow<List<Deck>> = _decks.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    private val _isInitialLoad = MutableStateFlow(true)
-    val isInitialLoad: StateFlow<Boolean> = _isInitialLoad.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
@@ -48,10 +48,6 @@ class MainViewModel(
         scope.launch {
             repository.getDecks().collect { decksFromDb ->
                 _decks.value = decksFromDb
-                // Mark initial load as complete once we have data from any source
-                if (decksFromDb.isNotEmpty()) {
-                    _isInitialLoad.value = false
-                }
             }
         }
     }
@@ -75,14 +71,10 @@ class MainViewModel(
                 // Fetch from network and update database
                 // The Flow collection in init will automatically update _decks
                 repository.refreshDecks()
-                // Mark initial load complete even if network fetch returns empty
-                _isInitialLoad.value = false
-            } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 _error.value = e.message ?: "Unknown error occurred"
-                // Still mark initial load complete on error
-                _isInitialLoad.value = false
             } finally {
                 _isLoading.value = false
             }
@@ -141,5 +133,12 @@ class MainViewModel(
             // Database Flow will automatically update _decks with new progress
             // No need to manually update _decks here (reactive architecture)
         }
+    }
+
+    /**
+     * Cancel screen-scoped work when this instance leaves composition.
+     */
+    fun onCleared() {
+        scope.cancel()
     }
 }
