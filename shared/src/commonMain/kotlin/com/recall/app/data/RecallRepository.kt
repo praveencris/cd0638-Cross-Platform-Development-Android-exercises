@@ -72,26 +72,16 @@ class RecallRepositoryImpl(
     private val dao: RecallDao
 ) : RecallRepository {
     override fun getDecks(): Flow<List<Deck>> {
-        // PERFORMANCE OPTIMIZATION (Module 8c):
-        // Fixed N+1 query pattern by using Room @Relation
-        //
-        // BEFORE (N+1 pattern):
-        // - 1 query: SELECT * FROM DeckEntity
-        // - N queries: SELECT * FROM CardEntity WHERE deckId = ? (one per deck)
-        // - Total: 1+N queries (11 queries for 10 decks)
-        //
-        // AFTER (single JOIN query):
-        // - 1 query: SELECT DeckEntity.*, CardEntity.* FROM DeckEntity LEFT JOIN CardEntity...
-        // - Total: 1 query (regardless of number of decks)
-        //
-        // Impact: Instant loading, smooth UI, no database bottleneck
-        return dao.getDecksWithCards().map { decksWithCards ->
-            decksWithCards.map { deckWithCards ->
-                // Convert cards from entity to domain model
-                val cards = deckWithCards.cards.map { it.toDomain() }
+        return dao.getDecks().map { deckEntities ->
+            deckEntities.map { deckEntity ->
+                // For each deck, fetch its cards from database
+                // Note: This is intentionally using N+1 query pattern for pedagogical purposes
+                // Future profiling lesson (8c) will identify and optimize this
+                val cardEntities = dao.getCardsForDeck(deckEntity.id)
+                val cards = cardEntities.map { it.toDomain() }
 
-                // Convert deck from entity to domain model with cards
-                deckWithCards.deck.toDomain(cards = cards)
+                // Convert entity to domain model with cards
+                deckEntity.toDomain(cards = cards)
             }
         }
     }
@@ -108,22 +98,22 @@ class RecallRepositoryImpl(
             deckEntities.associateBy { it.id }
         }.first()
 
-        // 3. Convert domain models to entities and save to database
-        decksFromApi.forEach { deck ->
+        // 3. Convert domain models to entities and save to database atomically
+        val deckEntities = decksFromApi.map { deck ->
             // Preserve progress if deck already exists
-            val deckEntity = deck.toEntity().copy(
+            deck.toEntity().copy(
                 currentCardIndex = existingDecks[deck.id]?.currentCardIndex ?: 0
             )
-            dao.insertDeck(deckEntity)
+        }
 
-            // Insert card entities for this deck
+        val cardsByDeckId = decksFromApi.associate { deck ->
             val cardEntities = deck.cards.map { card ->
                 card.toEntity(deckId = deck.id)
             }
-            dao.insertCards(cardEntities)
+            deck.id to cardEntities
         }
 
-        // 4. Database Flow automatically notifies observers (no return needed)
+        dao.refreshDecks(deckEntities, cardsByDeckId)
     }
 
     override suspend fun updateDeckProgress(deckId: String, cardIndex: Int) {
