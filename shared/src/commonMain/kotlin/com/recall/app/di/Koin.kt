@@ -1,6 +1,6 @@
 package com.recall.app.di
 
-import com.recall.app.MainViewModel
+import io.ktor.client.HttpClient
 import com.recall.app.network.NetworkClient
 import com.recall.app.network.RecallApiService
 import org.koin.core.context.startKoin
@@ -13,11 +13,13 @@ import org.koin.dsl.module
  * Provides instances that are common across all platforms
  */
 val sharedModule = module {
-    // Provide singleton instance of RecallApiService
-    single { RecallApiService(NetworkClient.httpClient) }
+    // Keep the HTTP client inside DI so it can be disposed with the Koin graph.
+    single<HttpClient> { NetworkClient.createHttpClient() } onClose { client ->
+        client?.close()
+    }
 
-    // Provide MainViewModel instance (factory scope - new instance per injection)
-    factory { MainViewModel(get()) }
+    // Provide singleton instance of RecallApiService
+    single { RecallApiService(get()) }
 }
 
 /**
