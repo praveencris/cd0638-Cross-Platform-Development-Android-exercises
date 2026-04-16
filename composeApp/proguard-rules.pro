@@ -43,6 +43,18 @@
 -keep class com.recall.app.di.** { *; }
 
 # ============================================================
+# Firebase
+# ============================================================
+# Firebase can use reflection during startup, event logging, and crash reporting.
+-keep class com.google.firebase.analytics.** { *; }
+-keep class com.google.firebase.components.ComponentRegistrar { *; }
+-keep class com.google.firebase.provider.FirebaseInitProvider { *; }
+-keep class com.google.android.gms.measurement.** { *; }
+-dontwarn com.google.firebase.analytics.**
+-dontwarn com.google.firebase.components.**
+-dontwarn com.google.android.gms.measurement.**
+
+# ============================================================
 # Kotlin Coroutines
 # ============================================================
 # Keep coroutines for proper async operation
