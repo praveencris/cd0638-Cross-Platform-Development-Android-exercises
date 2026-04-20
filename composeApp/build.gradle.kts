@@ -8,8 +8,35 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.googleServices)
-    alias(libs.plugins.firebaseCrashlytics)
+    alias(libs.plugins.googleServices) apply false
+    alias(libs.plugins.firebaseCrashlytics) apply false
+}
+
+val hasGoogleServicesConfig = listOf(
+    file("google-services.json"),
+    file("src/debug/google-services.json"),
+    file("src/release/google-services.json")
+).any { it.exists() }
+
+val requiresFirebaseConfig = gradle.startParameter.taskNames.any { taskName ->
+    val requestedTask = taskName.substringAfterLast(':')
+    requestedTask.contains("Release", ignoreCase = true) ||
+        requestedTask.startsWith("bundle", ignoreCase = true) ||
+        requestedTask.startsWith("publish", ignoreCase = true)
+}
+
+if (hasGoogleServicesConfig) {
+    apply(plugin = libs.plugins.googleServices.get().pluginId)
+    apply(plugin = libs.plugins.firebaseCrashlytics.get().pluginId)
+} else if (requiresFirebaseConfig) {
+    throw GradleException(
+        "Release-capable builds require google-services.json for Firebase setup. " +
+            "Add composeApp/google-services.json or a variant-specific file before building release tasks."
+    )
+} else {
+    logger.lifecycle(
+        "google-services.json not found in composeApp; skipping Google Services and Crashlytics plugins for local builds."
+    )
 }
 
 kotlin {
@@ -133,4 +160,3 @@ android {
 dependencies {
     debugImplementation(libs.compose.uiTooling)
 }
-

@@ -1,47 +1,60 @@
 package com.recall.app.network
 
+import com.recall.app.domain.models.Card
+import com.recall.app.domain.models.Deck
+import com.recall.app.domain.models.DecksResponse
+import com.recall.app.domain.models.Meta
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.headersOf
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
- * Integration tests for RecallApiService
- * Tests the actual API call and JSON parsing
+ * Unit tests for RecallApiService
+ * Tests JSON parsing and field mapping without hitting the live network.
  */
 class RecallApiTest {
 
-    /**
-     * Test that the API successfully fetches and parses decks
-     */
+    private val testDecks = listOf(
+        Deck(
+            id = "deck-1",
+            title = "NASA Space Gallery",
+            colorHex = "#112233",
+            cards = listOf(
+                Card(id = "card-1", front = "Front 1", back = "Back 1")
+            )
+        )
+    )
+
     @Test
     fun test_fetchAllDecks_returns_decks() = runTest {
-        // Arrange: Create the API service with the configured client
-        val apiService = RecallApiService(NetworkClient.httpClient)
+        val apiService = createApiService()
 
-        // Act: Fetch all decks from the API
         val decks = apiService.fetchAllDecks()
 
-        // Assert: Verify we got decks back
         assertTrue(
             actual = decks.isNotEmpty(),
-            message = "Should fetch at least one deck"
+            message = "Should parse at least one deck from the API response"
         )
     }
 
-    /**
-     * Test that the first deck has the expected title
-     */
     @Test
     fun test_first_deck_title_is_nasa_space_gallery() = runTest {
-        // Arrange
-        val apiService = RecallApiService(NetworkClient.httpClient)
+        val apiService = createApiService()
 
-        // Act
         val decks = apiService.fetchAllDecks()
 
-        // Assert: Verify the first deck's title
         val firstDeck = decks.firstOrNull()
         assertNotNull(firstDeck, "First deck should not be null")
         assertEquals(
@@ -51,47 +64,56 @@ class RecallApiTest {
         )
     }
 
-    /**
-     * Test that decks contain cards with proper data
-     */
     @Test
     fun test_decks_contain_cards_with_data() = runTest {
-        // Arrange
-        val apiService = RecallApiService(NetworkClient.httpClient)
+        val apiService = createApiService()
 
-        // Act
         val decks = apiService.fetchAllDecks()
 
-        // Assert: Verify first deck has cards
         val firstDeck = decks.first()
         assertTrue(
             actual = firstDeck.cards.isNotEmpty(),
             message = "First deck should contain cards"
         )
 
-        // Verify card structure
         val firstCard = firstDeck.cards.first()
         assertNotNull(firstCard.id, "Card should have an ID")
         assertNotNull(firstCard.front, "Card should have front text")
         assertNotNull(firstCard.back, "Card should have back text")
     }
 
-    /**
-     * Test that color field is properly mapped to colorHex
-     */
     @Test
     fun test_deck_color_is_mapped_correctly() = runTest {
-        // Arrange
-        val apiService = RecallApiService(NetworkClient.httpClient)
+        val apiService = createApiService()
 
-        // Act
         val decks = apiService.fetchAllDecks()
 
-        // Assert: Verify color field is mapped
         val firstDeck = decks.first()
         assertTrue(
             actual = firstDeck.colorHex.startsWith("#"),
             message = "Deck color should be a hex color code starting with #"
         )
+    }
+
+    private fun createApiService(): RecallApiService {
+        val json = Json { ignoreUnknownKeys = true }
+        val engine = MockEngine { request ->
+            assertEquals(RecallApiConfig.decksUrl, request.url.toString())
+            respond(
+                content = json.encodeToString(
+                    DecksResponse(
+                        meta = Meta(version = 1, author = "test", license = "test"),
+                        decks = testDecks
+                    )
+                ),
+                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            )
+        }
+        val client = HttpClient(engine) {
+            install(ContentNegotiation) {
+                json(json)
+            }
+        }
+        return RecallApiService(client)
     }
 }
