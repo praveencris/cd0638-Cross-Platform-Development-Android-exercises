@@ -29,16 +29,24 @@ import com.recall.app.domain.models.Deck
  * - Adaptive background gradient based on deck category
  *
  * @param deck The deck being studied
+ * @param startIndex The initial card index for resuming an in-progress deck
+ * @param onCardReviewed Callback invoked after advancing to the next card
  * @param onClose Callback when user closes the study session
  * @param modifier Optional modifier for the screen
  */
 @Composable
 fun StudyScreen(
     deck: Deck,
+    startIndex: Int = 0,
+    onCardReviewed: (Int) -> Unit = {},
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var currentCardIndex by remember { mutableStateOf(0) }
+    val initialCardIndex = remember(deck.id, startIndex, deck.cards.size) {
+        initialStudyCardIndex(startIndex, deck.cards.size)
+    }
+
+    var currentCardIndex by remember(deck.id, initialCardIndex) { mutableStateOf(initialCardIndex) }
     var isFlipped by remember { mutableStateOf(false) }
     val totalCards = deck.cards.size
     val progress = if (totalCards > 0) {
@@ -93,20 +101,27 @@ fun StudyScreen(
                 if (isFlipped) {
                     SpacedRepetitionButtons(
                         onAgain = {
-                            // Move to next card
-                            currentCardIndex = (currentCardIndex + 1) % totalCards
+                            val nextIndex = nextStudyCardIndex(currentCardIndex, totalCards)
+                            currentCardIndex = nextIndex
+                            onCardReviewed(nextIndex)
                             isFlipped = false
                         },
                         onHard = {
-                            currentCardIndex = (currentCardIndex + 1) % totalCards
+                            val nextIndex = nextStudyCardIndex(currentCardIndex, totalCards)
+                            currentCardIndex = nextIndex
+                            onCardReviewed(nextIndex)
                             isFlipped = false
                         },
                         onGood = {
-                            currentCardIndex = (currentCardIndex + 1) % totalCards
+                            val nextIndex = nextStudyCardIndex(currentCardIndex, totalCards)
+                            currentCardIndex = nextIndex
+                            onCardReviewed(nextIndex)
                             isFlipped = false
                         },
                         onEasy = {
-                            currentCardIndex = (currentCardIndex + 1) % totalCards
+                            val nextIndex = nextStudyCardIndex(currentCardIndex, totalCards)
+                            currentCardIndex = nextIndex
+                            onCardReviewed(nextIndex)
                             isFlipped = false
                         },
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp)
@@ -129,6 +144,16 @@ fun StudyScreen(
             }
         }
     }
+}
+
+internal fun initialStudyCardIndex(startIndex: Int, totalCards: Int): Int {
+    if (totalCards <= 0) return 0
+    return startIndex.coerceIn(0, totalCards - 1)
+}
+
+internal fun nextStudyCardIndex(currentCardIndex: Int, totalCards: Int): Int {
+    if (totalCards <= 0) return 0
+    return (currentCardIndex + 1) % totalCards
 }
 
 /**
