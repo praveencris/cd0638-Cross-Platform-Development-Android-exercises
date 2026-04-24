@@ -1,5 +1,6 @@
 package com.recall.app
 
+import com.recall.app.domain.Result
 import com.recall.app.domain.models.Card
 import com.recall.app.domain.models.Deck
 import com.recall.app.network.RecallApiService
@@ -307,10 +308,10 @@ class FakeRecallApiService : RecallApiService(
     var shouldThrowError: Boolean = false
     var errorMessage: String = "Test error"
 
-    override suspend fun fetchAllDecks(): List<Deck> {
+    override suspend fun fetchAllDecks(): Result<List<Deck>> {
         if (shouldThrowError) {
-            throw Exception(errorMessage)
+            return Result.Error(Exception(errorMessage))
         }
-        return decksToReturn
+        return Result.Success(decksToReturn)
     }
 }
