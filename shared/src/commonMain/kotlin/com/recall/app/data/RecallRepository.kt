@@ -94,10 +94,7 @@ class RecallRepositoryImpl(
 
         // TEMPORARY: Direct API call (remove this after implementing TODO 5)
         return kotlinx.coroutines.flow.flow {
-            when (val result = api.fetchAllDecks()) {
-                is Result.Success -> emit(result.data)
-                is Result.Error -> emit(emptyList())
-            }
+            emit(api.fetchAllDecks())
         }
     }
 
@@ -129,10 +126,7 @@ class RecallRepositoryImpl(
         // - Data persists across app restarts
 
         // TEMPORARY: Just fetch without saving (remove this after implementing TODO 6)
-        when (val result = api.fetchAllDecks()) {
-            is Result.Success -> { /* Not saving to database yet - students will implement this */ }
-            is Result.Error -> throw result.exception
-        }
+        api.fetchAllDecks()
     }
 
     override suspend fun updateDeckProgress(deckId: String, cardIndex: Int) {
