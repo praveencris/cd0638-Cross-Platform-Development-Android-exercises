@@ -39,7 +39,8 @@ class MainViewModel(
         scope.launch {
             _isLoading.value = true
             _error.value = null
-            when (val result = apiService.fetchAllDecks()) {
+            try {
+                when (val result = apiService.fetchAllDecks()) {
                 is Result.Success -> {
                     _decks.value = result.data
                 }
@@ -49,6 +50,7 @@ class MainViewModel(
                         throw exception
                     }
                     _error.value = result.message
+                }
                 }
             } finally {
                 _isLoading.value = false
