@@ -75,6 +75,7 @@ class MainViewModel(
                 throw e
             } catch (e: Exception) {
                 _error.value = e.message ?: "Unknown error occurred"
+                }
             } finally {
                 _isLoading.value = false
             }
