@@ -92,6 +92,8 @@ fun App() {
                                 isRefreshing = isLoading,
                                 onRefresh = viewModel::fetchDecks,
                                 onDeckSelected = viewModel::selectDeck,
+                                getStartIndex = viewModel::getStartIndex,
+                                onCardReviewed = viewModel::onCardReviewed,
                                 isInitialLoad = isInitialLoad
                             )
                         }
