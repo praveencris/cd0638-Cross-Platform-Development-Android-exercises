@@ -45,7 +45,8 @@ class MainViewModel(
         scope.launch {
             _isLoading.value = true
             _error.value = null
-            when (val result = apiService.fetchAllDecks()) {
+            try {
+                when (val result = apiService.fetchAllDecks()) {
                 is Result.Success -> {
                     _decks.value = result.data
                 }
@@ -55,6 +56,7 @@ class MainViewModel(
                         throw exception
                     }
                     _error.value = result.message
+                }
                 }
             } finally {
                 _isLoading.value = false
@@ -94,22 +96,6 @@ class MainViewModel(
 
         // Save the card index for resume
         deckProgress[deckId] = actualIndex
-
-        // Calculate progress fraction (0.0 to 1.0)
-        val progressFraction = if (cardCount > 0) {
-            actualIndex.toFloat() / cardCount.toFloat()
-        } else {
-            0f
-        }
-
-        // Update the deck in the list to trigger UI updates
-        _decks.value = _decks.value.map { currentDeck ->
-            if (currentDeck.id == deckId) {
-                currentDeck.copy(progress = progressFraction)
-            } else {
-                currentDeck
-            }
-        }
     }
 
     /**
