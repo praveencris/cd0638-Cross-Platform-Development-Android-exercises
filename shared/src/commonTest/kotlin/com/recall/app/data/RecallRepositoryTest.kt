@@ -155,6 +155,20 @@ private class FakeRecallDao(
         insertedCardBatches += cards
     }
 
+    override suspend fun deleteCardsForDeck(deckId: String) = Unit
+
+    override suspend fun deleteCardsNotInDeckIds(deckIds: List<String>) = Unit
+
+    override suspend fun deleteDecksNotIn(deckIds: List<String>) {
+        decksFlow.value = decksFlow.value.filter { it.id in deckIds }
+    }
+
+    override suspend fun deleteAllCards() = Unit
+
+    override suspend fun deleteAllDecks() {
+        decksFlow.value = emptyList()
+    }
+
     override suspend fun getCardsForDeck(deckId: String): List<CardEntity> = emptyList()
 
     override suspend fun updateDeckProgress(deckId: String, cardIndex: Int) {
