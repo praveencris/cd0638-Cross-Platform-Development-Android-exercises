@@ -37,7 +37,7 @@ class MainViewModel(
         fetchDecks()
     }
 
-    private fun fetchDecks() {
+    fun fetchDecks() {
         scope.launch {
             _isLoading.value = true
             _error.value = null
