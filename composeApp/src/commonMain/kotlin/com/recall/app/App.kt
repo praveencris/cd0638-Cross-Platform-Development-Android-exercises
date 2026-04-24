@@ -90,7 +90,9 @@ fun App() {
                                 decks = decks,
                                 isRefreshing = isLoading,
                                 onRefresh = viewModel::fetchDecks,
-                                onDeckSelected = viewModel::selectDeck
+                                onDeckSelected = viewModel::selectDeck,
+                                getStartIndex = viewModel::getStartIndex,
+                                onCardReviewed = viewModel::onCardReviewed
                             )
                         }
                     }
