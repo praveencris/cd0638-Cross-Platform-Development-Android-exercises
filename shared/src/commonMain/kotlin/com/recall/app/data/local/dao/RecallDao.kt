@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.recall.app.data.local.entity.CardEntity
 import com.recall.app.data.local.entity.DeckEntity
+import com.recall.app.data.local.entity.DeckWithCards
 import kotlinx.coroutines.flow.Flow
 
 @Dao
