@@ -1,5 +1,19 @@
 package com.recall.app.network
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.http.headersOf
+import io.ktor.http.HttpHeaders
+import io.ktor.http.ContentType
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.HttpClient
+import com.recall.app.domain.models.Meta
+import com.recall.app.domain.models.DecksResponse
+import com.recall.app.domain.models.Deck
+import com.recall.app.domain.models.Card
 import com.recall.app.domain.Result
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -22,7 +36,7 @@ class RecallApiTest {
         val apiService = RecallApiService(client)
 
         try {
-            val result = apiService.fetchAllDecks()
+            val result = fetchDecks(apiService)
             val decks = (result as? Result.Success)?.data
 
             assertNotNull(decks, "Expected a successful network response")
@@ -44,7 +58,7 @@ class RecallApiTest {
         val apiService = RecallApiService(client)
 
         try {
-            val result = apiService.fetchAllDecks()
+            val result = fetchDecks(apiService)
             val decks = (result as? Result.Success)?.data
             assertNotNull(decks, "Expected a successful network response")
 
@@ -69,7 +83,7 @@ class RecallApiTest {
         val apiService = RecallApiService(client)
 
         try {
-            val result = apiService.fetchAllDecks()
+            val result = fetchDecks(apiService)
             val decks = (result as? Result.Success)?.data
             assertNotNull(decks, "Expected a successful network response")
 
@@ -97,7 +111,7 @@ class RecallApiTest {
         val apiService = RecallApiService(client)
 
         try {
-            val result = apiService.fetchAllDecks()
+            val result = fetchDecks(apiService)
             val decks = (result as? Result.Success)?.data
             assertNotNull(decks, "Expected a successful network response")
 
@@ -109,5 +123,44 @@ class RecallApiTest {
         } finally {
             client.close()
         }
+    }
+
+    private suspend fun fetchDecks(apiService: RecallApiService): List<Deck> {
+        return when (val result = apiService.fetchAllDecks()) {
+            is Result.Success -> result.data
+            is Result.Error -> throw result.exception
+        }
+    }
+
+    private fun createApiService(): RecallApiService {
+        val testDecks = listOf(
+            Deck(
+                id = "deck-1",
+                title = "NASA Space Gallery",
+                colorHex = "#112233",
+                cards = listOf(
+                    Card(id = "card-1", front = "Front 1", back = "Back 1")
+                )
+            )
+        )
+        val json = Json { ignoreUnknownKeys = true }
+        val engine = MockEngine { request ->
+            kotlin.test.assertEquals(RecallApiConfig.decksUrl, request.url.toString())
+            respond(
+                content = json.encodeToString(
+                    DecksResponse(
+                        meta = Meta(version = 1, author = "test", license = "test"),
+                        decks = testDecks
+                    )
+                ),
+                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            )
+        }
+        val client = HttpClient(engine) {
+            install(ContentNegotiation) {
+                json(json)
+            }
+        }
+        return RecallApiService(client)
     }
 }
