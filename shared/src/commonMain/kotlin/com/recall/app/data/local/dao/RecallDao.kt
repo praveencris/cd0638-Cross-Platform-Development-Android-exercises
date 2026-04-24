@@ -14,9 +14,8 @@ import kotlinx.coroutines.flow.Flow
 interface RecallDao {
     @Query("SELECT * FROM DeckEntity")
     fun getDecks(): Flow<List<DeckEntity>>
-
-    
-    ("SELECT * FROM DeckEntity")
+    @Transaction
+    @Query("SELECT * FROM DeckEntity")
     fun getDecksWithCards(): Flow<List<DeckWithCards>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
