@@ -7,7 +7,6 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.recall.app.data.local.entity.CardEntity
 import com.recall.app.data.local.entity.DeckEntity
-import com.recall.app.data.local.entity.DeckWithCards
 import kotlinx.coroutines.flow.Flow
 
 @Dao
