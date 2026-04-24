@@ -1,5 +1,6 @@
 package com.recall.app.network
 
+import com.recall.app.domain.Result
 import com.recall.app.domain.models.Card
 import com.recall.app.domain.models.Deck
 import com.recall.app.domain.models.DecksResponse
@@ -41,7 +42,7 @@ class RecallApiTest {
     fun test_fetchAllDecks_returns_decks() = runTest {
         val apiService = createApiService()
 
-        val decks = apiService.fetchAllDecks()
+        val decks = fetchDecks(apiService)
 
         assertTrue(
             actual = decks.isNotEmpty(),
@@ -53,7 +54,7 @@ class RecallApiTest {
     fun test_first_deck_title_is_nasa_space_gallery() = runTest {
         val apiService = createApiService()
 
-        val decks = apiService.fetchAllDecks()
+        val decks = fetchDecks(apiService)
 
         val firstDeck = decks.firstOrNull()
         assertNotNull(firstDeck, "First deck should not be null")
@@ -68,7 +69,7 @@ class RecallApiTest {
     fun test_decks_contain_cards_with_data() = runTest {
         val apiService = createApiService()
 
-        val decks = apiService.fetchAllDecks()
+        val decks = fetchDecks(apiService)
 
         val firstDeck = decks.first()
         assertTrue(
@@ -86,13 +87,20 @@ class RecallApiTest {
     fun test_deck_color_is_mapped_correctly() = runTest {
         val apiService = createApiService()
 
-        val decks = apiService.fetchAllDecks()
+        val decks = fetchDecks(apiService)
 
         val firstDeck = decks.first()
         assertTrue(
             actual = firstDeck.colorHex.startsWith("#"),
             message = "Deck color should be a hex color code starting with #"
         )
+    }
+
+    private suspend fun fetchDecks(apiService: RecallApiService): List<Deck> {
+        return when (val result = apiService.fetchAllDecks()) {
+            is Result.Success -> result.data
+            is Result.Error -> throw result.exception
+        }
     }
 
     private fun createApiService(): RecallApiService {
