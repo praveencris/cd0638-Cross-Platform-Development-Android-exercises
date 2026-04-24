@@ -85,6 +85,7 @@ class MainViewModel(
                 _error.value = e.message ?: "Unknown error occurred"
                 // Still mark initial load complete on error
                 _isInitialLoad.value = false
+                }
             } finally {
                 _isLoading.value = false
             }
