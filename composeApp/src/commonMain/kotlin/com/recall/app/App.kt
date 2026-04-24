@@ -81,7 +81,9 @@ fun App() {
                                 windowSize = windowSize,
                                 selectedDeck = selectedDeck,
                                 decks = decks,
-                                onDeckSelected = viewModel::selectDeck
+                                onDeckSelected = viewModel::selectDeck,
+                                getStartIndex = viewModel::getStartIndex,
+                                onCardReviewed = viewModel::onCardReviewed
                             )
                         }
                     }
