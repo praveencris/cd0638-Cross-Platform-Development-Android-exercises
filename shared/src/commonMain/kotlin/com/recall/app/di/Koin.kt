@@ -6,6 +6,7 @@ import com.recall.app.network.RecallApiService
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.onClose
+import org.koin.core.module.dsl.withOptions
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 
@@ -15,8 +16,10 @@ import org.koin.dsl.module
  */
 val sharedModule = module {
     // Keep the HTTP client inside DI so it can be disposed with the Koin graph.
-    single<HttpClient> { NetworkClient.createHttpClient() } onClose { client ->
-        client?.close()
+    single<HttpClient> { NetworkClient.createHttpClient() } withOptions {
+        onClose { client ->
+            client?.close()
+        }
     }
 
     // Provide singleton instance of RecallApiService
