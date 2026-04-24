@@ -66,7 +66,7 @@ android {
         val minor = (project.findProperty("APP_VERSION_MINOR") as String).toInt()
         val patch = (project.findProperty("APP_VERSION_PATCH") as String).toInt()
         versionCode = major * 1_000_000 + minor * 1_000 + patch
-        versionName = "\$major.\$minor.\$patch"
+        versionName = ".."
     }
     packaging {
         resources {
