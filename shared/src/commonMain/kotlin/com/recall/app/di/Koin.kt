@@ -5,6 +5,7 @@ import com.recall.app.network.NetworkClient
 import com.recall.app.network.RecallApiService
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.onClose
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 
