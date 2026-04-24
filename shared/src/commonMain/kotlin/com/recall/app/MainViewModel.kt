@@ -57,6 +57,7 @@ class MainViewModel(
                     }
                     _error.value = result.message
                 }
+                }
             } finally {
                 _isLoading.value = false
             }
