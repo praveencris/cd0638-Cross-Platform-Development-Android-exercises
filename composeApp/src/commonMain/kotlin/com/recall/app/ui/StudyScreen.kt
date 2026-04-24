@@ -35,10 +35,12 @@ import com.recall.app.domain.models.Deck
 @Composable
 fun StudyScreen(
     deck: Deck,
+    startIndex: Int = 0,
+    onCardReviewed: (Int) -> Unit = {},
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var currentCardIndex by remember { mutableStateOf(0) }
+    var currentCardIndex by remember { mutableStateOf(startIndex) }
     var isFlipped by remember { mutableStateOf(false) }
     val totalCards = deck.cards.size
     val progress = if (totalCards > 0) {
