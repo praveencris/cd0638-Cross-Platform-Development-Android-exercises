@@ -57,8 +57,8 @@ class RecallRepositoryTest {
 
         repository.refreshDecks()
 
-        val insertedDeck = dao.insertedDecks.single()
-        val insertedCards = dao.insertedCardBatches.single()
+        val insertedDeck = dao.refreshedDecks.single()
+        val insertedCards = dao.refreshedCardsByDeckId.getValue(apiDeck.id)
 
         assertEquals(2, insertedDeck.currentCardIndex)
         assertEquals(apiDeck.id, insertedDeck.id)
@@ -82,7 +82,7 @@ class RecallRepositoryTest {
 
         repository.refreshDecks()
 
-        val insertedDeck = dao.insertedDecks.single()
+        val insertedDeck = dao.refreshedDecks.single()
         assertEquals(0, insertedDeck.currentCardIndex)
     }
 
@@ -105,7 +105,7 @@ class RecallRepositoryTest {
 
         repository.refreshDecks()
 
-        val insertedCards = dao.insertedCardBatches.single()
+        val insertedCards = dao.refreshedCardsByDeckId.getValue(apiDeck.id)
         assertEquals(listOf("card-a", "card-b"), insertedCards.map { it.id })
         assertNotNull(insertedCards.firstOrNull())
     }
@@ -140,6 +140,10 @@ private class FakeRecallDao(
 
     val insertedDecks = mutableListOf<DeckEntity>()
     val insertedCardBatches = mutableListOf<List<CardEntity>>()
+    var refreshedDecks: List<DeckEntity> = emptyList()
+        private set
+    var refreshedCardsByDeckId: Map<String, List<CardEntity>> = emptyMap()
+        private set
 
     override fun getDecks(): Flow<List<DeckEntity>> = decksFlow.asStateFlow()
 
@@ -175,5 +179,14 @@ private class FakeRecallDao(
         decksFlow.value = decksFlow.value.map { deck ->
             if (deck.id == deckId) deck.copy(currentCardIndex = cardIndex) else deck
         }
+    }
+
+    override suspend fun refreshDecks(
+        decks: List<DeckEntity>,
+        cardsByDeckId: Map<String, List<CardEntity>>
+    ) {
+        refreshedDecks = decks
+        refreshedCardsByDeckId = cardsByDeckId
+        decksFlow.value = decks
     }
 }
