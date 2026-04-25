@@ -95,6 +95,8 @@ android {
         val minor = (project.findProperty("APP_VERSION_MINOR") as String).toInt()
         val patch = (project.findProperty("APP_VERSION_PATCH") as String).toInt()
         versionCode = major * 1_000_000 + minor * 1_000 + patch
+        // Keep Play Store/user-facing version text in sync with the versionCode
+        // source properties; placeholders can accidentally ship in release builds.
         versionName = "$major.$minor.$patch"
     }
     packaging {
