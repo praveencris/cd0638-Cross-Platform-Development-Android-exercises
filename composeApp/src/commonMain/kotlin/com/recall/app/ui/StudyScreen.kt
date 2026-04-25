@@ -68,7 +68,7 @@ fun StudyScreen(
             // Top bar
             TopBar(
                 deckTitle = deck.title,
-                currentIndex = currentCardIndex + 1,
+                currentIndex = if (totalCards > 0) currentCardIndex + 1 else 0,
                 totalCards = totalCards,
                 progress = progress,
                 onClose = onClose
