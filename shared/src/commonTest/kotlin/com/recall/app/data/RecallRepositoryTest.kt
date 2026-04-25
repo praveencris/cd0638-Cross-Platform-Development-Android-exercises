@@ -140,6 +140,8 @@ private class FakeRecallDao(
 
     val insertedDecks = mutableListOf<DeckEntity>()
     val insertedCardBatches = mutableListOf<List<CardEntity>>()
+    // The repository now uses the refresh transaction, so tests assert the
+    // transaction payload instead of individual insert calls.
     var refreshedDecks: List<DeckEntity> = emptyList()
         private set
     var refreshedCardsByDeckId: Map<String, List<CardEntity>> = emptyMap()

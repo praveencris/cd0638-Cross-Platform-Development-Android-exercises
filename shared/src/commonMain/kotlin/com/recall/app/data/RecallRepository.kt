@@ -106,7 +106,8 @@ class RecallRepositoryImpl(
         // 2. Get existing decks to preserve progress
         val existingDecks = dao.getDecks().first().associateBy { it.id }
 
-        // 3. Save the complete API snapshot atomically while preserving local progress
+        // 3. Production hardening: write the whole API snapshot through one DAO
+        // transaction so stale decks/cards are removed together and saved progress survives.
         val deckEntities = decksFromApi.map { deck ->
             deck.toEntity().copy(
                 currentCardIndex = existingDecks[deck.id]?.currentCardIndex ?: 0
