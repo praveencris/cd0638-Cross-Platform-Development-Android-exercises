@@ -106,20 +106,17 @@ class RecallRepositoryImpl(
         // 2. Get existing decks to preserve progress
         val existingDecks = dao.getDecks().first().associateBy { it.id }
 
-        // 3. Convert domain models to entities and save to database
-        decksFromApi.forEach { deck ->
-            // Preserve progress if deck already exists
-            val deckEntity = deck.toEntity().copy(
+        // 3. Save the complete API snapshot atomically while preserving local progress
+        val deckEntities = decksFromApi.map { deck ->
+            deck.toEntity().copy(
                 currentCardIndex = existingDecks[deck.id]?.currentCardIndex ?: 0
             )
-            dao.insertDeck(deckEntity)
-
-            // Insert card entities for this deck
-            val cardEntities = deck.cards.map { card ->
-                card.toEntity(deckId = deck.id)
-            }
-            dao.insertCards(cardEntities)
         }
+        val cardsByDeckId = decksFromApi.associate { deck ->
+            deck.id to deck.cards.map { card -> card.toEntity(deckId = deck.id) }
+        }
+
+        dao.refreshDecks(deckEntities, cardsByDeckId)
 
         // 4. Database Flow automatically notifies observers (no return needed)
     }
