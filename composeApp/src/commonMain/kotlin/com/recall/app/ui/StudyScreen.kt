@@ -46,6 +46,9 @@ fun StudyScreen(
     } else {
         0f
     }
+    // Production guard: an empty deck should display "0 / 0" instead of the
+    // misleading "1 / 0" that a simple currentCardIndex + 1 would produce.
+    val displayedCardIndex = if (totalCards > 0) currentCardIndex + 1 else 0
 
     val currentCard = if (totalCards > 0 && currentCardIndex < totalCards) {
         deck.cards[currentCardIndex]
@@ -66,7 +69,7 @@ fun StudyScreen(
             // Top bar
             TopBar(
                 deckTitle = deck.title,
-                currentIndex = if (totalCards > 0) currentCardIndex + 1 else 0,
+                currentIndex = displayedCardIndex,
                 totalCards = totalCards,
                 progress = progress,
                 onClose = onClose
