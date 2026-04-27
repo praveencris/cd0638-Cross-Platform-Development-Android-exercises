@@ -1,6 +1,7 @@
 # 🏁 Solution 2: Building the App's Brain
 
 **Branch Name:** `sol-lesson-2-shared-business-logic`
+
 This branch contains the core **Domain Layer** of the Recall app. This layer is platform-independent and contains the data structures and algorithms that serve as the foundation for the entire project.
 
 ## Branch Context
