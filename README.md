@@ -6,6 +6,13 @@
 
 **Estimated Time:** 20 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 
 In this exercise, you will establish the physical and logical connection between the Android App and the Shared KMP module. You will configure the build system to recognize the shared code and set up **Koin** to manage dependencies across the platform boundary.
