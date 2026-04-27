@@ -1,4 +1,6 @@
 # 💾 Exercise 8a: Database Foundation (Room KMP)
+
+**Branch Name:** `lesson-8a-db-foundation-setup`
 **Module:** Persistence & Performance
 **Prerequisite:** Completed Module 7b
 **Estimated Time:** 30 Minutes
