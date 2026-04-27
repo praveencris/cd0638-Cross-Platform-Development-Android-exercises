@@ -275,3 +275,10 @@ Continue to **Exercise 13b** to add:
 - [Firebase Analytics Documentation](https://firebase.google.com/docs/analytics)
 - [Kotlin Multiplatform expect/actual](https://kotlinlang.org/docs/multiplatform-expect-actual.html)
 - [CocoaPods Integration with KMP](https://kotlinlang.org/docs/native-cocoapods.html)
+
+## Branch Context
+
+This is the completed solution branch for the matching exercise. Use it after attempting the lesson branch to compare implementation choices and verify your work.
+
+For production-hardened code, compare this branch with its matching prod-sol-* branch when one exists.
+
