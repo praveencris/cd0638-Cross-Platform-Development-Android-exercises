@@ -3,6 +3,13 @@
 **Module:** Shared Business Logic & Data Models
 **Estimated Time:** 30–40 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 
 In this exercise, you will build the "Shared Domain" of the Recall app. This layer contains the core data structures and the mathematical "Brain" (the SM-2 algorithm) that powers the study sessions. This code is written once in the `shared` module and is utilized by both the Android and iOS applications.
