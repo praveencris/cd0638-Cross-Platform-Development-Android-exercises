@@ -1,4 +1,6 @@
 # ⌚ Exercise 7b: Wear OS Ecosystem
+
+**Branch Name:** `lesson-7b-wear-os`
 **Module:** Advanced Wear OS Integration
 **Prerequisite:** Completed Module 7a (Basic List UI)
 **Estimated Time:** 60 Minutes
