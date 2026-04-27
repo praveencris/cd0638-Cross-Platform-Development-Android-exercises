@@ -2,8 +2,7 @@
 
 # 🏁 Solution 4b: Shared UI & State
 
-**Branch:** `solution-module-4b`
-
+**Branch Name:** `prod-sol-lesson-4b-consuming-di-handshake`
 This branch demonstrates the power of Compose Multiplatform. We implemented the UI and State Logic **once**, and it drives both the Android and iOS applications.
 
 ## Production Reference
