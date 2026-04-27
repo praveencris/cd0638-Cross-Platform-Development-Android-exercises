@@ -1,5 +1,7 @@
 # 🧠 Exercise 2: Building the App's Brain
 
+**Branch Name:** `lesson-2-shared-business-logic`
+
 **Module:** Shared Business Logic & Data Models
 **Estimated Time:** 30–40 Minutes
 
