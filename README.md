@@ -6,6 +6,13 @@ This branch demonstrates the **Wearable Data Layer API** for inter-device commun
 
 > **Note:** This is a demonstration/sample branch. In the real Recall architecture, the watch app accesses shared KMP code directly via Koin, making the Data Layer unnecessary for data access. This branch exists purely to teach the Data Layer API pattern that is essential for apps where code sharing isn't possible.
 
+## Branch Context
+
+This is the completed solution branch for the matching exercise. Use it after attempting the lesson branch to compare implementation choices and verify your work.
+
+For production-hardened code, compare this branch with its matching prod-sol-* branch when one exists.
+
+
 ## 🛠️ Implementation Summary
 
 ### 1. WearDataLayerService — Core API Wrapper
