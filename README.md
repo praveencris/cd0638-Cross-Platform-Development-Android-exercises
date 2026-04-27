@@ -250,3 +250,10 @@ After completing this exercise:
 - [Fastlane gym (build_app) Reference](https://docs.fastlane.tools/actions/build_app/)
 - [Apple Developer Program](https://developer.apple.com/programs/)
 - [TestFlight Beta Testing Guide](https://developer.apple.com/testflight/)
+
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
