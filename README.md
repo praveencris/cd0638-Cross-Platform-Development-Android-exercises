@@ -1,4 +1,6 @@
 # 📊 Exercise 13a: Firebase Analytics
+
+**Branch Name:** `lesson-13a-firebase-analytics`
 **Module:** Monitoring & Analytics
 **Estimated Time:** 30-40 minutes
 **Part:** 1 of 2 (Crashlytics & Remote Config in Exercise 13b)
