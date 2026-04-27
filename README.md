@@ -3,6 +3,13 @@
 **Prerequisite:** Completed Module 8c (Performance & Polish)
 **Estimated Time:** 45 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 In this exercise, you will transform Recall from an English-only app into a global product. You will extract all hardcoded strings into **Resource Files**, implement **Spanish** support, and handle complex grammar rules using **Plurals**.
 
