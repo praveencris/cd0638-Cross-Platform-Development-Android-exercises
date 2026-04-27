@@ -2,6 +2,13 @@
 **Module:** Wear OS Development
 **Estimated Time:** 30 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 In this exercise, you will create a standalone **Wear OS** app for Recall. Unlike the mobile app, this interface is optimized for **5-second interactions** on a round screen. You will learn to use `ScalingLazyColumn` and the "Fish-Eye" effect.
 
