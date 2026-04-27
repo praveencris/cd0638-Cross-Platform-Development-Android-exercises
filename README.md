@@ -2,6 +2,13 @@
 **Module:** Monitoring & Analytics
 **Part:** 1 of 2 (Crashlytics & Remote Config in Exercise 13b)
 
+## Production Reference
+
+This branch is a production-grade reference for the matching solution branch. It keeps the lesson scope intact while adding small runtime, release, or data-safety hardening where that feature exists.
+
+Use the matching sol-* branch to study the original course solution; use this prod-sol-* branch to compare the production-ready version of the same lesson.
+
+
 ## iOS CocoaPods Setup (Required)
 
 This branch uses CocoaPods for Firebase iOS dependencies. After checking out this branch, run:
