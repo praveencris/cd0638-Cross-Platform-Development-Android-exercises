@@ -6,6 +6,13 @@
 
 This branch demonstrates the power of Compose Multiplatform. We implemented the UI and State Logic **once**, and it drives both the Android and iOS applications.
 
+## Production Reference
+
+This branch is a production-grade reference for the matching solution branch. It keeps the lesson scope intact while adding small runtime, release, or data-safety hardening where that feature exists.
+
+Use the matching sol-* branch to study the original course solution; use this prod-sol-* branch to compare the production-ready version of the same lesson.
+
+
 ## 🛠️ Implementation Summary
 
 1. **Shared ViewModel**: Located in `commonMain`, this class manages the `RecallApiService` and exposes a `StateFlow<List<Deck>>`. It handles coroutines platform-agnostically.
