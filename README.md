@@ -9,6 +9,13 @@ This solution implements the complete Firebase integration for Recall, including
 
 This provides a unified observability stack with cross-platform analytics, crash reporting, and remote configuration capabilities.
 
+## Branch Context
+
+This is the completed solution branch for the matching exercise. Use it after attempting the lesson branch to compare implementation choices and verify your work.
+
+For production-hardened code, compare this branch with its matching prod-sol-* branch when one exists.
+
+
 ## ⚠️ iOS CocoaPods Setup (Required)
 
 This branch uses CocoaPods for Firebase iOS dependencies. After checking out this branch, run:
