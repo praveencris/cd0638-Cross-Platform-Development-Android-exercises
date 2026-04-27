@@ -98,3 +98,10 @@ To verify your work:
    du -sh iosApp/build/XCFrameworks/debug/shared.framework
    ```
    Release should be significantly smaller than Debug.
+
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
