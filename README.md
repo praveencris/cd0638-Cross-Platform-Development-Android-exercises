@@ -1,6 +1,7 @@
 # 🏁 Solution 1: The "Hello World" of KMP
 
 **Branch Name:** `prod-sol-lesson-1-project-setup`
+
 This branch contains the successful configuration of the **Recall** Shared Module. We have transitioned the project from a broken state to a compiling, tested environment capable of running on both Android and iOS.
 
 ## Production Reference
