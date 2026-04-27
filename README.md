@@ -4,6 +4,13 @@
 
 **Estimated Time:** 20 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 
 In this exercise, you will connect the "Recall" app to the internet. You will set up the **Ktor HTTP Client**—the industry standard for KMP networking—and fetch a JSON file containing 10 decks and 50 flashcards from a remote server.
