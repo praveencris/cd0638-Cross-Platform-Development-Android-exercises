@@ -1,6 +1,5 @@
 # 🏁 Solution 9: Internationalization
-**Branch:** `solution-module-9`
-
+**Branch Name:** `prod-sol-lesson-9-internationalization`
 This branch refactors the application to support multi-language environments using the **Compose Multiplatform Resources** library.
 
 ## Production Reference
