@@ -2,6 +2,13 @@
 **Module:** Tablet & Foldable Optimization
 **Estimated Time:** 45 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 In this exercise, you will build the complete "Study Loop". This includes the 3D Flip Animation, Keyboard Shortcuts, and most importantly, **State Persistence** so users can pick up exactly where they left off.
 
