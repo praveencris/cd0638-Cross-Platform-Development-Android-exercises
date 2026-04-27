@@ -1,4 +1,6 @@
 # 🔥 Exercise 13b: Crashlytics & Remote Config
+
+**Branch Name:** `lesson-13b-crashlytics-remoteconfig`
 **Module:** Monitoring & Analytics
 **Estimated Time:** 30-40 minutes
 **Part:** 2 of 2 (Building on Exercise 13a)
