@@ -6,6 +6,13 @@
 
 This branch implements the foundational logic for **Adaptive Layouts** in Kotlin Multiplatform. Instead of relying on Android-specific resource qualifiers (like `sw600dp`), we built a pure Compose solution that works on Android, iOS, and Desktop.
 
+## Branch Context
+
+This is the completed solution branch for the matching exercise. Use it after attempting the lesson branch to compare implementation choices and verify your work.
+
+For production-hardened code, compare this branch with its matching prod-sol-* branch when one exists.
+
+
 ## 🛠️ Implementation Summary
 
 1. **Window Size Detection**: Implemented a custom `calculateWindowSize()` composable using `BoxWithConstraints`. This reads the available screen width and categorizes it into standard breakpoints.
