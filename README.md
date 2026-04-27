@@ -1,6 +1,5 @@
 # 🏁 Solution 7: Wear OS Implementation
-**Branch:** `solution-module-7`
-
+**Branch Name:** `prod-sol-lesson-7a-wear-os`
 This branch adds a native **Wear OS** module (`:wear`) to the KMP project. It demonstrates how to reuse 100% of the backend logic while writing a completely separate, optimized UI for the wrist.
 
 ## Production Reference
