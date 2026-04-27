@@ -3,6 +3,13 @@
 **Estimated Time:** 30-40 minutes
 **Part:** 2 of 2 (Building on Exercise 13a)
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 Build on your working Firebase Analytics from Exercise 13a to add **Crashlytics** (crash reporting) and **Remote Config** (dynamic app configuration). You'll learn advanced KMP patterns for error handling and async operations.
 
