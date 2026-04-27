@@ -4,6 +4,13 @@
 **Prerequisite:** Completed Module 8a (Database Defined)
 **Estimated Time:** 45 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 In this exercise, you will implement the **Offline-First** pattern. You will "wire up" the database you created in Part 8a and rewire the `RecallRepository` so that the app *always* shows data from the local database (instant load), and only uses the network to update that database in the background.
 
