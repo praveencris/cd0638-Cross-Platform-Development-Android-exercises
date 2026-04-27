@@ -1,6 +1,6 @@
 # 🎨 Exercise 5b: The Responsive Dashboard
 
-**Branch:** `lesson-5b-ui-responsive-dashboard`
+**Branch Name:** `lesson-5b-ui-responsive-dashboard`
 **Module:** Building Adaptive UIs
 **Estimated Time:** 20-30 Minutes
 
