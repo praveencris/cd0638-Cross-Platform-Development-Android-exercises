@@ -1,5 +1,5 @@
 # 🧠 Exercise 8b: Offline Intelligence
-**Branch:** `lesson-8b-db-foundation-setup`
+**Branch Name:** `lesson-8b-db-foundation-setup`
 **Module:** Persistence & Performance
 **Prerequisite:** Completed Module 8a (Database Defined)
 **Estimated Time:** 45 Minutes
