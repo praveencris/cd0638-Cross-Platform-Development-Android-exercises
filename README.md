@@ -1,3 +1,5 @@
+**Branch Name:** `lesson-5a-ui-adaptive-scaffold`
+
 ### **Exercise 5a: The Adaptive Scaffold (README)**
 
 # 📐 Exercise 5a: The Adaptive Scaffold
