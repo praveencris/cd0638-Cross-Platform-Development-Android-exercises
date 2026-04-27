@@ -5,6 +5,13 @@ This solution prepares the iOS target for the App Store by aligning it with the 
 
 > **Prerequisite:** Archiving and code signing require a paid Apple Developer Program membership ($99/year). Without one, version sync and Debug/Release simulator builds still work — only the final archive step requires the account. All steps are documented below for the complete learning experience.
 
+## Production Reference
+
+This branch is a production-grade reference for the matching solution branch. It keeps the lesson scope intact while adding small runtime, release, or data-safety hardening where that feature exists.
+
+Use the matching sol-* branch to study the original course solution; use this prod-sol-* branch to compare the production-ready version of the same lesson.
+
+
 ## 🛠️ Implementation Summary
 
 ### 1. Centralized Versioning (Strategy B)
