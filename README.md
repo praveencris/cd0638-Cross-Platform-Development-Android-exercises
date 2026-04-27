@@ -3,6 +3,13 @@
 **Prerequisite:** Completed Module 8b
 **Estimated Time:** 40 Minutes (80 with Bonus)
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 The app works, but is it *fast*? In this exercise, you will use the **Android Profiler** to find two serious bugs: a database bottleneck and a memory leak.
 * **Required:** Fix the N+1 Query and the Memory Leak.
