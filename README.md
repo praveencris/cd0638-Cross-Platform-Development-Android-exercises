@@ -1,6 +1,5 @@
 # 🏁 Solution 7b: Advanced Wear OS
-**Branch:** `solution-module-7b`
-
+**Branch Name:** `sol-lesson-7b-wear-os`
 This branch extends the basic Wear OS app with deep system integrations, transforming it from a simple "List Viewer" into a native citizen of the watch ecosystem.
 
 ## Branch Context
