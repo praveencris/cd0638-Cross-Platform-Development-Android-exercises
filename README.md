@@ -2,6 +2,11 @@
 
 This repo is meant to be used to keep things organized during content development and act as the source of truth for all projects and exercises related to this course.
 
+## Branch Context
+
+This branch is the course repository index. Use the lesson and exercise branches for hands-on student work, the sol-* branches for completed solutions, and the prod-* branches for production-grade references.
+
+
 ## Folder Structure
 
 ### Lesson Folder
