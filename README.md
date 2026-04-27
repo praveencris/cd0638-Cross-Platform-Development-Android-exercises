@@ -9,6 +9,13 @@ This solution implements the complete Firebase integration for Recall, including
 
 This provides a unified observability stack with cross-platform analytics, crash reporting, and remote configuration capabilities.
 
+## Production Reference
+
+This branch is the cumulative production-grade reference after Solution 13b. It keeps the course app complete while documenting the production hardening added on top of the lesson flow.
+
+Use the matching lesson and solution branches for step-by-step study; use this branch when you want the final app-quality reference.
+
+
 ## ⚠️ iOS CocoaPods Setup (Required)
 
 This branch uses CocoaPods for Firebase iOS dependencies. After checking out this branch, run:
