@@ -3,6 +3,13 @@
 
 This branch contains the final production-ready configuration for the Recall app.
 
+## Production Reference
+
+This branch is a production-grade reference for the matching solution branch. It keeps the lesson scope intact while adding small runtime, release, or data-safety hardening where that feature exists.
+
+Use the matching sol-* branch to study the original course solution; use this prod-sol-* branch to compare the production-ready version of the same lesson.
+
+
 ## 🛠️ Implementation Summary
 
 ### 0. Centralized Versioning
