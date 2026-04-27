@@ -5,6 +5,13 @@
 **Module:** Building Adaptive UIs
 **Estimated Time:** 20 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 
 In this exercise, you will lay the foundation for a responsive application. You will implement a pure Kotlin Multiplatform mechanism to detect the screen size of the device (Phone vs. Tablet) without relying on Android XML resource qualifiers. This "Window Size Class" logic will drive the layout decisions for the entire app.
