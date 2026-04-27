@@ -1,6 +1,5 @@
 # 🏁 Solution 6a: Master-Detail Architecture
-**Branch:** `solution-module-6a`
-
+**Branch Name:** `prod-sol-lesson-6a-ui-adaptive-patterns`
 This branch implements a "Production Grade" Master-Detail layout that handles the nuances of container sizing versus device sizing.
 
 ## Production Reference
