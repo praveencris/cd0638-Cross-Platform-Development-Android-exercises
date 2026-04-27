@@ -3,6 +3,13 @@
 
 This branch extends the basic Wear OS app with deep system integrations, transforming it from a simple "List Viewer" into a native citizen of the watch ecosystem.
 
+## Production Reference
+
+This branch is a production-grade reference for the matching solution branch. It keeps the lesson scope intact while adding small runtime, release, or data-safety hardening where that feature exists.
+
+Use the matching sol-* branch to study the original course solution; use this prod-sol-* branch to compare the production-ready version of the same lesson.
+
+
 ## 🛠️ Implementation Summary
 
 ### 1. Health Services (Passive Data)
