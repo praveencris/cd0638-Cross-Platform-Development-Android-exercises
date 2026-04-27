@@ -3,6 +3,13 @@
 **Prerequisite:** Completed Module 7b
 **Estimated Time:** 30 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 In this exercise, you will lay the foundation for "Offline Support" by implementing a local SQLite database using **Room KMP**. You will define the data structure (Entities) and the methods to read/write it (DAO), running on both Android and iOS.
 
