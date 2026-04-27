@@ -1,5 +1,6 @@
 # 🏁 Solution 8c: Performance & Polish
 **Branch Name:** `prod-sol-lesson-8c-performance-optimization`
+
 This is the "Production Candidate" build. It is optimized for speed, memory, and user experience.
 
 ## Production Reference
