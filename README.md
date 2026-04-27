@@ -1,4 +1,6 @@
 # ⚡ Exercise 8c: Performance & Polish
+
+**Branch Name:** `lesson-8c-performance-optimization`
 **Module:** Persistence & Performance
 **Prerequisite:** Completed Module 8b
 **Estimated Time:** 40 Minutes (80 with Bonus)
