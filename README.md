@@ -6,6 +6,13 @@
 
 This branch implements the "Zen Study" UI design with fully adaptive behavior. It transforms the app from a simple text list into a production-grade dashboard that respects the user's device size.
 
+## Production Reference
+
+This branch is a production-grade reference for the matching solution branch. It keeps the lesson scope intact while adding small runtime, release, or data-safety hardening where that feature exists.
+
+Use the matching sol-* branch to study the original course solution; use this prod-sol-* branch to compare the production-ready version of the same lesson.
+
+
 ## 🛠️ Implementation Summary
 
 1. **Zen UI Components**: Built `DeckCard.kt` matching the provided design specifications:
