@@ -4,6 +4,13 @@
 
 This branch replaces the hardcoded mock data in the Tile and Complication with real data fetched from `RecallApiService`. The Tile now displays the actual first deck name and total card count, and the Complication shows the real number of cards across all decks.
 
+## Production Reference
+
+This branch is a production-grade reference for the matching solution branch. It keeps the lesson scope intact while adding small runtime, release, or data-safety hardening where that feature exists.
+
+Use the matching sol-* branch to study the original course solution; use this prod-sol-* branch to compare the production-ready version of the same lesson.
+
+
 ## 🛠️ Implementation Summary
 
 ### 1. Real Data in TileService
