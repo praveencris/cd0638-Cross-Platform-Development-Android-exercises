@@ -1,4 +1,6 @@
 # ⌚ Exercise 7d: Wearable Data Layer API
+
+**Branch Name:** `lesson-7d-wear-data-layer`
 **Module:** Wearable Data Layer (Optional Deep Dive)
 **Prerequisite:** Completed Exercise 7c
 **Estimated Time:** 45 Minutes
