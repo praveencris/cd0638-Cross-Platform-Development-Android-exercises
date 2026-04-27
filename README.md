@@ -3,6 +3,13 @@
 **Module:** Project Setup & Configuration
 **Estimated Time:** 15-20 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 
 In this first exercise, you will take a "broken" Kotlin Multiplatform project and bring it to life. Your goal is to prove that your **Shared Module** is correctly configured to run on both Android and iOS by adding a common dependency (`kotlinx-datetime`) and writing your first piece of shared code.
