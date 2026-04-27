@@ -3,6 +3,13 @@
 
 This branch extends the basic Wear OS app with deep system integrations, transforming it from a simple "List Viewer" into a native citizen of the watch ecosystem.
 
+## Branch Context
+
+This is the completed solution branch for the matching exercise. Use it after attempting the lesson branch to compare implementation choices and verify your work.
+
+For production-hardened code, compare this branch with its matching prod-sol-* branch when one exists.
+
+
 ## 🛠️ Implementation Summary
 
 ### 1. Health Services (Passive Data)
