@@ -1,4 +1,6 @@
 # 🍎 Exercise 11 (iOS): App Store Hardening
+
+**Branch Name:** `lesson-11-ios-production-release-prep`
 **Module:** Release & Deployment
 **Prerequisite:** Module 11 (Android) completed
 **Estimated Time:** 30 Minutes
