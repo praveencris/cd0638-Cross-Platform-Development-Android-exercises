@@ -12,6 +12,13 @@ This is a Kotlin Multiplatform project targeting Android, iOS.
 * [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
   you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### Build and Run Android Application
 
 To build and run the development version of the Android app, use the run configuration from the run widget
