@@ -1,4 +1,6 @@
 # ⌚ Exercise 7c: Wear OS Data Polish
+
+**Branch Name:** `lesson-7c-wear-polish`
 **Module:** Advanced Wear OS Integration (continued)
 **Prerequisite:** Completed Exercise 7b
 **Estimated Time:** 30 Minutes
