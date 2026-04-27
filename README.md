@@ -3,6 +3,7 @@
 # 🎨 Solution 5b: The Responsive Dashboard
 
 **Branch Name:** `prod-sol-lesson-5b-ui-responsive-dashboard`
+
 This branch implements the "Zen Study" UI design with fully adaptive behavior. It transforms the app from a simple text list into a production-grade dashboard that respects the user's device size.
 
 ## Production Reference
