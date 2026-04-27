@@ -3,6 +3,13 @@
 
 This branch implements the persistence layer using **Room KMP**. It enables the shared business logic to store data locally on both Android and iOS devices.
 
+## Branch Context
+
+This is the completed solution branch for the matching exercise. Use it after attempting the lesson branch to compare implementation choices and verify your work.
+
+For production-hardened code, compare this branch with its matching prod-sol-* branch when one exists.
+
+
 ## 🛠️ Implementation Summary
 
 ### 1. Schema Definition (Entities)
