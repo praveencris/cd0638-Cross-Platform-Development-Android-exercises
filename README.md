@@ -1,4 +1,6 @@
 # 🌍 Exercise 9: Going Global (Internationalization)
+
+**Branch Name:** `lesson-9-internationalization`
 **Module:** Internationalization & Localization
 **Prerequisite:** Completed Module 8c (Performance & Polish)
 **Estimated Time:** 45 Minutes
