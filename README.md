@@ -2,6 +2,13 @@
 **Module:** Release & Deployment
 **Estimated Time:** 45 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 It is time to ship! In this exercise, you will move beyond the "Debug" environment. You will configure the app to be smaller, faster, and cryptographically signed so it can be uploaded to the Google Play Store.
 
