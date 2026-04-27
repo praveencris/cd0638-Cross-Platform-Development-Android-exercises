@@ -1,3 +1,5 @@
+**Branch Name:** `exer-lesson-1-project-setup`
+
 This is a Kotlin Multiplatform project targeting Android, iOS.
 
 * [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
