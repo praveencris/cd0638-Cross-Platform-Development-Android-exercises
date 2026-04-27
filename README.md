@@ -3,6 +3,13 @@
 
 This branch completes the Offline-First implementation. The app is now fully robust against network flakiness.
 
+## Branch Context
+
+This is the completed solution branch for the matching exercise. Use it after attempting the lesson branch to compare implementation choices and verify your work.
+
+For production-hardened code, compare this branch with its matching prod-sol-* branch when one exists.
+
+
 ## 🛠️ Implementation Summary
 
 ### 1. Database Instantiation (KMP)
