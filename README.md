@@ -1,4 +1,6 @@
 # 🧠 Exercise 6b: The Study Interface
+
+**Branch Name:** `lesson-6b-ui-adaptive-patterns`
 **Module:** Tablet & Foldable Optimization
 **Estimated Time:** 45 Minutes
 
