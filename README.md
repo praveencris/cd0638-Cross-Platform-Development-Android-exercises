@@ -1,6 +1,5 @@
 # 🏁 Solution 10: Accessibility
-**Branch:** `solution-module-10`
-
+**Branch Name:** `sol-lesson-10-accessibility`
 This branch optimizes the app for assistive technologies like TalkBack and VoiceOver.
 
 ## Branch Context
