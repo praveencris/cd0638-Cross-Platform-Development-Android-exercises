@@ -1,5 +1,5 @@
 # 🏁 Solution 7c: Wear OS Data Polish
-**Branch:** `sol-lesson-7c-wear-polish`
+**Branch Name:** `sol-lesson-7c-wear-polish`
 **Prerequisite:** Completed Exercise 7b
 
 This branch replaces the hardcoded mock data in the Tile and Complication with real data fetched from `RecallApiService`. The Tile now displays the actual first deck name and total card count, and the Complication shows the real number of cards across all decks.
