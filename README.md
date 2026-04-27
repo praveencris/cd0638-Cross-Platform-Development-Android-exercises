@@ -6,6 +6,13 @@
 
 This branch implements the "Zen Study" UI design with fully adaptive behavior. It transforms the app from a simple text list into a production-grade dashboard that respects the user's device size.
 
+## Branch Context
+
+This is the completed solution branch for the matching exercise. Use it after attempting the lesson branch to compare implementation choices and verify your work.
+
+For production-hardened code, compare this branch with its matching prod-sol-* branch when one exists.
+
+
 ## 🛠️ Implementation Summary
 
 1. **Zen UI Components**: Built `DeckCard.kt` matching the provided design specifications:
