@@ -1,5 +1,6 @@
 # 🏁 Solution 6b: Study Mode & State Hoisting
 **Branch Name:** `sol-lesson-6b-ui-adaptive-patterns`
+
 This branch implements the production-grade "Study Loop," featuring 3D animations, keyboard support, and a reactive architecture for progress tracking.
 
 ## Branch Context
