@@ -1,4 +1,6 @@
 # 📦 Exercise 11: Production Release Preparation
+
+**Branch Name:** `lesson-11-android-production-release-prep`
 **Module:** Release & Deployment
 **Estimated Time:** 45 Minutes
 
