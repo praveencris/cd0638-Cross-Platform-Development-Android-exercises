@@ -1,4 +1,6 @@
 # ⌚ Exercise 7a: Wear OS Fundamentals
+
+**Branch Name:** `lesson-7a-wear-os`
 **Module:** Wear OS Development
 **Estimated Time:** 30 Minutes
 
