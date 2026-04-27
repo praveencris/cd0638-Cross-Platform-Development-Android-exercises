@@ -1,4 +1,6 @@
 # 🤖 Exercise 12a: Android Release Pipeline
+
+**Branch Name:** `lesson-12a-android-playstore-publish`
 **Module:** Publishing & Distribution
 **Estimated Time:** 45 Minutes
 
