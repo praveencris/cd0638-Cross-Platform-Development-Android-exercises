@@ -1,3 +1,5 @@
+**Branch Name:** `lesson-4b-consuming-di-handshake`
+
 #### **README: Exercise 4b (The Shared Bridge)**
 
 # 🌉 Exercise 4b: Shared UI & State
