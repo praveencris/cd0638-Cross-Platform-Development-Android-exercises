@@ -1,4 +1,6 @@
 # 🪟 Exercise 6a: The Master-Detail Navigator
+
+**Branch Name:** `lesson-6a-ui-adaptive-patterns`
 **Module:** Tablet & Foldable Optimization
 **Estimated Time:** 25 Minutes
 
