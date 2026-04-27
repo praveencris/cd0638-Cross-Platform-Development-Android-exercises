@@ -1,5 +1,7 @@
 # 🌐 Exercise 3: Connecting to the Cloud
 
+**Branch Name:** `lesson-3-networking-with-ktor`
+
 **Module:** Networking with Ktor & Serialization
 
 **Estimated Time:** 20 Minutes
