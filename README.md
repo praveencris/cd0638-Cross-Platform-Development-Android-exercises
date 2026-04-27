@@ -2,8 +2,7 @@
 
 # 📐 Solution 5a: The Adaptive Scaffold
 
-**Branch:** `sol-lesson-5a-ui-adaptive-scaffold`
-
+**Branch Name:** `prod-sol-lesson-5a-ui-adaptive-scaffold`
 This branch implements the foundational logic for **Adaptive Layouts** in Kotlin Multiplatform. Instead of relying on Android-specific resource qualifiers (like `sw600dp`), we built a pure Compose solution that works on Android, iOS, and Desktop.
 
 ## Production Reference
