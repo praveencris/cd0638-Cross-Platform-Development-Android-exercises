@@ -4,6 +4,13 @@
 
 This branch contains the successful configuration of the **Recall** Shared Module. We have transitioned the project from a broken state to a compiling, tested environment capable of running on both Android and iOS.
 
+## Branch Context
+
+This is the completed solution branch for the matching exercise. Use it after attempting the lesson branch to compare implementation choices and verify your work.
+
+For production-hardened code, compare this branch with its matching prod-sol-* branch when one exists.
+
+
 ## 🛠️ Implementation Summary
 
 ### 1. Centralized Dependency Management
