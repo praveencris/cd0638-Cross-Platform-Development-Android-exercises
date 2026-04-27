@@ -3,6 +3,13 @@
 **Estimated Time:** 30-40 minutes
 **Part:** 1 of 2 (Crashlytics & Remote Config in Exercise 13b)
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 Learn to integrate **Firebase Analytics** in your KMP app to track user behavior across Android and iOS. You'll focus on the core challenge: implementing platform-specific type conversions while using the expect/actual pattern.
 
