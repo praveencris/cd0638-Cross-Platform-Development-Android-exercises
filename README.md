@@ -1,5 +1,7 @@
 # 📱 Exercise 1: The "Hello World" of KMP
 
+**Branch Name:** `lesson-1-project-setup`
+
 **Module:** Project Setup & Configuration
 **Estimated Time:** 15-20 Minutes
 
