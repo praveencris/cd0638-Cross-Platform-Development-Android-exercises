@@ -1,4 +1,6 @@
 # 📊 Exercise 13a: Firebase Analytics - Solution
+
+**Branch Name:** `sol-lesson-13a-firebase-analytics`
 **Module:** Monitoring & Analytics
 **Part:** 1 of 2 (Crashlytics & Remote Config in Exercise 13b)
 
