@@ -1,4 +1,6 @@
 # 🍎 Exercise 12b: iOS Release Pipeline
+
+**Branch Name:** `lesson-12b-ios-appstore-publish`
 **Module:** Publishing & Distribution
 **Estimated Time:** 45 Minutes
 
