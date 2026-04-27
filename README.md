@@ -1,4 +1,6 @@
 # 🔥 Solution 13b: Crashlytics & Remote Config
+
+**Branch Name:** `sol-lesson-13b-crashlytics-remoteconfig`
 **Module:** Monitoring & Analytics
 **Part:** 2 of 2 (Building on Exercise 13a)
 
