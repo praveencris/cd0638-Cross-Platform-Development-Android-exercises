@@ -3,6 +3,7 @@
 # 🏁 Solution 4a: The DI Handshake
 
 **Branch Name:** `prod-sol-lesson-4a-consuming-di-handshake`
+
 This branch contains the successfully linked architecture between the Android frontend and the KMP shared logic.
 
 ## Production Reference
