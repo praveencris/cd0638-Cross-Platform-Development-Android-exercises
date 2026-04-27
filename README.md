@@ -3,6 +3,13 @@
 **Prerequisite:** Completed Module 7a (Basic List UI)
 **Estimated Time:** 60 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 In this exercise, you will go beyond the app code and integrate Recall with the full Wear OS ecosystem. You will implement **Health Services** (Heart Rate), a **Complication**, and a **Tile**.
 
