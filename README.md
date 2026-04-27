@@ -4,6 +4,13 @@
 **Module:** Building Adaptive UIs
 **Estimated Time:** 20-30 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 
 In this exercise, you will implement the "Zen Study" design aesthetic. You will build a high-fidelity `DeckCard` component and use the `WindowSize` logic from Exercise 5a to toggle between a **List Layout** (for phones) and a **Grid Layout** (for tablets).
