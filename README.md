@@ -1,6 +1,5 @@
 # 🏁 Solution 11 (iOS): Production Release
-**Branch:** `sol-lesson-11-ios-production-release-prep`
-
+**Branch Name:** `sol-lesson-11-ios-production-release-prep`
 This solution prepares the iOS target for the App Store by aligning it with the Android production build.
 
 > **Prerequisite:** Archiving and code signing require a paid Apple Developer Program membership ($99/year). Without one, version sync and Debug/Release simulator builds still work — only the final archive step requires the account. All steps are documented below for the complete learning experience.
