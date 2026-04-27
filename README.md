@@ -3,6 +3,13 @@
 **Prerequisite:** Completed Exercise 7c
 **Estimated Time:** 45 Minutes
 
+## Branch Context
+
+This is a student exercise branch. Some code is intentionally incomplete or simplified so you can complete the lesson tasks in order.
+
+Use the matching sol-* branch to review the completed solution, and the matching prod-sol-* branch when you want to see production hardening for the same lesson.
+
+
 ### **🎓 Objective**
 In this exercise, you will implement inter-device communication between a Wear OS watch and a phone using the **Wearable Data Layer API**. You'll use three core APIs: CapabilityClient (device discovery), MessageClient (one-off commands), and DataClient (persistent data sync).
 
