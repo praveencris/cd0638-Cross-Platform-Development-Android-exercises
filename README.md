@@ -1,5 +1,5 @@
 # 🏁 Solution 7d: Wearable Data Layer API
-**Branch:** `sol-lesson-7d-wear-data-layer`
+**Branch Name:** `sol-lesson-7d-wear-data-layer`
 **Prerequisite:** Completed Exercise 7c
 
 This branch demonstrates the **Wearable Data Layer API** for inter-device communication between a phone app and a Wear OS watch app over Bluetooth. It implements all three core APIs: DataClient, MessageClient, and CapabilityClient.
