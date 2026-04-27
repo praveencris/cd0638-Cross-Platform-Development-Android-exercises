@@ -3,6 +3,13 @@
 
 This solution implements automated packaging for Play Store distribution using Fastlane, the industry-standard CI/CD tool for mobile apps.
 
+## Branch Context
+
+This is the completed solution branch for the matching exercise. Use it after attempting the lesson branch to compare implementation choices and verify your work.
+
+For production-hardened code, compare this branch with its matching prod-sol-* branch when one exists.
+
+
 ## 🛠️ Implementation Summary
 
 ### 1. The `gradle` Action
