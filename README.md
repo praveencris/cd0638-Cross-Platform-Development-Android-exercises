@@ -1,5 +1,6 @@
 # 🏁 Solution 8b: Offline Intelligence
 **Branch Name:** `prod-sol-lesson-8b-db-foundation-setup`
+
 This branch completes the Offline-First implementation. The app is now fully robust against network flakiness.
 
 ## Production Reference
