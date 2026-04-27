@@ -1,6 +1,5 @@
 # 🏁 Solution 12a: Android Packaging
-**Branch:** `sol-lesson-12a-android-playstore-publish`
-
+**Branch Name:** `prod-sol-lesson-12a-android-playstore-publish`
 This solution implements automated packaging for Play Store distribution using Fastlane, the industry-standard CI/CD tool for mobile apps.
 
 ## Production Reference
