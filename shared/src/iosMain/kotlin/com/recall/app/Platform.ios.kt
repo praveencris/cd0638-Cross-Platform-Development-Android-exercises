@@ -20,5 +20,6 @@ actual fun getPlatform(): Platform = IOSPlatform()
  * Uses Foundation's NSUUID for native UUID generation
  */
 actual fun generateUUID(): String {
-    TODO("Implement platform-specific UUID generation")
+   // TODO-DONE("Implement platform-specific UUID generation")
+    return NSUUID().UUIDString()
 }

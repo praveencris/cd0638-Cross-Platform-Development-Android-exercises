@@ -1,6 +1,7 @@
 package com.recall.app.domain
 
 import com.recall.app.domain.models.Card
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 /**
@@ -27,6 +28,21 @@ object SpaceRepetitionAlgo {
      * @return Updated card with new interval and ease factor
      */
     fun calculateNextReview(card: Card, quality: Int): Card {
-        TODO("Implement SM-2 Logic based on provided formula")
+        //TODO("Implement SM-2 Logic based on provided formula")
+        if(quality < 3){
+            return card.copy(interval = 1, ease = card.ease)
+        }
+        val nextInterval = when(card.interval){
+            0-> 1
+            1->6
+            else -> (card.interval*card.ease).roundToInt()
+        }
+        val easeAdjustment = 0.1f - (5 - quality)  *(0.08f + (5 - quality)*  0.02f)
+        val newEase = (card.ease + easeAdjustment).coerceAtLeast(EASE_MIN)
+
+        return card.copy(
+            interval = nextInterval,
+            ease = newEase
+        )
     }
 }

@@ -17,5 +17,6 @@ actual fun getPlatform(): Platform = AndroidPlatform()
  * Uses java.util.UUID for native UUID generation
  */
 actual fun generateUUID(): String {
-    TODO("Implement platform-specific UUID generation")
+    //TODO-DONE("Implement platform-specific UUID generation")
+    return java.util.UUID.randomUUID().toString()
 }
