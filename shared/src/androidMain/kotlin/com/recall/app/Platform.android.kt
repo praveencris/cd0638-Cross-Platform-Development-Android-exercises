@@ -4,7 +4,7 @@ package com.recall.app
  * Android platform implementation
  */
 class AndroidPlatform : Platform {
-    override val name: String = "Android"
+    override val name: String = "Droid"
 }
 
 /**
