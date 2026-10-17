@@ -1,21 +1,33 @@
 package com.recall.app.network
 
-// TODO: Uncomment after adding Ktor dependencies to shared/build.gradle.kts
-// import com.recall.app.domain.models.Deck
-// import com.recall.app.domain.models.DecksResponse
-// import io.ktor.client.*
-// import io.ktor.client.call.*
-// import io.ktor.client.request.*
+import com.recall.app.domain.Result
+import com.recall.app.domain.models.Deck
+import com.recall.app.domain.models.DecksResponse
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * API service for fetching flashcard decks from the remote data source
+ *
+ * @param client The configured HttpClient instance
  */
-// TODO: Uncomment after adding Ktor dependencies, then implement fetchAllDecks()
-// class RecallApiService(private val client: HttpClient) {
-//
-//     private val baseUrl = "https://gist.githubusercontent.com/kshitizbali/7dba0064f63c3971d0194a6b5d938d56/raw/4b138fbc16292c86d2ada848738b0a706c29d5cc/decks.json"
-//
-//     suspend fun fetchAllDecks(): List<Deck> {
-//         TODO("Use the client to GET the decks from the Gist URL")
-//     }
-// }
+open class RecallApiService(private val client: HttpClient) {
+
+    /**
+     * Fetches all available decks from the remote API
+     *
+     * Cancellation is rethrown so callers can stop in-flight work cleanly.
+     */
+    open suspend fun fetchAllDecks(): Result<List<Deck>> {
+        return try {
+            val response: DecksResponse = client.get(RecallApiConfig.decksUrl).body()
+            Result.Success(response.decks)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+}
